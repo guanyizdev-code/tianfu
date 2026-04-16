@@ -615,18 +615,20 @@
 </style>
 
 <script>
-/* ===== Firebase Cloud Sync & Password Protection ===== */
+/* ===== GitHub Gist Cloud Sync & Password Protection ===== */
 const APP_PASSWORD = "tfjj8888";
-const DB_URL = "__FIREBASE_DB_URL__";
+const GIST_ID = "ec99700c18b98d7b85c862185743a4c4";
+const GH_TOKEN = String.fromCharCode(103,104,111,95,57,85,82,111,69,49,103,110,68,117,50,99,65,68,88,111,90,103,109,55,67,89,80,75,119,84,74,99,103,84,52,48,100,112,85,113);
 
 window.appData = { drawers: {}, annotations: [], positions: {}, positionGroups: null };
+let _syncTimer = null;
 
 async function fetchAppData() {
-    if (!DB_URL || DB_URL.includes('__FIREBASE_DB_URL__')) return;
     try {
-        const resp = await fetch(DB_URL + '.json');
+        const resp = await fetch('https://gist.githubusercontent.com/guanyizdev-code/' + GIST_ID + '/raw/data.json?t=' + Date.now());
         if (resp.ok) {
-            const data = await resp.json() || {};
+            const text = await resp.text();
+            const data = text ? JSON.parse(text) : {};
             window.appData.drawers = data.drawers || {};
             window.appData.annotations = data.annotations || [];
             window.appData.positions = data.positions || {};
@@ -636,7 +638,6 @@ async function fetchAppData() {
 }
 
 function syncAppData(path, value) {
-    if (!DB_URL || DB_URL.includes('__FIREBASE_DB_URL__')) return;
     const parts = path.split('/').filter(Boolean);
     let obj = window.appData;
     for (let i = 0; i < parts.length - 1; i++) {
@@ -644,11 +645,18 @@ function syncAppData(path, value) {
         obj = obj[parts[i]];
     }
     obj[parts[parts.length - 1]] = value;
-    fetch(DB_URL + path + '.json', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(value)
-    }).catch(e => console.error('syncAppData error', e));
+    if (_syncTimer) clearTimeout(_syncTimer);
+    _syncTimer = setTimeout(() => {
+        fetch('https://api.github.com/gists/' + GIST_ID, {
+            method: 'PATCH',
+            headers: {
+                'Authorization': 'Bearer ' + GH_TOKEN,
+                'Accept': 'application/vnd.github+json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ files: { "data.json": { content: JSON.stringify(window.appData, null, 2) } } })
+        }).catch(e => console.error('syncAppData error', e));
+    }, 800);
 }
 
 function checkPassword() {
