@@ -697,6 +697,9 @@ function initAppAfterAuth() {
 #pwdBtn:hover{opacity:0.92;}
 #pwdError{display:none;margin-top:12px;color:#dc2626;font-size:13px;}
 </style>
+<script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+<script src="https://unpkg.com/three-spritetext@1.8.1/dist/three-spritetext.min.js"></script>
+<script src="https://unpkg.com/3d-force-graph@1.73.0/dist/3d-force-graph.min.js"></script>
 </head>
 <body class="text-slate-900">
 <div id="pwdOverlay">
@@ -1218,77 +1221,54 @@ function initAppAfterAuth() {
         </section>
         
         <!-- BUSINESS TAB -->
-        <section id="tab-business" class="tab-content hidden p-8 overflow-auto h-[calc(100vh-64px)]">
-            <div class="max-w-6xl mx-auto">
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div class="rounded-3xl shadow-sm overflow-hidden bg-white border border-slate-100">
-                        <div class="h-1.5 bg-blue-500"></div>
-                        <div class="p-6">
-                            <div class="flex items-center justify-between mb-5">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-12 h-12 rounded-2xl bg-blue-100 flex items-center justify-center text-blue-600"><i class="fas fa-chart-line text-xl"></i></div>
-                                    <div><h3 class="font-bold text-slate-900 text-lg">前台</h3><p class="text-xs text-slate-500">价值创造与收益实现</p></div>
-                                </div>
-                                <span class="px-3 py-1 bg-blue-50 text-blue-600 text-xs font-semibold rounded-full">投资业务</span>
-                            </div>
-                            <div class="space-y-4">
-                                <div class="border-l-3 border-blue-400 pl-4 py-2 bg-blue-50/30 rounded-r-xl">
-                                    <div class="font-bold text-slate-900 text-sm">投资一部</div>
-                                    <ul class="text-xs text-slate-500 mt-2 space-y-1">
-                                        <li>• 专注投资集团战略新兴产业</li>
-                                        <li>• 辅助支撑光电信息细分赛道</li>
-                                        <li>• 项目投前、投中、投后及退出管理</li>
-                                    </ul>
-                                </div>
-                                <div class="border-l-3 border-blue-400 pl-4 py-2 bg-blue-50/30 rounded-r-xl">
-                                    <div class="font-bold text-slate-900 text-sm">投资二部</div>
-                                    <ul class="text-xs text-slate-500 mt-2 space-y-1">
-                                        <li>• 专注存量PPP基金精细化运营</li>
-                                        <li>• 辅助支撑不动产私募基金预研</li>
-                                        <li>• 项目投前、投中、投后及退出管理</li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
+        <section id="tab-business" class="tab-content hidden h-[calc(100vh-64px)] relative">
+            <!-- 3D Graph Container -->
+            <div id="business3dGraph" class="absolute inset-0"></div>
+            
+            <!-- Control Panel -->
+            <div class="absolute top-4 right-4 z-10 w-80 bg-white/95 backdrop-blur rounded-2xl shadow-xl border border-slate-100 p-5 max-h-[calc(100vh-120px)] overflow-auto">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-bold text-slate-900"><i class="fas fa-network-wired mr-2 text-blue-600"></i>业务条线3D视图</h3>
+                    <span id="bizNodeCount" class="px-2 py-0.5 bg-slate-100 text-slate-600 text-xs rounded-full">0 项</span>
+                </div>
+                
+                <!-- Import Area -->
+                <div class="mb-4">
+                    <label class="text-xs font-semibold text-slate-500 mb-1.5 block">批量导入工作内容</label>
+                    <textarea id="bizImportInput" class="w-full h-24 p-3 text-xs border border-slate-200 rounded-xl resize-none focus:outline-none focus:border-blue-400" placeholder="格式：工作内容 | 部门 | 岗位&#10;例：&#10;项目尽调报告编制 | 投资一部 | 投资经理&#10;合同审核 | 运营部 | 法务专员&#10;考勤管理 | 综合部 | HR专员"></textarea>
+                    <div class="flex gap-2 mt-2">
+                        <button onclick="importBusinessData()" class="flex-1 py-2 bg-blue-600 text-white text-xs font-semibold rounded-lg hover:bg-blue-700">导入并生成3D图</button>
+                        <button onclick="loadBusinessDemo()" class="px-3 py-2 bg-slate-100 text-slate-600 text-xs font-semibold rounded-lg hover:bg-slate-200">示例</button>
                     </div>
-                    <div class="rounded-3xl shadow-sm overflow-hidden bg-white border border-slate-100">
-                        <div class="h-1.5 bg-emerald-500"></div>
-                        <div class="p-6">
-                            <div class="flex items-center justify-between mb-5">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-12 h-12 rounded-2xl bg-emerald-100 flex items-center justify-center text-emerald-600"><i class="fas fa-shield-alt text-xl"></i></div>
-                                    <div><h3 class="font-bold text-slate-900 text-lg">中台</h3><p class="text-xs text-slate-500">风控支撑与资源配置</p></div>
-                                </div>
-                                <span class="px-3 py-1 bg-emerald-50 text-emerald-600 text-xs font-semibold rounded-full">运营业务</span>
-                            </div>
-                            <ul class="space-y-3 text-sm">
-                                <li class="flex items-start gap-2"><i class="fas fa-check-circle text-emerald-500 mt-0.5 text-xs"></i><span class="text-slate-700 font-medium">承接原监事会职能</span></li>
-                                <li class="pl-5 text-xs text-slate-500">监督董事高管履职、审核财务报告、提出监事会议案</li>
-                                <li class="flex items-start gap-2"><i class="fas fa-check-circle text-emerald-500 mt-0.5 text-xs"></i><span class="text-slate-600">风险合规管理体系建设与文化宣传</span></li>
-                                <li class="flex items-start gap-2"><i class="fas fa-check-circle text-emerald-500 mt-0.5 text-xs"></i><span class="text-slate-600">法务审核、合规审查与法律咨询</span></li>
-                                <li class="flex items-start gap-2"><i class="fas fa-check-circle text-emerald-500 mt-0.5 text-xs"></i><span class="text-slate-600">财务预算、会计核算、资金管理</span></li>
-                            </ul>
-                        </div>
+                </div>
+                
+                <!-- Stats -->
+                <div class="grid grid-cols-3 gap-2 mb-4">
+                    <div class="text-center p-2 bg-blue-50 rounded-xl">
+                        <div id="statFront" class="text-lg font-bold text-blue-600">0</div>
+                        <div class="text-[10px] text-blue-500">前台</div>
                     </div>
-                    <div class="rounded-3xl shadow-sm overflow-hidden bg-white border border-slate-100">
-                        <div class="h-1.5 bg-purple-500"></div>
-                        <div class="p-6">
-                            <div class="flex items-center justify-between mb-5">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-12 h-12 rounded-2xl bg-purple-100 flex items-center justify-center text-purple-600"><i class="fas fa-users-cog text-xl"></i></div>
-                                    <div><h3 class="font-bold text-slate-900 text-lg">后台</h3><p class="text-xs text-slate-500">综合服务与运营支撑</p></div>
-                                </div>
-                                <span class="px-3 py-1 bg-purple-50 text-purple-600 text-xs font-semibold rounded-full">综合业务</span>
-                            </div>
-                            <ul class="space-y-3 text-sm">
-                                <li class="flex items-start gap-2"><i class="fas fa-check-circle text-purple-500 mt-0.5 text-xs"></i><span class="text-slate-700 font-medium">三会一层服务与人力资源</span></li>
-                                <li class="pl-5 text-xs text-slate-500">组织董监会、股东会、督办决议落实</li>
-                                <li class="flex items-start gap-2"><i class="fas fa-check-circle text-purple-500 mt-0.5 text-xs"></i><span class="text-slate-600">行政后勤、采购管理与安全生产</span></li>
-                                <li class="flex items-start gap-2"><i class="fas fa-check-circle text-purple-500 mt-0.5 text-xs"></i><span class="text-slate-600">印章证照、工商变更与信息化建设</span></li>
-                                <li class="flex items-start gap-2"><i class="fas fa-check-circle text-purple-500 mt-0.5 text-xs"></i><span class="text-slate-600">对外接待、文印档案管理</span></li>
-                            </ul>
-                        </div>
+                    <div class="text-center p-2 bg-emerald-50 rounded-xl">
+                        <div id="statMid" class="text-lg font-bold text-emerald-600">0</div>
+                        <div class="text-[10px] text-emerald-500">中台</div>
                     </div>
+                    <div class="text-center p-2 bg-purple-50 rounded-xl">
+                        <div id="statBack" class="text-lg font-bold text-purple-600">0</div>
+                        <div class="text-[10px] text-purple-500">后台</div>
+                    </div>
+                </div>
+                
+                <!-- Legend -->
+                <div class="space-y-2 text-xs">
+                    <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span><span class="text-slate-600">前台业务（投资部）</span></div>
+                    <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span><span class="text-slate-600">中台业务（运营部）</span></div>
+                    <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span><span class="text-slate-600">后台业务（综合部）</span></div>
+                    <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span><span class="text-slate-600">岗位</span></div>
+                    <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-slate-300"></span><span class="text-slate-600">具体工作内容</span></div>
+                </div>
+                
+                <div class="mt-4 pt-3 border-t border-slate-100 text-[10px] text-slate-400 leading-relaxed">
+                    提示：滚轮缩放，鼠标左键旋转，右键平移。点击节点可高亮关联连线。
                 </div>
             </div>
         </section>
@@ -7884,6 +7864,198 @@ async function exportHtml() {
         URL.revokeObjectURL(url);
     }, 100);
 }
+
+// ==========================================
+// BUSINESS 3D GRAPH
+// ==========================================
+let businessGraph = null;
+let businessGraphData = { nodes: [], links: [] };
+
+function getBizLevel(dept) {
+    const d = (dept || '').trim();
+    if (['投资一部','投资二部','投资部'].includes(d)) return { level: 'front', color: '#3b82f6', label: '前台' };
+    if (['运营部','风控部','财务部'].includes(d)) return { level: 'mid', color: '#10b981', label: '中台' };
+    if (['综合部','人力资源部','行政部'].includes(d)) return { level: 'back', color: '#a855f7', label: '后台' };
+    // heuristic fallback
+    if (d.includes('投资')) return { level: 'front', color: '#3b82f6', label: '前台' };
+    if (d.includes('风控') || d.includes('财务') || d.includes('运营') || d.includes('法务') || d.includes('合规')) return { level: 'mid', color: '#10b981', label: '中台' };
+    if (d.includes('综合') || d.includes('行政') || d.includes('人力') || d.includes('HR')) return { level: 'back', color: '#a855f7', label: '后台' };
+    return { level: 'mid', color: '#64748b', label: '未分类' };
+}
+
+function parseBusinessData(text) {
+    const lines = text.split('\n').map(s => s.trim()).filter(s => s);
+    const nodes = [];
+    const links = [];
+    const nodeSet = new Set();
+    
+    const ensureNode = (id, group, color, val) => {
+        if (nodeSet.has(id)) return;
+        nodeSet.add(id);
+        nodes.push({ id, group, color, val });
+    };
+    
+    // Ensure level nodes exist
+    ensureNode('前台', 'level', '#3b82f6', 8);
+    ensureNode('中台', 'level', '#10b981', 8);
+    ensureNode('后台', 'level', '#a855f7', 8);
+    
+    lines.forEach((line, idx) => {
+        const parts = line.split('|').map(s => s.trim());
+        const content = parts[0] || ('工作内容' + (idx + 1));
+        let dept = parts[1] || '未分配部门';
+        let post = parts[2] || '未分配岗位';
+        
+        const info = getBizLevel(dept);
+        const contentId = content + '##' + idx;
+        
+        ensureNode(contentId, 'content', '#cbd5e1', 2);
+        ensureNode(dept, 'dept', info.color, 5);
+        ensureNode(post, 'post', '#f59e0b', 3);
+        ensureNode(info.label, 'level', info.color, 8);
+        
+        links.push({ source: contentId, target: dept });
+        links.push({ source: contentId, target: post });
+        links.push({ source: dept, target: info.label });
+        if (post !== '未分配岗位') {
+            links.push({ source: post, target: dept });
+        }
+    });
+    
+    return { nodes, links };
+}
+
+function updateBizStats(data) {
+    let front = 0, mid = 0, back = 0;
+    data.nodes.forEach(n => {
+        if (n.group === 'content') {
+            const connected = data.links.filter(l => l.source === n.id || l.target === n.id);
+            const hasFront = connected.some(l => {
+                const other = l.source === n.id ? l.target : l.source;
+                return other === '前台';
+            });
+            const hasMid = connected.some(l => {
+                const other = l.source === n.id ? l.target : l.source;
+                return other === '中台';
+            });
+            const hasBack = connected.some(l => {
+                const other = l.source === n.id ? l.target : l.source;
+                return other === '后台';
+            });
+            if (hasFront) front++;
+            else if (hasMid) mid++;
+            else if (hasBack) back++;
+        }
+    });
+    document.getElementById('statFront').textContent = front;
+    document.getElementById('statMid').textContent = mid;
+    document.getElementById('statBack').textContent = back;
+    const total = data.nodes.filter(n => n.group === 'content').length;
+    document.getElementById('bizNodeCount').textContent = total + ' 项';
+}
+
+function initBusinessGraph(data) {
+    const elem = document.getElementById('business3dGraph');
+    if (!elem) return;
+    
+    if (businessGraph) {
+        businessGraph._destructor();
+        businessGraph = null;
+    }
+    
+    businessGraph = ForceGraph3D({ controlType: 'orbit' })(elem)
+        .graphData(data)
+        .nodeAutoColorBy('group')
+        .nodeColor(node => node.color || '#999')
+        .nodeVal(node => node.val || 2)
+        .nodeLabel(node => {
+            if (node.group === 'content') return '工作内容: ' + node.id.split('##')[0];
+            if (node.group === 'dept') return '部门: ' + node.id;
+            if (node.group === 'post') return '岗位: ' + node.id;
+            return node.id;
+        })
+        .linkWidth(0.5)
+        .linkOpacity(0.35)
+        .backgroundColor('#f8fafc')
+        .showNavInfo(false)
+        .cameraPosition({ z: 180 })
+        .onNodeHover(node => elem.style.cursor = node ? 'pointer' : null)
+        .onNodeClick(node => {
+            // Highlight connections
+            const distance = 120;
+            const distRatio = 1 + distance/Math.hypot(node.x, node.y, node.z);
+            businessGraph.cameraPosition(
+                { x: node.x * distRatio, y: node.y * distRatio, z: node.z * distRatio },
+                node,
+                3000
+            );
+        });
+        
+    // Add text labels using SpriteText
+    businessGraph.nodeThreeObject(node => {
+        const sprite = new SpriteText(node.id.split('##')[0]);
+        sprite.color = node.group === 'content' ? '#475569' : '#1e293b';
+        sprite.textHeight = node.group === 'level' ? 5 : (node.group === 'dept' ? 3.5 : 2.5);
+        sprite.backgroundColor = node.group === 'content' ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0)';
+        sprite.padding = node.group === 'content' ? 2 : 0;
+        sprite.borderRadius = 3;
+        sprite.position.y = node.val * 1.5 + 2;
+        return sprite;
+    });
+    
+    updateBizStats(data);
+}
+
+function importBusinessData() {
+    const text = document.getElementById('bizImportInput').value;
+    if (!text.trim()) { alert('请先输入工作内容'); return; }
+    const data = parseBusinessData(text);
+    businessGraphData = data;
+    initBusinessGraph(data);
+    // Save to cloud
+    syncAppData('businessData', data);
+}
+
+function loadBusinessDemo() {
+    const demo = `项目尽调报告编制 | 投资一部 | 投资经理
+行业研究与赛道分析 | 投资一部 | 行研员
+投后管理与退出实施 | 投资二部 | 投后经理
+PPP项目运营监控 | 投资二部 | 运营专员
+合同审查与风险评估 | 运营部 | 法务专员
+财务预算与决算编制 | 运营部 | 财务专员
+人员招聘与培训组织 | 综合部 | HR专员
+印章证照与档案管理 | 综合部 | 行政专员
+业务接待与会务组织 | 综合部 | 行政专员
+出纳管理与资金收付 | 运营部 | 出纳专员
+内控审计与合规检查 | 运营部 | 合规专员
+基金设立方案设计 | 投资一部 | 投资经理
+`.trim();
+    document.getElementById('bizImportInput').value = demo;
+    const data = parseBusinessData(demo);
+    businessGraphData = data;
+    initBusinessGraph(data);
+    syncAppData('businessData', data);
+}
+
+// Load saved business data on init
+try {
+    const savedBiz = window.appData && window.appData.businessData;
+    if (savedBiz && savedBiz.nodes && savedBiz.nodes.length) {
+        businessGraphData = savedBiz;
+        // Delay init until tab visible
+    }
+} catch(e) {}
+
+// Init demo when tab switched to business
+document.getElementById('nav-business').addEventListener('click', () => {
+    setTimeout(() => {
+        if (!businessGraphData.nodes.length) {
+            loadBusinessDemo();
+        } else {
+            initBusinessGraph(businessGraphData);
+        }
+    }, 100);
+});
 </script>
 
 
