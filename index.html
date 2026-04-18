@@ -102,6 +102,16 @@
             height: calc(100vh - 64px);
             overflow: auto;
             cursor: grab;
+            display: flex;
+        }
+        .org-chart-wrapper {
+            position: absolute;
+            width: 1600px;
+            height: 1000px;
+            flex-shrink: 0;
+            left: 40%;
+            top: 50%;
+            transform: translate(-50%, -50%);
         }
         #orgCanvas:active { cursor: grabbing; }
         #orgCanvas.dragging-node { cursor: default; }
@@ -459,6 +469,454 @@
         
         .tab-content.hidden { display: none; }
         
+        /* ===== 神经网络业务条线样式（浅色调） ===== */
+        #bizContainer {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%);
+            overflow: hidden;
+        }
+
+        /* Canvas background for neural network lines */
+        #neuralCanvas {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        /* Main neuron nodes */
+        .neuron-node {
+            position: absolute;
+            z-index: 10;
+            cursor: pointer;
+            transition: left 0.7s cubic-bezier(0.34, 1.56, 0.64, 1), top 0.7s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.5s ease;
+            transform-origin: center center;
+            transform: translate(-50%, -50%);
+        }
+        .neuron-node .node-ring {
+            position: absolute;
+            inset: -20px;
+            border-radius: 50%;
+            border: 2px solid currentColor;
+            opacity: 0.2;
+            animation: neuronPulse 3s ease-in-out infinite;
+        }
+        .neuron-node .node-ring:nth-child(2) {
+            inset: -35px;
+            animation-delay: 1s;
+            opacity: 0.12;
+        }
+        .neuron-node .node-ring:nth-child(3) {
+            inset: -50px;
+            animation-delay: 2s;
+            opacity: 0.06;
+        }
+        @keyframes neuronPulse {
+            0%, 100% { transform: scale(1); opacity: 0.2; }
+            50% { transform: scale(1.15); opacity: 0.08; }
+        }
+        .neuron-node .node-core {
+            width: 120px; height: 120px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 3px solid white;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.12), 0 0 40px currentColor;
+            transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .neuron-node .node-icon {
+            font-size: 28px;
+            margin-bottom: 4px;
+        }
+        .neuron-node .node-label {
+            font-size: 18px;
+            font-weight: 700;
+            color: white;
+        }
+        .neuron-node .node-count {
+            font-size: 11px;
+            color: rgba(255,255,255,0.85);
+            margin-top: 2px;
+        }
+
+        /* Active state */
+        .neuron-node.active .node-core {
+            transform: scale(1.4);
+            box-shadow: 0 8px 40px rgba(0,0,0,0.15), 0 0 80px currentColor, 0 0 120px currentColor;
+        }
+        .neuron-node.active .node-ring {
+            animation-duration: 1.5s;
+            opacity: 0.35;
+        }
+
+        /* Inactive state */
+        .neuron-node.inactive {
+            opacity: 0.45;
+            filter: grayscale(0.5);
+            pointer-events: auto;
+            cursor: pointer;
+        }
+        .neuron-node.inactive .node-core {
+            transform: scale(0.85);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+
+        /* Secondary nodes (categories) */
+        .category-node {
+            position: absolute;
+            z-index: 15;
+            cursor: pointer;
+            padding: 10px 18px;
+            border-radius: 24px;
+            background: white;
+            border: 2px solid currentColor;
+            color: #334155;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            white-space: nowrap;
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(0.5);
+            pointer-events: none;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        }
+        .category-node.visible {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+            pointer-events: auto;
+        }
+        .category-node:hover {
+            background: white;
+            transform: translate(-50%, -50%) scale(1.12);
+            box-shadow: 0 4px 24px currentColor;
+        }
+        .category-node .cat-count {
+            font-size: 10px;
+            opacity: 0.5;
+            margin-left: 6px;
+            color: #64748b;
+        }
+
+        /* Task popup */
+        #taskPopup {
+            position: absolute;
+            z-index: 100;
+            max-width: 480px;
+            max-height: 70vh;
+            overflow-y: auto;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0,0,0,0.08);
+            border-radius: 20px;
+            padding: 24px;
+            color: #1e293b;
+            opacity: 0;
+            transform: translateY(10px) scale(0.95);
+            transition: all 0.3s ease;
+            pointer-events: none;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.12), 0 0 40px rgba(0,0,0,0.05);
+        }
+        #taskPopup.show {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            pointer-events: auto;
+        }
+        #taskPopup .popup-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(0,0,0,0.08);
+        }
+        #taskPopup .task-list-item {
+            padding: 14px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.06);
+            font-size: 16px;
+            line-height: 1.7;
+            color: #334155;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+        #taskPopup .task-list-item:last-child {
+            border-bottom: none;
+        }
+        #taskPopup .task-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            margin-top: 8px;
+            flex-shrink: 0;
+            box-shadow: 0 0 8px currentColor;
+        }
+        #taskPopup .close-btn {
+            position: absolute;
+            top: 16px; right: 16px;
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.06);
+            border: 1px solid rgba(0,0,0,0.08);
+            color: #64748b;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            font-size: 14px;
+        }
+        #taskPopup .close-btn:hover {
+            background: rgba(0,0,0,0.1);
+            color: #1e293b;
+        }
+
+        /* Floating particles */
+        .neural-particle {
+            position: absolute;
+            width: 3px; height: 3px;
+            border-radius: 50%;
+            background: #94a3b8;
+            opacity: 0;
+            z-index: 2;
+            pointer-events: none;
+        }
+        @keyframes particleFloat {
+            0% { opacity: 0; transform: translateY(0) scale(0); }
+            20% { opacity: 0.6; }
+            80% { opacity: 0.6; }
+            100% { opacity: 0; transform: translateY(-100px) scale(1.5); }
+        }
+
+        /* Legend */
+        .nn-legend {
+            position: absolute;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 20;
+            display: flex;
+            gap: 24px;
+            background: rgba(255,255,255,0.7);
+            backdrop-filter: blur(12px);
+            padding: 10px 24px;
+            border-radius: 30px;
+            border: 1px solid rgba(0,0,0,0.06);
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        }
+        .nn-legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: #475569;
+            font-weight: 500;
+        }
+        .nn-legend-dot {
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            box-shadow: 0 0 8px currentColor;
+        }
+
+        /* ===== 业务条线右侧抽屉样式 ===== */
+        #lineDrawer {
+            position: fixed;
+            top: 0; right: 0; bottom: 0;
+            width: 100%; max-width: 480px;
+            background: rgba(255,255,255,0.98);
+            backdrop-filter: blur(24px);
+            border-left: 1px solid rgba(0,0,0,0.08);
+            box-shadow: -20px 0 60px rgba(0,0,0,0.15);
+            z-index: 120;
+            transform: translateX(100%);
+            transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+            display: flex; flex-direction: column;
+        }
+        #lineDrawer.open { transform: translateX(0); }
+
+        #drawerOverlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.3);
+            backdrop-filter: blur(4px);
+            z-index: 110;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        #drawerOverlay.open { opacity: 1; pointer-events: auto; }
+
+        .drawer-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid rgba(0,0,0,0.08);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        #drawerTitle {
+            font-size: 18px;
+            font-weight: 700;
+        }
+        .drawer-close {
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.06);
+            border: none;
+            font-size: 20px;
+            color: #64748b;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .drawer-close:hover { background: rgba(0,0,0,0.1); }
+
+        #drawerDesc {
+            padding: 12px 24px;
+            font-size: 13px;
+            color: #64748b;
+            background: rgba(0,0,0,0.02);
+        }
+
+        #drawerBody {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 24px;
+        }
+
+        .drawer-sub-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px;
+            background: rgba(0,0,0,0.02);
+            border-radius: 12px;
+            cursor: pointer;
+        }
+        .drawer-sub-header:hover { background: rgba(0,0,0,0.05); }
+        .drawer-sub-icon {
+            font-size: 12px;
+            transition: transform 0.2s;
+        }
+        .drawer-sub-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        .drawer-sub-count {
+            font-size: 11px;
+            color: #94a3b8;
+            margin-left: auto;
+        }
+
+        .drawer-sub-body {
+            margin-top: 8px;
+            padding-left: 12px;
+            display: none;
+        }
+        .drawer-sub-body.expanded { display: block; }
+
+        .drawer-mod {
+            margin-bottom: 8px;
+        }
+        .drawer-mod-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 1px solid rgba(0,0,0,0.04);
+        }
+        .drawer-mod-header:hover { border-color: rgba(0,0,0,0.1); }
+        .drawer-mod-icon {
+            width: 20px; height: 20px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+        }
+        .drawer-mod-title {
+            font-size: 13px;
+            font-weight: 500;
+            color: #334155;
+        }
+        .drawer-mod-count {
+            font-size: 10px;
+            color: #94a3b8;
+            margin-left: auto;
+        }
+
+        .drawer-mod-body {
+            margin-top: 6px;
+            padding-left: 28px;
+            display: none;
+        }
+        .drawer-mod-body.expanded { display: block; }
+
+        .drawer-work {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            padding: 6px 0;
+            font-size: 12px;
+            color: #475569;
+            line-height: 1.5;
+        }
+        .drawer-work-dot {
+            width: 5px; height: 5px;
+            border-radius: 50%;
+            margin-top: 5px;
+            flex-shrink: 0;
+        }
+        .drawer-work-text {
+            flex: 1;
+        }
+
+        /* Title overlay */
+        .nn-title {
+            position: absolute;
+            top: 24px; left: 28px;
+            z-index: 20;
+        }
+        .nn-title h3 {
+            font-size: 22px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+        .nn-title p {
+            font-size: 13px;
+            color: #64748b;
+            margin-top: 4px;
+        }
+
+        /* Reset button */
+        .nn-reset-btn {
+            position: absolute;
+            top: 24px; right: 28px;
+            z-index: 20;
+            padding: 8px 16px;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.8);
+            border: 1px solid rgba(0,0,0,0.08);
+            color: #475569;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            opacity: 0;
+            pointer-events: none;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .nn-reset-btn.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .nn-reset-btn:hover {
+            background: white;
+            color: #1e293b;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
         /* Handbook cards & modal */
         .hb-card {
             background: #ffffff;
@@ -615,6 +1073,27 @@
             transition: all 0.3s cubic-bezier(0.32, 0.72, 0, 1);
         }
         .pos-modal-panel.open { opacity: 1; pointer-events: auto; transform: translate(-50%, -50%) scale(1); }
+        
+        /* Business Accordion */
+        .biz-accordion { max-width: 900px; margin: 0 auto; padding: 24px; }
+        .biz-tier1 { margin-bottom: 16px; border-radius: 16px; background: #ffffff; border: 1px solid var(--border-subtle); box-shadow: var(--shadow-sm); overflow: hidden; }
+        .biz-tier1-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; cursor: pointer; transition: background .2s; }
+        .biz-tier1-header:hover { background: rgba(0,0,0,0.02); }
+        .biz-tier1-title { font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+        .biz-tier1-badge { font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 999px; }
+        .biz-tier1-content { max-height: 0; overflow: hidden; transition: max-height .4s cubic-bezier(0.32, 0.72, 0, 1); }
+        .biz-tier1-content.open { max-height: 2000px; }
+        .biz-tier2 { border-top: 1px solid var(--border-subtle); }
+        .biz-tier2-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 20px 12px 28px; cursor: pointer; background: #fafafa; transition: background .2s; }
+        .biz-tier2-header:hover { background: #f3f4f6; }
+        .biz-tier2-title { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+        .biz-tier2-content { max-height: 0; overflow: hidden; transition: max-height .35s cubic-bezier(0.32, 0.72, 0, 1); background: #ffffff; }
+        .biz-tier2-content.open { max-height: 1200px; }
+        .biz-tier2-inner { padding: 10px 20px 16px 36px; }
+        .biz-item { position: relative; padding-left: 14px; font-size: 13px; color: var(--text-secondary); line-height: 1.7; margin-bottom: 8px; }
+        .biz-item::before { content: ''; position: absolute; left: 0; top: 9px; width: 5px; height: 5px; border-radius: 50%; background: currentColor; opacity: .55; }
+        .biz-chevron { transition: transform .3s ease; color: var(--text-muted); }
+        .biz-chevron.open { transform: rotate(180deg); }
 </style>
 <style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.fixed{position:fixed}.absolute{position:absolute}.relative{position:relative}.sticky{position:sticky}.left-0{left:0px}.left-3{left:0.75rem}.right-0{right:0px}.top-0{top:0px}.top-1\/2{top:50%}.z-20{z-index:20}.z-50{z-index:50}.mx-auto{margin-left:auto;margin-right:auto}.mb-10{margin-bottom:2.5rem}.mb-2{margin-bottom:0.5rem}.mb-3{margin-bottom:0.75rem}.mb-4{margin-bottom:1rem}.mb-5{margin-bottom:1.25rem}.mb-6{margin-bottom:1.5rem}.ml-3{margin-left:0.75rem}.mr-1\.5{margin-right:0.375rem}.mt-0\.5{margin-top:0.125rem}.mt-1{margin-top:0.25rem}.mt-2{margin-top:0.5rem}.mt-3{margin-top:0.75rem}.block{display:block}.flex{display:flex}.inline-flex{display:inline-flex}.grid{display:grid}.hidden{display:none}.h-1\.5{height:0.375rem}.h-10{height:2.5rem}.h-12{height:3rem}.h-16{height:4rem}.h-9{height:2.25rem}.h-\[calc\(100vh-64px\)\]{height:calc(100vh - 64px)}.h-full{height:100%}.h-8{height:2rem}.h-1{height:0.25rem}.max-h-\[calc\(100vh-180px\)\]{max-height:calc(100vh - 180px)}.min-h-screen{min-height:100vh}.w-10{width:2.5rem}.w-12{width:3rem}.w-14{width:3.5rem}.w-20{width:5rem}.w-56{width:14rem}.w-9{width:2.25rem}.w-full{width:100%}.w-16{width:4rem}.w-8{width:2rem}.w-1\.5{width:0.375rem}.w-80{width:20rem}.min-w-0{min-width:0px}.min-w-\[160px\]{min-width:160px}.min-w-\[180px\]{min-width:180px}.max-w-4xl{max-width:56rem}.max-w-5xl{max-width:64rem}.max-w-6xl{max-width:72rem}.max-w-sm{max-width:24rem}.max-w-\[120px\]{max-width:120px}.flex-1{flex:1 1 0%}.flex-shrink-0{flex-shrink:0}.-translate-y-1\/2{--tw-translate-y:-50%;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.cursor-pointer{cursor:pointer}.resize-none{resize:none}.resize-y{resize:vertical}.list-inside{list-style-position:inside}.list-disc{list-style-type:disc}.grid-cols-1{grid-template-columns:repeat(1, minmax(0, 1fr))}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.items-start{align-items:flex-start}.items-center{align-items:center}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-1{gap:0.25rem}.gap-1\.5{gap:0.375rem}.gap-2{gap:0.5rem}.gap-3{gap:0.75rem}.gap-4{gap:1rem}.gap-5{gap:1.25rem}.gap-6{gap:1.5rem}.gap-2\.5{gap:0.625rem}.space-y-1 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.25rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.25rem * var(--tw-space-y-reverse))}.space-y-2 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.5rem * var(--tw-space-y-reverse))}.space-y-3 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.75rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.75rem * var(--tw-space-y-reverse))}.space-y-4 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1rem * var(--tw-space-y-reverse))}.space-y-6 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.5rem * var(--tw-space-y-reverse))}.space-y-8 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(2rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(2rem * var(--tw-space-y-reverse))}.space-y-10 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(2.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(2.5rem * var(--tw-space-y-reverse))}.space-y-2\.5 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.625rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.625rem * var(--tw-space-y-reverse))}.divide-y > :not([hidden]) ~ :not([hidden]){--tw-divide-y-reverse:0;border-top-width:calc(1px * calc(1 - var(--tw-divide-y-reverse)));border-bottom-width:calc(1px * var(--tw-divide-y-reverse))}.divide-slate-100 > :not([hidden]) ~ :not([hidden]){--tw-divide-opacity:1;border-color:rgb(241 245 249 / var(--tw-divide-opacity, 1))}.overflow-auto{overflow:auto}.overflow-hidden{overflow:hidden}.overflow-x-auto{overflow-x:auto}.overflow-y-auto{overflow-y:auto}.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.whitespace-normal{white-space:normal}.whitespace-pre-wrap{white-space:pre-wrap}.rounded-2xl{border-radius:1rem}.rounded-3xl{border-radius:1.5rem}.rounded-full{border-radius:9999px}.rounded-lg{border-radius:0.5rem}.rounded-xl{border-radius:0.75rem}.rounded-r-xl{border-top-right-radius:0.75rem;border-bottom-right-radius:0.75rem}.border{border-width:1px}.border-0{border-width:0px}.border-b{border-bottom-width:1px}.border-r{border-right-width:1px}.border-t{border-top-width:1px}.border-t-4{border-top-width:4px}.border-amber-100{--tw-border-opacity:1;border-color:rgb(254 243 199 / var(--tw-border-opacity, 1))}.border-black\/5{border-color:rgb(0 0 0 / 0.05)}.border-blue-100{--tw-border-opacity:1;border-color:rgb(219 234 254 / var(--tw-border-opacity, 1))}.border-blue-400{--tw-border-opacity:1;border-color:rgb(96 165 250 / var(--tw-border-opacity, 1))}.border-blue-500{--tw-border-opacity:1;border-color:rgb(59 130 246 / var(--tw-border-opacity, 1))}.border-emerald-500{--tw-border-opacity:1;border-color:rgb(16 185 129 / var(--tw-border-opacity, 1))}.border-indigo-100{--tw-border-opacity:1;border-color:rgb(224 231 255 / var(--tw-border-opacity, 1))}.border-red-500{--tw-border-opacity:1;border-color:rgb(239 68 68 / var(--tw-border-opacity, 1))}.border-rose-100{--tw-border-opacity:1;border-color:rgb(255 228 230 / var(--tw-border-opacity, 1))}.border-slate-100{--tw-border-opacity:1;border-color:rgb(241 245 249 / var(--tw-border-opacity, 1))}.border-slate-200{--tw-border-opacity:1;border-color:rgb(226 232 240 / var(--tw-border-opacity, 1))}.border-violet-500{--tw-border-opacity:1;border-color:rgb(139 92 246 / var(--tw-border-opacity, 1))}.border-emerald-100{--tw-border-opacity:1;border-color:rgb(209 250 229 / var(--tw-border-opacity, 1))}.border-purple-100{--tw-border-opacity:1;border-color:rgb(243 232 255 / var(--tw-border-opacity, 1))}.bg-amber-100{--tw-bg-opacity:1;background-color:rgb(254 243 199 / var(--tw-bg-opacity, 1))}.bg-amber-50\/50{background-color:rgb(255 251 235 / 0.5)}.bg-black\/5{background-color:rgb(0 0 0 / 0.05)}.bg-blue-100{--tw-bg-opacity:1;background-color:rgb(219 234 254 / var(--tw-bg-opacity, 1))}.bg-blue-50{--tw-bg-opacity:1;background-color:rgb(239 246 255 / var(--tw-bg-opacity, 1))}.bg-blue-50\/30{background-color:rgb(239 246 255 / 0.3)}.bg-blue-50\/50{background-color:rgb(239 246 255 / 0.5)}.bg-blue-500{--tw-bg-opacity:1;background-color:rgb(59 130 246 / var(--tw-bg-opacity, 1))}.bg-blue-600{--tw-bg-opacity:1;background-color:rgb(37 99 235 / var(--tw-bg-opacity, 1))}.bg-emerald-100{--tw-bg-opacity:1;background-color:rgb(209 250 229 / var(--tw-bg-opacity, 1))}.bg-emerald-50{--tw-bg-opacity:1;background-color:rgb(236 253 245 / var(--tw-bg-opacity, 1))}.bg-emerald-50\/50{background-color:rgb(236 253 245 / 0.5)}.bg-emerald-500{--tw-bg-opacity:1;background-color:rgb(16 185 129 / var(--tw-bg-opacity, 1))}.bg-purple-100{--tw-bg-opacity:1;background-color:rgb(243 232 255 / var(--tw-bg-opacity, 1))}.bg-purple-50{--tw-bg-opacity:1;background-color:rgb(250 245 255 / var(--tw-bg-opacity, 1))}.bg-purple-50\/50{background-color:rgb(250 245 255 / 0.5)}.bg-purple-500{--tw-bg-opacity:1;background-color:rgb(168 85 247 / var(--tw-bg-opacity, 1))}.bg-red-100{--tw-bg-opacity:1;background-color:rgb(254 226 226 / var(--tw-bg-opacity, 1))}.bg-slate-100{--tw-bg-opacity:1;background-color:rgb(241 245 249 / var(--tw-bg-opacity, 1))}.bg-slate-200{--tw-bg-opacity:1;background-color:rgb(226 232 240 / var(--tw-bg-opacity, 1))}.bg-slate-50{--tw-bg-opacity:1;background-color:rgb(248 250 252 / var(--tw-bg-opacity, 1))}.bg-slate-900{--tw-bg-opacity:1;background-color:rgb(15 23 42 / var(--tw-bg-opacity, 1))}.bg-violet-100{--tw-bg-opacity:1;background-color:rgb(237 233 254 / var(--tw-bg-opacity, 1))}.bg-violet-50{--tw-bg-opacity:1;background-color:rgb(245 243 255 / var(--tw-bg-opacity, 1))}.bg-white{--tw-bg-opacity:1;background-color:rgb(255 255 255 / var(--tw-bg-opacity, 1))}.bg-rose-100{--tw-bg-opacity:1;background-color:rgb(255 228 230 / var(--tw-bg-opacity, 1))}.bg-gradient-to-br{background-image:linear-gradient(to bottom right, var(--tw-gradient-stops))}.bg-gradient-to-r{background-image:linear-gradient(to right, var(--tw-gradient-stops))}.from-amber-50{--tw-gradient-from:#fffbeb var(--tw-gradient-from-position);--tw-gradient-to:rgb(255 251 235 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.from-blue-50{--tw-gradient-from:#eff6ff var(--tw-gradient-from-position);--tw-gradient-to:rgb(239 246 255 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.from-blue-500{--tw-gradient-from:#3b82f6 var(--tw-gradient-from-position);--tw-gradient-to:rgb(59 130 246 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.from-indigo-50{--tw-gradient-from:#eef2ff var(--tw-gradient-from-position);--tw-gradient-to:rgb(238 242 255 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.from-rose-50{--tw-gradient-from:#fff1f2 var(--tw-gradient-from-position);--tw-gradient-to:rgb(255 241 242 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.from-slate-900{--tw-gradient-from:#0f172a var(--tw-gradient-from-position);--tw-gradient-to:rgb(15 23 42 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.to-blue-700{--tw-gradient-to:#1d4ed8 var(--tw-gradient-to-position)}.to-slate-800{--tw-gradient-to:#1e293b var(--tw-gradient-to-position)}.to-white{--tw-gradient-to:#fff var(--tw-gradient-to-position)}.p-1{padding:0.25rem}.p-10{padding:2.5rem}.p-3{padding:0.75rem}.p-5{padding:1.25rem}.p-6{padding:1.5rem}.p-8{padding:2rem}.px-3{padding-left:0.75rem;padding-right:0.75rem}.px-4{padding-left:1rem;padding-right:1rem}.px-5{padding-left:1.25rem;padding-right:1.25rem}.px-6{padding-left:1.5rem;padding-right:1.5rem}.py-1{padding-top:0.25rem;padding-bottom:0.25rem}.py-1\.5{padding-top:0.375rem;padding-bottom:0.375rem}.py-2{padding-top:0.5rem;padding-bottom:0.5rem}.py-3{padding-top:0.75rem;padding-bottom:0.75rem}.py-4{padding-top:1rem;padding-bottom:1rem}.py-2\.5{padding-top:0.625rem;padding-bottom:0.625rem}.pl-4{padding-left:1rem}.pl-5{padding-left:1.25rem}.pl-8{padding-left:2rem}.pr-4{padding-right:1rem}.pt-16{padding-top:4rem}.pb-4{padding-bottom:1rem}.text-left{text-align:left}.text-center{text-align:center}.font-mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}.text-2xl{font-size:1.5rem;line-height:2rem}.text-3xl{font-size:1.875rem;line-height:2.25rem}.text-\[10px\]{font-size:10px}.text-\[11px\]{font-size:11px}.text-base{font-size:1rem;line-height:1.5rem}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:0.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:0.75rem;line-height:1rem}.font-bold{font-weight:700}.font-medium{font-weight:500}.font-semibold{font-weight:600}.uppercase{text-transform:uppercase}.leading-none{line-height:1}.leading-relaxed{line-height:1.625}.leading-tight{line-height:1.25}.tracking-wider{letter-spacing:0.05em}.text-amber-500{--tw-text-opacity:1;color:rgb(245 158 11 / var(--tw-text-opacity, 1))}.text-amber-700{--tw-text-opacity:1;color:rgb(180 83 9 / var(--tw-text-opacity, 1))}.text-blue-500{--tw-text-opacity:1;color:rgb(59 130 246 / var(--tw-text-opacity, 1))}.text-blue-600{--tw-text-opacity:1;color:rgb(37 99 235 / var(--tw-text-opacity, 1))}.text-blue-700{--tw-text-opacity:1;color:rgb(29 78 216 / var(--tw-text-opacity, 1))}.text-emerald-500{--tw-text-opacity:1;color:rgb(16 185 129 / var(--tw-text-opacity, 1))}.text-emerald-600{--tw-text-opacity:1;color:rgb(5 150 105 / var(--tw-text-opacity, 1))}.text-emerald-700{--tw-text-opacity:1;color:rgb(4 120 87 / var(--tw-text-opacity, 1))}.text-indigo-700{--tw-text-opacity:1;color:rgb(67 56 202 / var(--tw-text-opacity, 1))}.text-purple-500{--tw-text-opacity:1;color:rgb(168 85 247 / var(--tw-text-opacity, 1))}.text-purple-600{--tw-text-opacity:1;color:rgb(147 51 234 / var(--tw-text-opacity, 1))}.text-red-600{--tw-text-opacity:1;color:rgb(220 38 38 / var(--tw-text-opacity, 1))}.text-red-700{--tw-text-opacity:1;color:rgb(185 28 28 / var(--tw-text-opacity, 1))}.text-rose-700{--tw-text-opacity:1;color:rgb(190 18 60 / var(--tw-text-opacity, 1))}.text-slate-400{--tw-text-opacity:1;color:rgb(148 163 184 / var(--tw-text-opacity, 1))}.text-slate-500{--tw-text-opacity:1;color:rgb(100 116 139 / var(--tw-text-opacity, 1))}.text-slate-600{--tw-text-opacity:1;color:rgb(71 85 105 / var(--tw-text-opacity, 1))}.text-slate-700{--tw-text-opacity:1;color:rgb(51 65 85 / var(--tw-text-opacity, 1))}.text-slate-800{--tw-text-opacity:1;color:rgb(30 41 59 / var(--tw-text-opacity, 1))}.text-slate-900{--tw-text-opacity:1;color:rgb(15 23 42 / var(--tw-text-opacity, 1))}.text-violet-600{--tw-text-opacity:1;color:rgb(124 58 237 / var(--tw-text-opacity, 1))}.text-violet-700{--tw-text-opacity:1;color:rgb(109 40 217 / var(--tw-text-opacity, 1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.text-slate-300{--tw-text-opacity:1;color:rgb(203 213 225 / var(--tw-text-opacity, 1))}.opacity-30{opacity:0.3}.opacity-90{opacity:0.9}.shadow-lg{--tw-shadow:0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 10px 15px -3px var(--tw-shadow-color), 0 4px 6px -4px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-sm{--tw-shadow:0 1px 2px 0 rgb(0 0 0 / 0.05);--tw-shadow-colored:0 1px 2px 0 var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-blue-500\/25{--tw-shadow-color:rgb(59 130 246 / 0.25);--tw-shadow:var(--tw-shadow-colored)}.transition{transition-property:color, background-color, border-color, fill, stroke, opacity, box-shadow, transform, filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition-all{transition-property:all;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.duration-300{transition-duration:300ms}.placeholder\:text-slate-400::placeholder{--tw-text-opacity:1;color:rgb(148 163 184 / var(--tw-text-opacity, 1))}.hover\:-translate-y-1:hover{--tw-translate-y:-0.25rem;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.hover\:bg-black\/5:hover{background-color:rgb(0 0 0 / 0.05)}.hover\:bg-blue-700:hover{--tw-bg-opacity:1;background-color:rgb(29 78 216 / var(--tw-bg-opacity, 1))}.hover\:bg-slate-100:hover{--tw-bg-opacity:1;background-color:rgb(241 245 249 / var(--tw-bg-opacity, 1))}.hover\:bg-slate-200:hover{--tw-bg-opacity:1;background-color:rgb(226 232 240 / var(--tw-bg-opacity, 1))}.hover\:bg-slate-300:hover{--tw-bg-opacity:1;background-color:rgb(203 213 225 / var(--tw-bg-opacity, 1))}.hover\:bg-slate-50:hover{--tw-bg-opacity:1;background-color:rgb(248 250 252 / var(--tw-bg-opacity, 1))}.hover\:bg-slate-800:hover{--tw-bg-opacity:1;background-color:rgb(30 41 59 / var(--tw-bg-opacity, 1))}.hover\:shadow-xl:hover{--tw-shadow:0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 20px 25px -5px var(--tw-shadow-color), 0 8px 10px -6px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.focus\:outline-none:focus{outline:2px solid transparent;outline-offset:2px}.focus\:ring-2:focus{--tw-ring-offset-shadow:var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow:var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000)}.focus\:ring-blue-500\/40:focus{--tw-ring-color:rgb(59 130 246 / 0.4)}@media (min-width: 768px){.md\:grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}}@media (min-width: 1024px){.lg\:grid-cols-3{grid-template-columns:repeat(3, minmax(0, 1fr))}}</style><style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.fixed{position:fixed}.absolute{position:absolute}.relative{position:relative}.sticky{position:sticky}.left-0{left:0px}.left-3{left:0.75rem}.right-0{right:0px}.top-0{top:0px}.top-1\/2{top:50%}.z-20{z-index:20}.z-50{z-index:50}.mx-auto{margin-left:auto;margin-right:auto}.mb-10{margin-bottom:2.5rem}.mb-2{margin-bottom:0.5rem}.mb-3{margin-bottom:0.75rem}.mb-4{margin-bottom:1rem}.mb-5{margin-bottom:1.25rem}.mb-6{margin-bottom:1.5rem}.ml-3{margin-left:0.75rem}.mr-1\.5{margin-right:0.375rem}.mt-0\.5{margin-top:0.125rem}.mt-1{margin-top:0.25rem}.mt-2{margin-top:0.5rem}.mt-3{margin-top:0.75rem}.block{display:block}.flex{display:flex}.inline-flex{display:inline-flex}.grid{display:grid}.hidden{display:none}.h-1{height:0.25rem}.h-1\.5{height:0.375rem}.h-10{height:2.5rem}.h-12{height:3rem}.h-16{height:4rem}.h-8{height:2rem}.h-9{height:2.25rem}.h-\[calc\(100vh-64px\)\]{height:calc(100vh - 64px)}.h-full{height:100%}.max-h-\[calc\(100vh-180px\)\]{max-height:calc(100vh - 180px)}.min-h-screen{min-height:100vh}.w-1\.5{width:0.375rem}.w-10{width:2.5rem}.w-12{width:3rem}.w-14{width:3.5rem}.w-20{width:5rem}.w-56{width:14rem}.w-8{width:2rem}.w-80{width:20rem}.w-9{width:2.25rem}.w-full{width:100%}.w-16{width:4rem}.min-w-0{min-width:0px}.min-w-\[160px\]{min-width:160px}.min-w-\[180px\]{min-width:180px}.max-w-4xl{max-width:56rem}.max-w-5xl{max-width:64rem}.max-w-6xl{max-width:72rem}.max-w-\[120px\]{max-width:120px}.max-w-sm{max-width:24rem}.flex-1{flex:1 1 0%}.flex-shrink-0{flex-shrink:0}.-translate-y-1\/2{--tw-translate-y:-50%;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.cursor-pointer{cursor:pointer}.resize-none{resize:none}.resize-y{resize:vertical}.list-inside{list-style-position:inside}.list-disc{list-style-type:disc}.grid-cols-1{grid-template-columns:repeat(1, minmax(0, 1fr))}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.items-start{align-items:flex-start}.items-center{align-items:center}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-1{gap:0.25rem}.gap-1\.5{gap:0.375rem}.gap-2{gap:0.5rem}.gap-2\.5{gap:0.625rem}.gap-3{gap:0.75rem}.gap-4{gap:1rem}.gap-5{gap:1.25rem}.gap-6{gap:1.5rem}.space-y-1 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.25rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.25rem * var(--tw-space-y-reverse))}.space-y-10 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(2.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(2.5rem * var(--tw-space-y-reverse))}.space-y-2 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.5rem * var(--tw-space-y-reverse))}.space-y-2\.5 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.625rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.625rem * var(--tw-space-y-reverse))}.space-y-3 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.75rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.75rem * var(--tw-space-y-reverse))}.space-y-4 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1rem * var(--tw-space-y-reverse))}.space-y-6 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.5rem * var(--tw-space-y-reverse))}.space-y-8 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(2rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(2rem * var(--tw-space-y-reverse))}.divide-y > :not([hidden]) ~ :not([hidden]){--tw-divide-y-reverse:0;border-top-width:calc(1px * calc(1 - var(--tw-divide-y-reverse)));border-bottom-width:calc(1px * var(--tw-divide-y-reverse))}.divide-slate-100 > :not([hidden]) ~ :not([hidden]){--tw-divide-opacity:1;border-color:rgb(241 245 249 / var(--tw-divide-opacity, 1))}.overflow-auto{overflow:auto}.overflow-hidden{overflow:hidden}.overflow-x-auto{overflow-x:auto}.overflow-y-auto{overflow-y:auto}.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.whitespace-normal{white-space:normal}.whitespace-pre-wrap{white-space:pre-wrap}.rounded-2xl{border-radius:1rem}.rounded-3xl{border-radius:1.5rem}.rounded-full{border-radius:9999px}.rounded-lg{border-radius:0.5rem}.rounded-xl{border-radius:0.75rem}.rounded-r-xl{border-top-right-radius:0.75rem;border-bottom-right-radius:0.75rem}.border{border-width:1px}.border-0{border-width:0px}.border-b{border-bottom-width:1px}.border-r{border-right-width:1px}.border-t{border-top-width:1px}.border-t-4{border-top-width:4px}.border-amber-100{--tw-border-opacity:1;border-color:rgb(254 243 199 / var(--tw-border-opacity, 1))}.border-black\/5{border-color:rgb(0 0 0 / 0.05)}.border-blue-100{--tw-border-opacity:1;border-color:rgb(219 234 254 / var(--tw-border-opacity, 1))}.border-blue-400{--tw-border-opacity:1;border-color:rgb(96 165 250 / var(--tw-border-opacity, 1))}.border-blue-500{--tw-border-opacity:1;border-color:rgb(59 130 246 / var(--tw-border-opacity, 1))}.border-emerald-100{--tw-border-opacity:1;border-color:rgb(209 250 229 / var(--tw-border-opacity, 1))}.border-emerald-500{--tw-border-opacity:1;border-color:rgb(16 185 129 / var(--tw-border-opacity, 1))}.border-indigo-100{--tw-border-opacity:1;border-color:rgb(224 231 255 / var(--tw-border-opacity, 1))}.border-purple-100{--tw-border-opacity:1;border-color:rgb(243 232 255 / var(--tw-border-opacity, 1))}.border-red-500{--tw-border-opacity:1;border-color:rgb(239 68 68 / var(--tw-border-opacity, 1))}.border-rose-100{--tw-border-opacity:1;border-color:rgb(255 228 230 / var(--tw-border-opacity, 1))}.border-slate-100{--tw-border-opacity:1;border-color:rgb(241 245 249 / var(--tw-border-opacity, 1))}.border-slate-200{--tw-border-opacity:1;border-color:rgb(226 232 240 / var(--tw-border-opacity, 1))}.border-violet-500{--tw-border-opacity:1;border-color:rgb(139 92 246 / var(--tw-border-opacity, 1))}.bg-amber-100{--tw-bg-opacity:1;background-color:rgb(254 243 199 / var(--tw-bg-opacity, 1))}.bg-amber-50\/50{background-color:rgb(255 251 235 / 0.5)}.bg-black\/5{background-color:rgb(0 0 0 / 0.05)}.bg-blue-100{--tw-bg-opacity:1;background-color:rgb(219 234 254 / var(--tw-bg-opacity, 1))}.bg-blue-50{--tw-bg-opacity:1;background-color:rgb(239 246 255 / var(--tw-bg-opacity, 1))}.bg-blue-50\/30{background-color:rgb(239 246 255 / 0.3)}.bg-blue-50\/50{background-color:rgb(239 246 255 / 0.5)}.bg-blue-500{--tw-bg-opacity:1;background-color:rgb(59 130 246 / var(--tw-bg-opacity, 1))}.bg-blue-600{--tw-bg-opacity:1;background-color:rgb(37 99 235 / var(--tw-bg-opacity, 1))}.bg-emerald-100{--tw-bg-opacity:1;background-color:rgb(209 250 229 / var(--tw-bg-opacity, 1))}.bg-emerald-50{--tw-bg-opacity:1;background-color:rgb(236 253 245 / var(--tw-bg-opacity, 1))}.bg-emerald-50\/50{background-color:rgb(236 253 245 / 0.5)}.bg-emerald-500{--tw-bg-opacity:1;background-color:rgb(16 185 129 / var(--tw-bg-opacity, 1))}.bg-purple-100{--tw-bg-opacity:1;background-color:rgb(243 232 255 / var(--tw-bg-opacity, 1))}.bg-purple-50{--tw-bg-opacity:1;background-color:rgb(250 245 255 / var(--tw-bg-opacity, 1))}.bg-purple-50\/50{background-color:rgb(250 245 255 / 0.5)}.bg-purple-500{--tw-bg-opacity:1;background-color:rgb(168 85 247 / var(--tw-bg-opacity, 1))}.bg-red-100{--tw-bg-opacity:1;background-color:rgb(254 226 226 / var(--tw-bg-opacity, 1))}.bg-rose-100{--tw-bg-opacity:1;background-color:rgb(255 228 230 / var(--tw-bg-opacity, 1))}.bg-slate-100{--tw-bg-opacity:1;background-color:rgb(241 245 249 / var(--tw-bg-opacity, 1))}.bg-slate-200{--tw-bg-opacity:1;background-color:rgb(226 232 240 / var(--tw-bg-opacity, 1))}.bg-slate-50{--tw-bg-opacity:1;background-color:rgb(248 250 252 / var(--tw-bg-opacity, 1))}.bg-slate-900{--tw-bg-opacity:1;background-color:rgb(15 23 42 / var(--tw-bg-opacity, 1))}.bg-violet-100{--tw-bg-opacity:1;background-color:rgb(237 233 254 / var(--tw-bg-opacity, 1))}.bg-violet-50{--tw-bg-opacity:1;background-color:rgb(245 243 255 / var(--tw-bg-opacity, 1))}.bg-white{--tw-bg-opacity:1;background-color:rgb(255 255 255 / var(--tw-bg-opacity, 1))}.bg-gradient-to-br{background-image:linear-gradient(to bottom right, var(--tw-gradient-stops))}.bg-gradient-to-r{background-image:linear-gradient(to right, var(--tw-gradient-stops))}.from-amber-50{--tw-gradient-from:#fffbeb var(--tw-gradient-from-position);--tw-gradient-to:rgb(255 251 235 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.from-blue-50{--tw-gradient-from:#eff6ff var(--tw-gradient-from-position);--tw-gradient-to:rgb(239 246 255 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.from-blue-500{--tw-gradient-from:#3b82f6 var(--tw-gradient-from-position);--tw-gradient-to:rgb(59 130 246 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.from-indigo-50{--tw-gradient-from:#eef2ff var(--tw-gradient-from-position);--tw-gradient-to:rgb(238 242 255 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.from-rose-50{--tw-gradient-from:#fff1f2 var(--tw-gradient-from-position);--tw-gradient-to:rgb(255 241 242 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.from-slate-900{--tw-gradient-from:#0f172a var(--tw-gradient-from-position);--tw-gradient-to:rgb(15 23 42 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.to-blue-700{--tw-gradient-to:#1d4ed8 var(--tw-gradient-to-position)}.to-slate-800{--tw-gradient-to:#1e293b var(--tw-gradient-to-position)}.to-white{--tw-gradient-to:#fff var(--tw-gradient-to-position)}.p-1{padding:0.25rem}.p-10{padding:2.5rem}.p-3{padding:0.75rem}.p-5{padding:1.25rem}.p-6{padding:1.5rem}.p-8{padding:2rem}.px-3{padding-left:0.75rem;padding-right:0.75rem}.px-4{padding-left:1rem;padding-right:1rem}.px-5{padding-left:1.25rem;padding-right:1.25rem}.px-6{padding-left:1.5rem;padding-right:1.5rem}.py-1{padding-top:0.25rem;padding-bottom:0.25rem}.py-1\.5{padding-top:0.375rem;padding-bottom:0.375rem}.py-2{padding-top:0.5rem;padding-bottom:0.5rem}.py-3{padding-top:0.75rem;padding-bottom:0.75rem}.py-4{padding-top:1rem;padding-bottom:1rem}.py-2\.5{padding-top:0.625rem;padding-bottom:0.625rem}.pb-4{padding-bottom:1rem}.pl-4{padding-left:1rem}.pl-5{padding-left:1.25rem}.pl-8{padding-left:2rem}.pr-4{padding-right:1rem}.pt-16{padding-top:4rem}.text-left{text-align:left}.text-center{text-align:center}.font-mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}.text-2xl{font-size:1.5rem;line-height:2rem}.text-3xl{font-size:1.875rem;line-height:2.25rem}.text-\[10px\]{font-size:10px}.text-\[11px\]{font-size:11px}.text-base{font-size:1rem;line-height:1.5rem}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:0.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:0.75rem;line-height:1rem}.font-bold{font-weight:700}.font-medium{font-weight:500}.font-semibold{font-weight:600}.uppercase{text-transform:uppercase}.leading-none{line-height:1}.leading-relaxed{line-height:1.625}.leading-tight{line-height:1.25}.tracking-wider{letter-spacing:0.05em}.text-amber-500{--tw-text-opacity:1;color:rgb(245 158 11 / var(--tw-text-opacity, 1))}.text-amber-700{--tw-text-opacity:1;color:rgb(180 83 9 / var(--tw-text-opacity, 1))}.text-blue-500{--tw-text-opacity:1;color:rgb(59 130 246 / var(--tw-text-opacity, 1))}.text-blue-600{--tw-text-opacity:1;color:rgb(37 99 235 / var(--tw-text-opacity, 1))}.text-blue-700{--tw-text-opacity:1;color:rgb(29 78 216 / var(--tw-text-opacity, 1))}.text-emerald-500{--tw-text-opacity:1;color:rgb(16 185 129 / var(--tw-text-opacity, 1))}.text-emerald-600{--tw-text-opacity:1;color:rgb(5 150 105 / var(--tw-text-opacity, 1))}.text-emerald-700{--tw-text-opacity:1;color:rgb(4 120 87 / var(--tw-text-opacity, 1))}.text-indigo-700{--tw-text-opacity:1;color:rgb(67 56 202 / var(--tw-text-opacity, 1))}.text-purple-500{--tw-text-opacity:1;color:rgb(168 85 247 / var(--tw-text-opacity, 1))}.text-purple-600{--tw-text-opacity:1;color:rgb(147 51 234 / var(--tw-text-opacity, 1))}.text-red-600{--tw-text-opacity:1;color:rgb(220 38 38 / var(--tw-text-opacity, 1))}.text-red-700{--tw-text-opacity:1;color:rgb(185 28 28 / var(--tw-text-opacity, 1))}.text-rose-700{--tw-text-opacity:1;color:rgb(190 18 60 / var(--tw-text-opacity, 1))}.text-slate-300{--tw-text-opacity:1;color:rgb(203 213 225 / var(--tw-text-opacity, 1))}.text-slate-400{--tw-text-opacity:1;color:rgb(148 163 184 / var(--tw-text-opacity, 1))}.text-slate-500{--tw-text-opacity:1;color:rgb(100 116 139 / var(--tw-text-opacity, 1))}.text-slate-600{--tw-text-opacity:1;color:rgb(71 85 105 / var(--tw-text-opacity, 1))}.text-slate-700{--tw-text-opacity:1;color:rgb(51 65 85 / var(--tw-text-opacity, 1))}.text-slate-800{--tw-text-opacity:1;color:rgb(30 41 59 / var(--tw-text-opacity, 1))}.text-slate-900{--tw-text-opacity:1;color:rgb(15 23 42 / var(--tw-text-opacity, 1))}.text-violet-600{--tw-text-opacity:1;color:rgb(124 58 237 / var(--tw-text-opacity, 1))}.text-violet-700{--tw-text-opacity:1;color:rgb(109 40 217 / var(--tw-text-opacity, 1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.opacity-30{opacity:0.3}.opacity-90{opacity:0.9}.shadow-lg{--tw-shadow:0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 10px 15px -3px var(--tw-shadow-color), 0 4px 6px -4px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-sm{--tw-shadow:0 1px 2px 0 rgb(0 0 0 / 0.05);--tw-shadow-colored:0 1px 2px 0 var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-blue-500\/25{--tw-shadow-color:rgb(59 130 246 / 0.25);--tw-shadow:var(--tw-shadow-colored)}.transition{transition-property:color, background-color, border-color, fill, stroke, opacity, box-shadow, transform, filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition-all{transition-property:all;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.duration-300{transition-duration:300ms}.placeholder\:text-slate-400::placeholder{--tw-text-opacity:1;color:rgb(148 163 184 / var(--tw-text-opacity, 1))}.hover\:-translate-y-1:hover{--tw-translate-y:-0.25rem;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.hover\:bg-black\/5:hover{background-color:rgb(0 0 0 / 0.05)}.hover\:bg-blue-700:hover{--tw-bg-opacity:1;background-color:rgb(29 78 216 / var(--tw-bg-opacity, 1))}.hover\:bg-slate-100:hover{--tw-bg-opacity:1;background-color:rgb(241 245 249 / var(--tw-bg-opacity, 1))}.hover\:bg-slate-200:hover{--tw-bg-opacity:1;background-color:rgb(226 232 240 / var(--tw-bg-opacity, 1))}.hover\:bg-slate-300:hover{--tw-bg-opacity:1;background-color:rgb(203 213 225 / var(--tw-bg-opacity, 1))}.hover\:bg-slate-50:hover{--tw-bg-opacity:1;background-color:rgb(248 250 252 / var(--tw-bg-opacity, 1))}.hover\:bg-slate-800:hover{--tw-bg-opacity:1;background-color:rgb(30 41 59 / var(--tw-bg-opacity, 1))}.hover\:shadow-xl:hover{--tw-shadow:0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 20px 25px -5px var(--tw-shadow-color), 0 8px 10px -6px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.focus\:outline-none:focus{outline:2px solid transparent;outline-offset:2px}.focus\:ring-2:focus{--tw-ring-offset-shadow:var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow:var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000)}.focus\:ring-blue-500\/40:focus{--tw-ring-color:rgb(59 130 246 / 0.4)}@media (min-width: 768px){.md\:grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}}@media (min-width: 1024px){.lg\:grid-cols-3{grid-template-columns:repeat(3, minmax(0, 1fr))}}</style><script>
 /* ===== GitHub Gist Cloud Sync & Password Protection ===== */
@@ -675,6 +1154,8 @@ function checkPassword() {
 }
 
 function initAppAfterAuth() {
+    // Show strategy tab immediately so user sees content right away
+    switchTab('strategy');
     fetchAppData().then(() => {
         renderOrgChart();
         drawConnections();
@@ -699,8 +1180,462 @@ function initAppAfterAuth() {
 </style>
 <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
 <script src="https://unpkg.com/three-spritetext@1.8.1/dist/three-spritetext.min.js"></script>
-<script src="https://unpkg.com/3d-force-graph@1.73.0/dist/3d-force-graph.min.js"></script>
-</head>
+<script src="https://unpkg.com/3d-force-graph@1.73.0/dist/3d-force-graph.min.js"></script><style type="text/css">.graph-info-msg {
+  top: 50%;
+  width: 100%;
+  text-align: center;
+  color: lavender;
+  opacity: 0.7;
+  font-size: 22px;
+  position: absolute;
+  font-family: Sans-serif;
+}
+
+.scene-container .clickable {
+  cursor: pointer;
+}
+
+.scene-container .grabbable {
+  cursor: move;
+  cursor: grab;
+  cursor: -moz-grab;
+  cursor: -webkit-grab;
+}
+
+.scene-container .grabbable:active {
+  cursor: grabbing;
+  cursor: -moz-grabbing;
+  cursor: -webkit-grabbing;
+}</style><style type="text/css">.scene-nav-info {
+  bottom: 5px;
+  width: 100%;
+  text-align: center;
+  color: slategrey;
+  opacity: 0.7;
+  font-size: 10px;
+}
+
+.scene-tooltip {
+  top: 0;
+  color: lavender;
+  font-size: 15px;
+}
+
+.scene-nav-info, .scene-tooltip {
+  position: absolute;
+  font-family: sans-serif;
+  pointer-events: none;
+  user-select: none;
+}
+
+.scene-container canvas:focus {
+  outline: none;
+}</style>
+<style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.fixed{position:fixed}.absolute{position:absolute}.relative{position:relative}.sticky{position:sticky}.inset-0{inset:0px}.left-0{left:0px}.left-3{left:0.75rem}.right-0{right:0px}.right-4{right:1rem}.top-0{top:0px}.top-1\/2{top:50%}.top-4{top:1rem}.z-10{z-index:10}.z-20{z-index:20}.z-50{z-index:50}.mx-auto{margin-left:auto;margin-right:auto}.mb-1\.5{margin-bottom:0.375rem}.mb-10{margin-bottom:2.5rem}.mb-2{margin-bottom:0.5rem}.mb-3{margin-bottom:0.75rem}.mb-4{margin-bottom:1rem}.mb-6{margin-bottom:1.5rem}.ml-3{margin-left:0.75rem}.mr-1\.5{margin-right:0.375rem}.mr-2{margin-right:0.5rem}.mt-0\.5{margin-top:0.125rem}.mt-1{margin-top:0.25rem}.mt-2{margin-top:0.5rem}.mt-3{margin-top:0.75rem}.mt-4{margin-top:1rem}.block{display:block}.flex{display:flex}.inline-flex{display:inline-flex}.grid{display:grid}.hidden{display:none}.h-1{height:0.25rem}.h-1\.5{height:0.375rem}.h-10{height:2.5rem}.h-16{height:4rem}.h-2\.5{height:0.625rem}.h-24{height:6rem}.h-8{height:2rem}.h-9{height:2.25rem}.h-\[calc\(100vh-64px\)\]{height:calc(100vh - 64px)}.h-full{height:100%}.max-h-\[calc\(100vh-120px\)\]{max-height:calc(100vh - 120px)}.max-h-\[calc\(100vh-180px\)\]{max-height:calc(100vh - 180px)}.min-h-screen{min-height:100vh}.w-1\.5{width:0.375rem}.w-10{width:2.5rem}.w-14{width:3.5rem}.w-2\.5{width:0.625rem}.w-20{width:5rem}.w-56{width:14rem}.w-8{width:2rem}.w-80{width:20rem}.w-9{width:2.25rem}.w-full{width:100%}.w-16{width:4rem}.min-w-0{min-width:0px}.min-w-\[160px\]{min-width:160px}.min-w-\[180px\]{min-width:180px}.max-w-4xl{max-width:56rem}.max-w-5xl{max-width:64rem}.max-w-6xl{max-width:72rem}.max-w-\[120px\]{max-width:120px}.max-w-sm{max-width:24rem}.flex-1{flex:1 1 0%}.flex-shrink-0{flex-shrink:0}.-translate-y-1\/2{--tw-translate-y:-50%;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.cursor-pointer{cursor:pointer}.resize-none{resize:none}.resize-y{resize:vertical}.list-inside{list-style-position:inside}.list-disc{list-style-type:disc}.grid-cols-1{grid-template-columns:repeat(1, minmax(0, 1fr))}.grid-cols-3{grid-template-columns:repeat(3, minmax(0, 1fr))}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.items-start{align-items:flex-start}.items-center{align-items:center}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-1{gap:0.25rem}.gap-1\.5{gap:0.375rem}.gap-2{gap:0.5rem}.gap-2\.5{gap:0.625rem}.gap-3{gap:0.75rem}.gap-4{gap:1rem}.gap-5{gap:1.25rem}.gap-6{gap:1.5rem}.space-y-10 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(2.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(2.5rem * var(--tw-space-y-reverse))}.space-y-2 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.5rem * var(--tw-space-y-reverse))}.space-y-2\.5 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.625rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.625rem * var(--tw-space-y-reverse))}.space-y-3 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.75rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.75rem * var(--tw-space-y-reverse))}.space-y-6 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.5rem * var(--tw-space-y-reverse))}.space-y-8 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(2rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(2rem * var(--tw-space-y-reverse))}.divide-y > :not([hidden]) ~ :not([hidden]){--tw-divide-y-reverse:0;border-top-width:calc(1px * calc(1 - var(--tw-divide-y-reverse)));border-bottom-width:calc(1px * var(--tw-divide-y-reverse))}.divide-slate-100 > :not([hidden]) ~ :not([hidden]){--tw-divide-opacity:1;border-color:rgb(241 245 249 / var(--tw-divide-opacity, 1))}.overflow-auto{overflow:auto}.overflow-hidden{overflow:hidden}.overflow-x-auto{overflow-x:auto}.overflow-y-auto{overflow-y:auto}.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.whitespace-normal{white-space:normal}.whitespace-pre-wrap{white-space:pre-wrap}.rounded-2xl{border-radius:1rem}.rounded-3xl{border-radius:1.5rem}.rounded-full{border-radius:9999px}.rounded-lg{border-radius:0.5rem}.rounded-xl{border-radius:0.75rem}.border{border-width:1px}.border-0{border-width:0px}.border-b{border-bottom-width:1px}.border-r{border-right-width:1px}.border-t{border-top-width:1px}.border-t-4{border-top-width:4px}.border-amber-100{--tw-border-opacity:1;border-color:rgb(254 243 199 / var(--tw-border-opacity, 1))}.border-black\/5{border-color:rgb(0 0 0 / 0.05)}.border-blue-100{--tw-border-opacity:1;border-color:rgb(219 234 254 / var(--tw-border-opacity, 1))}.border-blue-500{--tw-border-opacity:1;border-color:rgb(59 130 246 / var(--tw-border-opacity, 1))}.border-emerald-100{--tw-border-opacity:1;border-color:rgb(209 250 229 / var(--tw-border-opacity, 1))}.border-emerald-500{--tw-border-opacity:1;border-color:rgb(16 185 129 / var(--tw-border-opacity, 1))}.border-indigo-100{--tw-border-opacity:1;border-color:rgb(224 231 255 / var(--tw-border-opacity, 1))}.border-purple-100{--tw-border-opacity:1;border-color:rgb(243 232 255 / var(--tw-border-opacity, 1))}.border-red-500{--tw-border-opacity:1;border-color:rgb(239 68 68 / var(--tw-border-opacity, 1))}.border-rose-100{--tw-border-opacity:1;border-color:rgb(255 228 230 / var(--tw-border-opacity, 1))}.border-slate-100{--tw-border-opacity:1;border-color:rgb(241 245 249 / var(--tw-border-opacity, 1))}.border-slate-200{--tw-border-opacity:1;border-color:rgb(226 232 240 / var(--tw-border-opacity, 1))}.border-violet-500{--tw-border-opacity:1;border-color:rgb(139 92 246 / var(--tw-border-opacity, 1))}.bg-amber-100{--tw-bg-opacity:1;background-color:rgb(254 243 199 / var(--tw-bg-opacity, 1))}.bg-amber-400{--tw-bg-opacity:1;background-color:rgb(251 191 36 / var(--tw-bg-opacity, 1))}.bg-amber-50\/50{background-color:rgb(255 251 235 / 0.5)}.bg-black\/5{background-color:rgb(0 0 0 / 0.05)}.bg-blue-100{--tw-bg-opacity:1;background-color:rgb(219 234 254 / var(--tw-bg-opacity, 1))}.bg-blue-50{--tw-bg-opacity:1;background-color:rgb(239 246 255 / var(--tw-bg-opacity, 1))}.bg-blue-50\/50{background-color:rgb(239 246 255 / 0.5)}.bg-blue-500{--tw-bg-opacity:1;background-color:rgb(59 130 246 / var(--tw-bg-opacity, 1))}.bg-blue-600{--tw-bg-opacity:1;background-color:rgb(37 99 235 / var(--tw-bg-opacity, 1))}.bg-emerald-100{--tw-bg-opacity:1;background-color:rgb(209 250 229 / var(--tw-bg-opacity, 1))}.bg-emerald-50{--tw-bg-opacity:1;background-color:rgb(236 253 245 / var(--tw-bg-opacity, 1))}.bg-emerald-50\/50{background-color:rgb(236 253 245 / 0.5)}.bg-emerald-500{--tw-bg-opacity:1;background-color:rgb(16 185 129 / var(--tw-bg-opacity, 1))}.bg-purple-50{--tw-bg-opacity:1;background-color:rgb(250 245 255 / var(--tw-bg-opacity, 1))}.bg-purple-50\/50{background-color:rgb(250 245 255 / 0.5)}.bg-purple-500{--tw-bg-opacity:1;background-color:rgb(168 85 247 / var(--tw-bg-opacity, 1))}.bg-red-100{--tw-bg-opacity:1;background-color:rgb(254 226 226 / var(--tw-bg-opacity, 1))}.bg-rose-100{--tw-bg-opacity:1;background-color:rgb(255 228 230 / var(--tw-bg-opacity, 1))}.bg-slate-100{--tw-bg-opacity:1;background-color:rgb(241 245 249 / var(--tw-bg-opacity, 1))}.bg-slate-200{--tw-bg-opacity:1;background-color:rgb(226 232 240 / var(--tw-bg-opacity, 1))}.bg-slate-300{--tw-bg-opacity:1;background-color:rgb(203 213 225 / var(--tw-bg-opacity, 1))}.bg-slate-50{--tw-bg-opacity:1;background-color:rgb(248 250 252 / var(--tw-bg-opacity, 1))}.bg-slate-900{--tw-bg-opacity:1;background-color:rgb(15 23 42 / var(--tw-bg-opacity, 1))}.bg-violet-100{--tw-bg-opacity:1;background-color:rgb(237 233 254 / var(--tw-bg-opacity, 1))}.bg-violet-50{--tw-bg-opacity:1;background-color:rgb(245 243 255 / var(--tw-bg-opacity, 1))}.bg-white{--tw-bg-opacity:1;background-color:rgb(255 255 255 / var(--tw-bg-opacity, 1))}.bg-white\/95{background-color:rgb(255 255 255 / 0.95)}.bg-gradient-to-br{background-image:linear-gradient(to bottom right, var(--tw-gradient-stops))}.bg-gradient-to-r{background-image:linear-gradient(to right, var(--tw-gradient-stops))}.from-amber-50{--tw-gradient-from:#fffbeb var(--tw-gradient-from-position);--tw-gradient-to:rgb(255 251 235 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.from-blue-50{--tw-gradient-from:#eff6ff var(--tw-gradient-from-position);--tw-gradient-to:rgb(239 246 255 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.from-blue-500{--tw-gradient-from:#3b82f6 var(--tw-gradient-from-position);--tw-gradient-to:rgb(59 130 246 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.from-indigo-50{--tw-gradient-from:#eef2ff var(--tw-gradient-from-position);--tw-gradient-to:rgb(238 242 255 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.from-rose-50{--tw-gradient-from:#fff1f2 var(--tw-gradient-from-position);--tw-gradient-to:rgb(255 241 242 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.from-slate-900{--tw-gradient-from:#0f172a var(--tw-gradient-from-position);--tw-gradient-to:rgb(15 23 42 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.to-blue-700{--tw-gradient-to:#1d4ed8 var(--tw-gradient-to-position)}.to-slate-800{--tw-gradient-to:#1e293b var(--tw-gradient-to-position)}.to-white{--tw-gradient-to:#fff var(--tw-gradient-to-position)}.p-1{padding:0.25rem}.p-10{padding:2.5rem}.p-2{padding:0.5rem}.p-3{padding:0.75rem}.p-5{padding:1.25rem}.p-6{padding:1.5rem}.p-8{padding:2rem}.px-2{padding-left:0.5rem;padding-right:0.5rem}.px-3{padding-left:0.75rem;padding-right:0.75rem}.px-4{padding-left:1rem;padding-right:1rem}.px-5{padding-left:1.25rem;padding-right:1.25rem}.px-6{padding-left:1.5rem;padding-right:1.5rem}.py-0\.5{padding-top:0.125rem;padding-bottom:0.125rem}.py-1\.5{padding-top:0.375rem;padding-bottom:0.375rem}.py-2{padding-top:0.5rem;padding-bottom:0.5rem}.py-3{padding-top:0.75rem;padding-bottom:0.75rem}.py-4{padding-top:1rem;padding-bottom:1rem}.py-2\.5{padding-top:0.625rem;padding-bottom:0.625rem}.pb-4{padding-bottom:1rem}.pl-8{padding-left:2rem}.pr-4{padding-right:1rem}.pt-16{padding-top:4rem}.pt-3{padding-top:0.75rem}.text-left{text-align:left}.text-center{text-align:center}.font-mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}.text-2xl{font-size:1.5rem;line-height:2rem}.text-3xl{font-size:1.875rem;line-height:2.25rem}.text-\[10px\]{font-size:10px}.text-\[11px\]{font-size:11px}.text-base{font-size:1rem;line-height:1.5rem}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:0.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:0.75rem;line-height:1rem}.font-bold{font-weight:700}.font-medium{font-weight:500}.font-semibold{font-weight:600}.uppercase{text-transform:uppercase}.leading-none{line-height:1}.leading-relaxed{line-height:1.625}.leading-tight{line-height:1.25}.tracking-wider{letter-spacing:0.05em}.text-slate-900{--tw-text-opacity:1;color:rgb(15 23 42 / var(--tw-text-opacity, 1))}.text-amber-500{--tw-text-opacity:1;color:rgb(245 158 11 / var(--tw-text-opacity, 1))}.text-amber-700{--tw-text-opacity:1;color:rgb(180 83 9 / var(--tw-text-opacity, 1))}.text-blue-500{--tw-text-opacity:1;color:rgb(59 130 246 / var(--tw-text-opacity, 1))}.text-blue-600{--tw-text-opacity:1;color:rgb(37 99 235 / var(--tw-text-opacity, 1))}.text-blue-700{--tw-text-opacity:1;color:rgb(29 78 216 / var(--tw-text-opacity, 1))}.text-emerald-500{--tw-text-opacity:1;color:rgb(16 185 129 / var(--tw-text-opacity, 1))}.text-emerald-600{--tw-text-opacity:1;color:rgb(5 150 105 / var(--tw-text-opacity, 1))}.text-emerald-700{--tw-text-opacity:1;color:rgb(4 120 87 / var(--tw-text-opacity, 1))}.text-indigo-700{--tw-text-opacity:1;color:rgb(67 56 202 / var(--tw-text-opacity, 1))}.text-purple-500{--tw-text-opacity:1;color:rgb(168 85 247 / var(--tw-text-opacity, 1))}.text-purple-600{--tw-text-opacity:1;color:rgb(147 51 234 / var(--tw-text-opacity, 1))}.text-red-600{--tw-text-opacity:1;color:rgb(220 38 38 / var(--tw-text-opacity, 1))}.text-red-700{--tw-text-opacity:1;color:rgb(185 28 28 / var(--tw-text-opacity, 1))}.text-rose-700{--tw-text-opacity:1;color:rgb(190 18 60 / var(--tw-text-opacity, 1))}.text-slate-300{--tw-text-opacity:1;color:rgb(203 213 225 / var(--tw-text-opacity, 1))}.text-slate-400{--tw-text-opacity:1;color:rgb(148 163 184 / var(--tw-text-opacity, 1))}.text-slate-500{--tw-text-opacity:1;color:rgb(100 116 139 / var(--tw-text-opacity, 1))}.text-slate-600{--tw-text-opacity:1;color:rgb(71 85 105 / var(--tw-text-opacity, 1))}.text-slate-700{--tw-text-opacity:1;color:rgb(51 65 85 / var(--tw-text-opacity, 1))}.text-slate-800{--tw-text-opacity:1;color:rgb(30 41 59 / var(--tw-text-opacity, 1))}.text-violet-600{--tw-text-opacity:1;color:rgb(124 58 237 / var(--tw-text-opacity, 1))}.text-violet-700{--tw-text-opacity:1;color:rgb(109 40 217 / var(--tw-text-opacity, 1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.opacity-30{opacity:0.3}.opacity-90{opacity:0.9}.shadow-lg{--tw-shadow:0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 10px 15px -3px var(--tw-shadow-color), 0 4px 6px -4px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-sm{--tw-shadow:0 1px 2px 0 rgb(0 0 0 / 0.05);--tw-shadow-colored:0 1px 2px 0 var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-xl{--tw-shadow:0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 20px 25px -5px var(--tw-shadow-color), 0 8px 10px -6px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-blue-500\/25{--tw-shadow-color:rgb(59 130 246 / 0.25);--tw-shadow:var(--tw-shadow-colored)}.backdrop-blur{--tw-backdrop-blur:blur(8px);-webkit-backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia)}.transition{transition-property:color, background-color, border-color, fill, stroke, opacity, box-shadow, transform, filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition-all{transition-property:all;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.duration-300{transition-duration:300ms}.placeholder\:text-slate-400::placeholder{--tw-text-opacity:1;color:rgb(148 163 184 / var(--tw-text-opacity, 1))}.hover\:-translate-y-1:hover{--tw-translate-y:-0.25rem;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.hover\:bg-black\/5:hover{background-color:rgb(0 0 0 / 0.05)}.hover\:bg-blue-700:hover{--tw-bg-opacity:1;background-color:rgb(29 78 216 / var(--tw-bg-opacity, 1))}.hover\:bg-slate-100:hover{--tw-bg-opacity:1;background-color:rgb(241 245 249 / var(--tw-bg-opacity, 1))}.hover\:bg-slate-200:hover{--tw-bg-opacity:1;background-color:rgb(226 232 240 / var(--tw-bg-opacity, 1))}.hover\:bg-slate-300:hover{--tw-bg-opacity:1;background-color:rgb(203 213 225 / var(--tw-bg-opacity, 1))}.hover\:bg-slate-50:hover{--tw-bg-opacity:1;background-color:rgb(248 250 252 / var(--tw-bg-opacity, 1))}.hover\:bg-slate-800:hover{--tw-bg-opacity:1;background-color:rgb(30 41 59 / var(--tw-bg-opacity, 1))}.hover\:shadow-xl:hover{--tw-shadow:0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 20px 25px -5px var(--tw-shadow-color), 0 8px 10px -6px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.focus\:border-blue-400:focus{--tw-border-opacity:1;border-color:rgb(96 165 250 / var(--tw-border-opacity, 1))}.focus\:outline-none:focus{outline:2px solid transparent;outline-offset:2px}.focus\:ring-2:focus{--tw-ring-offset-shadow:var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow:var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000)}.focus\:ring-blue-500\/40:focus{--tw-ring-color:rgb(59 130 246 / 0.4)}@media (min-width: 768px){.md\:grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}}@media (min-width: 1024px){.lg\:grid-cols-3{grid-template-columns:repeat(3, minmax(0, 1fr))}}</style><style data-id="immersive-translate-input-injected-css">.immersive-translate-input {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 2147483647;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.immersive-translate-attach-loading::after {
+  content: " ";
+
+  --loading-color: #f78fb6;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  display: block;
+  margin: 12px auto;
+  position: relative;
+  color: white;
+  left: -100px;
+  box-sizing: border-box;
+  animation: immersiveTranslateShadowRolling 1.5s linear infinite;
+
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-2000%, -50%);
+  z-index: 100;
+}
+
+.immersive-translate-loading-spinner {
+  vertical-align: middle !important;
+  width: 10px !important;
+  height: 10px !important;
+  display: inline-block !important;
+  margin: 0 4px !important;
+  border: 2px rgba(221, 244, 255, 0.6) solid !important;
+  border-top: 2px rgba(0, 0, 0, 0.375) solid !important;
+  border-left: 2px rgba(0, 0, 0, 0.375) solid !important;
+  border-radius: 50% !important;
+  padding: 0 !important;
+  -webkit-animation: immersive-translate-loading-animation 0.6s infinite linear !important;
+  animation: immersive-translate-loading-animation 0.6s infinite linear !important;
+}
+
+@-webkit-keyframes immersive-translate-loading-animation {
+  from {
+    -webkit-transform: rotate(0deg);
+  }
+
+  to {
+    -webkit-transform: rotate(359deg);
+  }
+}
+
+@keyframes immersive-translate-loading-animation {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(359deg);
+  }
+}
+
+.immersive-translate-input-loading {
+  --loading-color: #f78fb6;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  display: block;
+  margin: 12px auto;
+  position: relative;
+  color: white;
+  left: -100px;
+  box-sizing: border-box;
+  animation: immersiveTranslateShadowRolling 1.5s linear infinite;
+}
+
+@keyframes immersiveTranslateShadowRolling {
+  0% {
+    box-shadow: 0px 0 rgba(255, 255, 255, 0), 0px 0 rgba(255, 255, 255, 0),
+      0px 0 rgba(255, 255, 255, 0), 0px 0 rgba(255, 255, 255, 0);
+  }
+
+  12% {
+    box-shadow: 100px 0 var(--loading-color), 0px 0 rgba(255, 255, 255, 0),
+      0px 0 rgba(255, 255, 255, 0), 0px 0 rgba(255, 255, 255, 0);
+  }
+
+  25% {
+    box-shadow: 110px 0 var(--loading-color), 100px 0 var(--loading-color),
+      0px 0 rgba(255, 255, 255, 0), 0px 0 rgba(255, 255, 255, 0);
+  }
+
+  36% {
+    box-shadow: 120px 0 var(--loading-color), 110px 0 var(--loading-color),
+      100px 0 var(--loading-color), 0px 0 rgba(255, 255, 255, 0);
+  }
+
+  50% {
+    box-shadow: 130px 0 var(--loading-color), 120px 0 var(--loading-color),
+      110px 0 var(--loading-color), 100px 0 var(--loading-color);
+  }
+
+  62% {
+    box-shadow: 200px 0 rgba(255, 255, 255, 0), 130px 0 var(--loading-color),
+      120px 0 var(--loading-color), 110px 0 var(--loading-color);
+  }
+
+  75% {
+    box-shadow: 200px 0 rgba(255, 255, 255, 0), 200px 0 rgba(255, 255, 255, 0),
+      130px 0 var(--loading-color), 120px 0 var(--loading-color);
+  }
+
+  87% {
+    box-shadow: 200px 0 rgba(255, 255, 255, 0), 200px 0 rgba(255, 255, 255, 0),
+      200px 0 rgba(255, 255, 255, 0), 130px 0 var(--loading-color);
+  }
+
+  100% {
+    box-shadow: 200px 0 rgba(255, 255, 255, 0), 200px 0 rgba(255, 255, 255, 0),
+      200px 0 rgba(255, 255, 255, 0), 200px 0 rgba(255, 255, 255, 0);
+  }
+}
+
+.immersive-translate-modal {
+  position: fixed;
+  z-index: 2147483647;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgb(0, 0, 0);
+  background-color: rgba(0, 0, 0, 0.4);
+  font-size: 15px;
+}
+
+.immersive-translate-modal-content {
+  background-color: #fefefe;
+  margin: 10% auto;
+  padding: 40px 24px 24px;
+  border-radius: 12px;
+  width: 350px;
+  font-family: system-ui, -apple-system, "Segoe UI", "Roboto", "Ubuntu",
+    "Cantarell", "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+    "Segoe UI Symbol", "Noto Color Emoji";
+  position: relative;
+}
+
+@media screen and (max-width: 768px) {
+  .immersive-translate-modal-content {
+    margin: 25% auto !important;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .immersive-translate-modal-content {
+    width: 80vw !important;
+    margin: 20vh auto !important;
+    padding: 20px 12px 12px !important;
+  }
+
+  .immersive-translate-modal-title {
+    font-size: 14px !important;
+  }
+
+  .immersive-translate-modal-body {
+    font-size: 13px !important;
+    max-height: 60vh !important;
+  }
+
+  .immersive-translate-btn {
+    font-size: 13px !important;
+    padding: 8px 16px !important;
+    margin: 0 4px !important;
+  }
+
+  .immersive-translate-modal-footer {
+    gap: 6px !important;
+    margin-top: 16px !important;
+  }
+}
+
+.immersive-translate-modal .immersive-translate-modal-content-in-input {
+  max-width: 500px;
+}
+.immersive-translate-modal-content-in-input .immersive-translate-modal-body {
+  text-align: left;
+  max-height: unset;
+}
+
+.immersive-translate-modal-title {
+  text-align: center;
+  font-size: 16px;
+  font-weight: 700;
+  color: #333333;
+}
+
+.immersive-translate-modal-body {
+  text-align: center;
+  font-size: 14px;
+  font-weight: 400;
+  color: #333333;
+  margin-top: 24px;
+}
+
+@media screen and (max-width: 768px) {
+  .immersive-translate-modal-body {
+    max-height: 250px;
+    overflow-y: auto;
+  }
+}
+
+.immersive-translate-close {
+  color: #666666;
+  position: absolute;
+  right: 16px;
+  top: 16px;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.immersive-translate-close:hover,
+.immersive-translate-close:focus {
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.immersive-translate-modal-footer {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 24px;
+}
+
+.immersive-translate-btn {
+  width: fit-content;
+  color: #fff;
+  background-color: #ea4c89;
+  border: none;
+  font-size: 14px;
+  margin: 0 8px;
+  padding: 9px 30px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.immersive-translate-btn-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.immersive-translate-btn:hover {
+  background-color: #f082ac;
+}
+.immersive-translate-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.immersive-translate-btn:disabled:hover {
+  background-color: #ea4c89;
+}
+
+.immersive-translate-link-btn {
+  background-color: transparent;
+  color: #ea4c89;
+  border: none;
+  cursor: pointer;
+  height: 30px;
+  line-height: 30px;
+}
+
+.immersive-translate-cancel-btn {
+  /* gray color */
+  background-color: rgb(89, 107, 120);
+}
+
+.immersive-translate-cancel-btn:hover {
+  background-color: hsl(205, 20%, 32%);
+}
+
+.immersive-translate-action-btn {
+  background-color: transparent;
+  color: #ea4c89;
+  border: 1px solid #ea4c89;
+}
+
+.immersive-translate-btn svg {
+  margin-right: 5px;
+}
+
+.immersive-translate-link {
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-drag: none;
+  text-decoration: none;
+  color: #ea4c89;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+}
+
+.immersive-translate-primary-link {
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-drag: none;
+  text-decoration: none;
+  color: #ea4c89;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+}
+
+.immersive-translate-modal input[type="radio"] {
+  margin: 0 6px;
+  cursor: pointer;
+}
+
+.immersive-translate-modal label {
+  cursor: pointer;
+}
+
+.immersive-translate-close-action {
+  position: absolute;
+  top: 2px;
+  right: 0px;
+  cursor: pointer;
+}
+
+.imt-primary-button {
+  display: flex;
+  padding: 12px 80px;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  border-radius: 8px;
+  background: #ea4c89;
+  color: #fff;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 24px;
+  border: none;
+  cursor: pointer;
+}
+
+.imt-retry-text {
+  color: #999;
+  text-align: center;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 21px;
+  cursor: pointer;
+}
+
+.imt-action-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.imt-modal-content-text {
+  text-align: left;
+  color: #333;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 24px;
+}
+
+.imt-linear-gradient-text {
+  background: linear-gradient(90deg, #00a6ff 0%, #c369ff 52.4%, #ff4590 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.imt-flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.imt-linear-black-btn {
+  border-radius: 50px;
+  background: linear-gradient(66deg, #222 19%, #696969 94.25%);
+  height: 48px;
+  width: 100%;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  justify-content: center;
+}
+</style></head>
 <body class="text-slate-900">
 <div id="pwdOverlay">
 <div id="pwdBox">
@@ -794,8 +1729,8 @@ function initAppAfterAuth() {
         </div>
         
         <nav class="flex items-center gap-1 bg-black/5 p-1 rounded-xl">
-            <button onclick="switchTab('strategy')" id="nav-strategy" class="tab-btn"><i class="fas fa-bullseye mr-1.5"></i>战略规划</button>
-            <button onclick="switchTab('org')" id="nav-org" class="tab-btn active"><i class="fas fa-sitemap mr-1.5"></i>组织架构</button>
+            <button onclick="switchTab('strategy')" id="nav-strategy" class="tab-btn active"><i class="fas fa-bullseye mr-1.5"></i>战略规划</button>
+            <button onclick="switchTab('org')" id="nav-org" class="tab-btn"><i class="fas fa-sitemap mr-1.5"></i>组织架构</button>
             <button onclick="switchTab('council')" id="nav-council" class="tab-btn"><i class="fas fa-landmark mr-1.5"></i>议事机构</button>
             <button onclick="switchTab('business')" id="nav-business" class="tab-btn"><i class="fas fa-briefcase mr-1.5"></i>业务条线</button>
             <button onclick="switchTab('authority')" id="nav-authority" class="tab-btn"><i class="fas fa-tasks mr-1.5"></i>权责清单</button>
@@ -883,24 +1818,30 @@ function initAppAfterAuth() {
         </section>
 
         <!-- ORG CHART TAB -->
-        <section id="tab-org" class="tab-content h-full">
-            <div id="orgCanvas" class="">
+        <section id="tab-org" class="tab-content h-full hidden">
+            <div id="orgCanvas" class="w-full h-full relative">
+              <!-- 议事机构标题 -->
+              <div class="org-title" style="position:absolute;top:28px;left:32px;z-index:20;">
+                    <h3 style="font-family:Geist,'Noto Sans SC',sans-serif;font-size:22px;font-weight:700;color:#1e293b;">议事机构</h3>
+                    <p style="font-family:Geist,'Noto Sans SC',sans-serif;font-size:17px;color:#475569;font-weight:500;line-height:1.7;letter-spacing:0.03em;margin-top:8px;">公司治理架构按照权力机构、治理核心、执行机构、业务部门四层级统筹划分，科学设置议事规则，保障决策科学、执行高效、监督有力。</p>
+                </div>
+              <div class="org-chart-wrapper" style="left:40%;top:50%;transform:translate(-50%,-50%);">
                 <!-- Canvas for glowing connections -->
                 <canvas id="connCanvas" width="1600" height="1000"></canvas>
-                
+
                 <!-- Level Labels -->
                 <div class="level-label power" style="top: 180px;">权力机构</div>
                 <div class="level-label governance" style="top: 340px;">治理核心</div>
                 <div class="level-label execution" style="top: 520px;">执行机构</div>
                 <div class="level-label business" style="top: 780px;">业务部门</div>
-                
+
                 <!-- Nodes Layer -->
                 <div id="nodesLayer"><div class="org-node council" data-id="gudonghui" style="left: 776px; top: 77px; border-top: 3px solid rgb(37, 99, 235);">
             <div class="node-icon" style="background:#2563eb15;color:#2563eb;"><i class="fas fa-landmark"></i></div>
             <div class="node-title">股东会</div>
             <div class="node-subtitle" style="text-align:center;"><div class="node-segment">定根本、决大事、保权益</div></div>
             <div class="node-childtitle" style="text-align:center;"><div class="node-segment">权力机构</div></div>
-            <div class="node-popover node-popover-bottom">
+            <div class="node-popover">
                 <div class="flex items-center gap-2 mb-2">
                     <div class="w-8 h-8 rounded-lg flex items-center justify-center text-xs" style="background:#2563eb15;color:#2563eb;">
                         <i class="fas fa-landmark"></i>
@@ -956,7 +1897,7 @@ function initAppAfterAuth() {
             <div class="node-title">董事会</div>
             <div class="node-subtitle" style="text-align:center;"><div class="node-segment">定战略、作决策、防风险</div></div>
             <div class="node-childtitle" style="text-align:center;"><div class="node-segment">战略与重大决策</div></div>
-            <div class="node-popover node-popover-bottom">
+            <div class="node-popover">
                 <div class="flex items-center gap-2 mb-2">
                     <div class="w-8 h-8 rounded-lg flex items-center justify-center text-xs" style="background:#db277715;color:#db2777;">
                         <i class="fas fa-users"></i>
@@ -1148,7 +2089,7 @@ function initAppAfterAuth() {
                     <i class="fas fa-pen text-[10px]"></i> 编辑详情
                 </button>
             </div></div></div>
-            </div>
+            </div></div>
         </section>
         
         <!-- COUNCIL TAB -->
@@ -1221,59 +2162,93 @@ function initAppAfterAuth() {
         </section>
         
         <!-- BUSINESS TAB -->
-        <section id="tab-business" class="tab-content hidden h-[calc(100vh-64px)] relative">
-            <!-- 3D Graph Container -->
-            <div id="business3dGraph" class="absolute inset-0"></div>
-            
-            <!-- Control Panel -->
-            <div class="absolute top-4 right-4 z-10 w-80 bg-white/95 backdrop-blur rounded-2xl shadow-xl border border-slate-100 p-5 max-h-[calc(100vh-120px)] overflow-auto">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="font-bold text-slate-900"><i class="fas fa-network-wired mr-2 text-blue-600"></i>业务条线3D视图</h3>
-                    <span id="bizNodeCount" class="px-2 py-0.5 bg-slate-100 text-slate-600 text-xs rounded-full">0 项</span>
+        <section id="tab-business" class="tab-content hidden h-[calc(100vh-64px)] relative overflow-hidden">
+            <div id="bizContainer" class="w-full h-full relative">
+                <canvas id="neuralCanvas"></canvas>
+
+                <div class="nn-title" style="top:28px;left:32px;">
+                    <p style="font-family:Geist,'Noto Sans SC',sans-serif;font-size:17px;color:#1e293b;font-weight:600;line-height:1.7;letter-spacing:0.03em;">公司业务架构按照前台、中台、后台统筹划分，共计 11 条主线业务、47 条子线业务，覆盖 730 项精细化具体工作事项。</p>
                 </div>
-                
-                <!-- Import Area -->
-                <div class="mb-4">
-                    <label class="text-xs font-semibold text-slate-500 mb-1.5 block">批量导入工作内容</label>
-                    <textarea id="bizImportInput" class="w-full h-24 p-3 text-xs border border-slate-200 rounded-xl resize-none focus:outline-none focus:border-blue-400" placeholder="格式：工作内容 | 部门 | 岗位&#10;例：&#10;项目尽调报告编制 | 投资一部 | 投资经理&#10;合同审核 | 运营部 | 法务专员&#10;考勤管理 | 综合部 | HR专员"></textarea>
-                    <div class="flex gap-2 mt-2">
-                        <button onclick="importBusinessData()" class="flex-1 py-2 bg-blue-600 text-white text-xs font-semibold rounded-lg hover:bg-blue-700">导入并生成3D图</button>
-                        <button onclick="loadBusinessDemo()" class="px-3 py-2 bg-slate-100 text-slate-600 text-xs font-semibold rounded-lg hover:bg-slate-200">示例</button>
+
+                <button id="nnResetBtn" class="nn-reset-btn" onclick="resetNeuralNetwork()">
+                    <i class="fas fa-undo mr-1.5"></i>返回
+                </button>
+
+                <!-- 主神经元节点 -->
+                <div id="neuron-front" class="neuron-node" style="left:20%;top:50%;color:#3b82f6;"
+                     onclick="activateNeuron('front')">
+                    <div class="node-ring" style="color:#3b82f6;"></div>
+                    <div class="node-ring" style="color:#3b82f6;"></div>
+                    <div class="node-ring" style="color:#3b82f6;"></div>
+                    <div class="node-core" style="background:rgba(59,130,246,0.15);">
+                        <div class="node-icon"><i class="fas fa-chart-line" style="color:#60a5fa;"></i></div>
+                        <div class="node-label">前台</div>
+                        <div class="node-count">4 项分类</div>
                     </div>
                 </div>
-                
-                <!-- Stats -->
-                <div class="grid grid-cols-3 gap-2 mb-4">
-                    <div class="text-center p-2 bg-blue-50 rounded-xl">
-                        <div id="statFront" class="text-lg font-bold text-blue-600">0</div>
-                        <div class="text-[10px] text-blue-500">前台</div>
-                    </div>
-                    <div class="text-center p-2 bg-emerald-50 rounded-xl">
-                        <div id="statMid" class="text-lg font-bold text-emerald-600">0</div>
-                        <div class="text-[10px] text-emerald-500">中台</div>
-                    </div>
-                    <div class="text-center p-2 bg-purple-50 rounded-xl">
-                        <div id="statBack" class="text-lg font-bold text-purple-600">0</div>
-                        <div class="text-[10px] text-purple-500">后台</div>
+
+                <div id="neuron-mid" class="neuron-node" style="left:50%;top:50%;color:#10b981;"
+                     onclick="activateNeuron('mid')">
+                    <div class="node-ring" style="color:#10b981;"></div>
+                    <div class="node-ring" style="color:#10b981;"></div>
+                    <div class="node-ring" style="color:#10b981;"></div>
+                    <div class="node-core" style="background:rgba(16,185,129,0.15);">
+                        <div class="node-icon"><i class="fas fa-cogs" style="color:#34d399;"></i></div>
+                        <div class="node-label">中台</div>
+                        <div class="node-count">3 项分类</div>
                     </div>
                 </div>
-                
-                <!-- Legend -->
-                <div class="space-y-2 text-xs">
-                    <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span><span class="text-slate-600">前台业务（投资部）</span></div>
-                    <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span><span class="text-slate-600">中台业务（运营部）</span></div>
-                    <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span><span class="text-slate-600">后台业务（综合部）</span></div>
-                    <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span><span class="text-slate-600">岗位</span></div>
-                    <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-slate-300"></span><span class="text-slate-600">具体工作内容</span></div>
+
+                <div id="neuron-back" class="neuron-node" style="left:80%;top:50%;color:#a855f7;"
+                     onclick="activateNeuron('back')">
+                    <div class="node-ring" style="color:#a855f7;"></div>
+                    <div class="node-ring" style="color:#a855f7;"></div>
+                    <div class="node-ring" style="color:#a855f7;"></div>
+                    <div class="node-core" style="background:rgba(168,85,247,0.15);">
+                        <div class="node-icon"><i class="fas fa-building" style="color:#c084fc;"></i></div>
+                        <div class="node-label">后台</div>
+                        <div class="node-count">4 项分类</div>
+                    </div>
                 </div>
-                
-                <div class="mt-4 pt-3 border-t border-slate-100 text-[10px] text-slate-400 leading-relaxed">
-                    提示：滚轮缩放，鼠标左键旋转，右键平移。点击节点可高亮关联连线。
+
+                <!-- 二级分类节点容器 -->
+                <div id="categoryNodes"></div>
+
+                <!-- 任务弹窗 -->
+                <div id="taskPopup">
+                    <button class="close-btn" onclick="closeTaskPopup()"><i class="fas fa-times"></i></button>
+                    <div class="popup-title" id="popupTitle"></div>
+                    <div id="popupTasks"></div>
+                </div>
+
+                <!-- 业务条线详情右侧抽屉 -->
+                <div id="lineDrawer">
+                    <div class="drawer-header">
+                        <div id="drawerTitle"></div>
+                        <button class="drawer-close" onclick="closeLineDrawer()">×</button>
+                    </div>
+                    <div id="drawerDesc"></div>
+                    <div id="drawerBody"></div>
+                </div>
+                <div id="drawerOverlay" onclick="closeLineDrawer()"></div>
+
+                <!-- 图例 -->
+                <div class="nn-legend">
+                    <div class="nn-legend-item">
+                        <span class="nn-legend-dot" style="background:#3b82f6;color:#3b82f6;"></span>
+                        <span>前台 · 投资业务</span>
+                    </div>
+                    <div class="nn-legend-item">
+                        <span class="nn-legend-dot" style="background:#10b981;color:#10b981;"></span>
+                        <span>中台 · 风控运营</span>
+                    </div>
+                    <div class="nn-legend-item">
+                        <span class="nn-legend-dot" style="background:#a855f7;color:#a855f7;"></span>
+                        <span>后台 · 综合行政</span>
+                    </div>
                 </div>
             </div>
         </section>
-        
-        <!-- AUTHORITY TAB -->
         <section id="tab-authority" class="tab-content hidden p-6 overflow-auto h-[calc(100vh-64px)]">
             <div class="rounded-3xl shadow-sm bg-white border border-slate-200">
                 <div class="p-5 border-b border-slate-100 flex flex-wrap items-center gap-3">
@@ -6894,12 +7869,13 @@ function renderOrgChart() {
         const tintStyle = `background:${color}15;color:${color};`;
         el.style.borderTop = '3px solid ' + color;
 
+        const popoverClass = (cfg.y < 350) ? 'node-popover node-popover-bottom' : 'node-popover';
         el.innerHTML = `
             <div class="node-icon" style="${tintStyle}"><i class="fas ${cfg.icon}"></i></div>
             <div class="node-title">${cfg.title}</div>
             ${subtitleHtml}
             ${childTitleHtml}
-            <div class="node-popover">
+            <div class="${popoverClass}">
                 <div class="flex items-center gap-2 mb-2">
                     <div class="w-8 h-8 rounded-lg flex items-center justify-center text-xs" style="${tintStyle}">
                         <i class="fas ${cfg.icon}"></i>
@@ -6924,17 +7900,21 @@ function renderOrgChart() {
                 </button>
             </div>`;
 
-        // 动态定位 popover：靠近顶部时向下展开
+        // 动态定位 popover：靠近顶部时向下展开，靠近底部时向上展开
         el.addEventListener('mouseenter', () => {
-            const popover = el.querySelector('.node-popover');
-            if (!popover) return;
-            const rect = el.getBoundingClientRect();
-            const popHeight = popover.offsetHeight || 260;
-            if (rect.top < popHeight + 40) {
-                popover.classList.add('node-popover-bottom');
-            } else {
-                popover.classList.remove('node-popover-bottom');
-            }
+            requestAnimationFrame(() => {
+                const popover = el.querySelector('.node-popover');
+                if (!popover) return;
+                const rect = el.getBoundingClientRect();
+                const popHeight = popover.getBoundingClientRect().height || 280;
+                const spaceAbove = rect.top;
+                const spaceBelow = window.innerHeight - rect.bottom;
+                if (spaceAbove < popHeight + 60 && spaceBelow > spaceAbove) {
+                    popover.classList.add('node-popover-bottom');
+                } else if (spaceBelow < popHeight + 60 && spaceAbove > spaceBelow) {
+                    popover.classList.remove('node-popover-bottom');
+                }
+            });
         });
 
         // popover 内编辑自动保存
@@ -7749,6 +8729,801 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        const overlay = document.getElementById('hbModalOverlay');
+        if (overlay && overlay.classList.contains('open')) closeHbModal();
+    }
+});
+
+// 业务条线完整数据（11条线、47子条线、116工作模块、730工作内容）
+const BIZ_DATA = {
+    front: {
+        label: '前台',
+        desc: '募投管退全流程 · 价值发现与培育',
+        color: '#1d4ed8',
+        icon: 'fa-chart-line',
+        count: '4条线 / 14子业务线 / 354项工作',
+        lines: {
+            '战略研究与项目开发': {
+                desc: '宏观经济研究、产业政策跟踪、行业深度分析、项目挖掘开发与立项审批',
+                subs: {
+                    '宏观形势与政策研究': {
+                        modules: {
+                            '宏观经济跟踪': ['跟踪全球主要经济体GDP增速、通胀水平、货币政策动态','跟踪国内宏观经济指标（GDP增速、CPI/PPI、PMI、社融/M2）','研判经济周期所处阶段，定位库存周期与资本开支周期位置','分析汇率波动对进出口企业及跨境投资的影响','跟踪大宗商品价格走势对产业链成本端的影响','研判宏观利率环境对估值模型折现率的影响','撰写宏观经济月度/季度跟踪报告，建立宏观指标预警阈值'],
+                            '国家及区域产业政策研究': ['跟踪国家战略性新兴产业政策','研究国家产业规划（制造强国战略、数字经济发展规划）','跟踪产业补贴目录变化','研究产业准入清单','跟踪资本市场政策（IPO审核、再融资、并购重组）','研究私募基金行业监管政策','跟踪区域产业政策','建立政策影响评估模型'],
+                            '地缘政治与国际环境研究': ['跟踪中美科技竞争动态','分析地缘政治冲突对供应链安全的影响','研究国际技术封锁对国内替代产业链的投资机会','跟踪全球产业链重构趋势','评估跨境投资的政治风险与合规要求']
+                        }
+                    },
+                    '产业与行业深度研究': {
+                        modules: {
+                            '产业链与价值链拆解': ['绘制目标行业全产业链图谱','识别产业链核心节点','分析上下游供需格局','评估产业链垂直一体化vs专业化分工优劣','研究产业链转移趋势','建立产业链核心企业清单'],
+                            '市场规模与增长驱动力分析': ['测算TAM/SAM/SOM市场规模','绘制行业渗透率曲线','拆解行业增长驱动因子','识别高成长细分领域','建立市场规模预测模型','跟踪行业关键指标月度/季度变化'],
+                            '竞争格局与企业对标': ['计算市场集中度指标','识别行业梯队清单','分析头部企业护城河类型','海外对标研究','潜在颠覆者识别','竞争格局演变趋势预判','建立竞争对手数据库'],
+                            '技术路线演进研究': ['梳理行业主流技术路线及代际演进','分析各技术路线成熟度','专利布局分析','研发管线跟踪','技术替代周期判断','技术标准化程度评估'],
+                            '商业模式与盈利逻辑分析': ['拆解目标企业收入结构','分析定价权来源与定价机制','测算单位经济模型','评估规模效应阈值','分析盈利模式可持续性','研究行业商业模式演变'],
+                            '监管与合规壁垒研究': ['梳理行业准入牌照要求','研究环保/能耗合规要求','分析数据安全与隐私合规','评估反垄断风险','研究行业特殊监管要求','跟踪监管政策变化趋势'],
+                            '细分赛道优先级排序': ['建立赛道评估打分卡','编制重点赛道深度研究报告','制定年度重点关注赛道清单','建立赛道进入/退出判断标准','编制赛道投资地图']
+                        }
+                    },
+                    '项目挖掘与立项': {
+                        modules: {
+                            '项目来源渠道建设': ['建立政府项目来源渠道','维护FA合作网络','建立已投企业项目推荐机制','参加行业展会/论坛挖掘项目','建立科研院所成果转化渠道','维护券商投行部门合作渠道','建立行业专家网络','定期扫描一级市场融资动态'],
+                            '项目初筛与入库': ['建立项目初筛评分标准','编制项目红线过滤清单','设计BP结构化评分模板','执行项目入库审批流程','维护项目CRM系统','定期清理项目库','编制项目储备月度报告'],
+                            '初步接触与NDA管理': ['制定创始人首次访谈提纲','执行首次访谈形成会议纪要','编制项目初步分析报告','发起NDA签署流程','开通VDR权限并管理访问日志','收集企业基础资料','建立项目跟进台账'],
+                            '项目立项与评审': ['编制项目立项申请报告','准备立项评审材料','组织立项评审会议','记录立项评审意见','出具立项决议文件','立项通过后启动尽职调查','立项未通过项目归档与反馈']
+                        }
+                    }
+                }
+            },
+            '基金募集与管理': {
+                desc: '基金架构设计、设立登记、备案、募集路演、投资者关系、运营及清算',
+                subs: {
+                    '基金架构设计与设立': {
+                        modules: {
+                            '基金架构设计': ['确定基金组织形式','设计基金治理结构','设计基金存续期结构','设计收益分配Waterfall结构','设计LP/GP权利义务条款','设计关键人条款','设计基金费用结构','编制基金条款清单Term Sheet'],
+                            '基金设立登记': ['准备基金设立前期资料','办理基金名称预核准','起草合伙协议/公司章程','办理工商登记注册','刻制印章','开立基金银行账户','选聘基金托管行并签订托管协议'],
+                            '中基协私募基金备案': ['维护管理人登记信息','填报AMBERS系统基金产品备案信息','上传备案所需附件','编制风险揭示书','确认投资者适当性管理程序','跟进备案审核进度','获取基金备案证明并归档']
+                        }
+                    },
+                    '基金募集与路演': {
+                        modules: {
+                            '募集材料准备': ['编制基金募集说明书PPM','制作基金路演PPT','整理基金管理人过往业绩','汇编代表性投资案例','编制核心团队介绍材料','制作基金数据包'],
+                            '潜在LP开发与管理': ['建立潜在LP数据库','制定LP开发计划','进行LP需求匹配分析','维护LP关系管理系统','定期发送市场资讯','安排LP反向尽调接待','跟进LP内部决策流程'],
+                            '路演执行与签约封闭': ['策划路演活动方案','组织线下路演会议','执行线上路演','安排一对一LP深度沟通','发送认购邀请函','收集并审核LP认购文件','协调LP出资打款','办理首次交割及后续交割程序']
+                        }
+                    },
+                    '基金运营管理': {
+                        modules: {
+                            '合伙人会议与投决会管理': ['编制年度合伙人会议计划','发送合伙人会议通知','准备合伙人会议材料','组织合伙人现场/电话会议','编制合伙人会议纪要','受理项目投资/退出议案','安排投决会会议','出具投决会决议文件'],
+                            '基金日常管理': ['管理基金银行账户','核算并计提管理费','配合基金会计核算','配合基金年度审计','办理基金税务申报','维护基金法定登记信息','管理基金印章及授权'],
+                            '信息披露与报告': ['编制季度基金运营报告','编制半年度/年度基金报告','按中基协要求完成信息披露更新','向LP发送定期报告','处理LP临时信息查询','编制基金内部管理报表']
+                        }
+                    },
+                    '基金变更与清算': {
+                        modules: {
+                            '基金重大事项变更': ['办理基金增资程序','办理基金减资程序','办理基金份额转让','办理基金借款程序','组织基金收益分配','处理基金合伙人除名/退伙'],
+                            '基金清算与注销': ['编制基金到期清算方案','办理非现金资产分配','完成剩余现金分配','编制基金清算报告','办理基金工商注销手续','完成中基协基金清算备案','基金档案最终归档']
+                        }
+                    }
+                }
+            },
+            '项目投资执行': {
+                desc: '尽职调查执行、投资方案设计、投决会汇报、协议谈判、交割出资',
+                subs: {
+                    '尽职调查执行': {
+                        modules: {
+                            '财务尽调': ['收入真实性核查','成本结构与毛利率分析','现金流质量与营运资本周期分析','关联方资金占用与担保排查','税务合规审查','盈利预测模型压力测试','财务内控体系评估','编制财务尽调报告'],
+                            '法律尽调': ['股权穿透与历史股东沿革核查','核心资产权属确认','重大合同审查','劳动人事合规检查','诉讼仲裁/行政处罚记录查询','数据合规与网络安全审查','知识产权权属与侵权风险评估','编制法律尽调报告'],
+                            '商业尽调': ['客户集中度/粘性/流失率验证','供应商稳定性与替代成本分析','产品竞争力与替代品威胁评估','销售渠道效率与返利政策审查','产能利用率/良率/扩产瓶颈分析','管理层战略清晰度评估','市场份额与行业地位验证','编制商业尽调报告'],
+                            '行业尽调': ['行业发展趋势与政策影响分析','竞争格局与竞争对手对标','技术路线与迭代风险评估','供应链安全与自主可控程度评估','人才结构与核心技术团队稳定性','编制行业尽调报告'],
+                            '专项尽调': ['技术尽调','ESG尽调','IT系统尽调','组织与人力尽调','反垄断与竞争法审查','编制专项尽调报告'],
+                            '尽调组织与管理': ['制定尽调工作计划','选聘尽调中介机构','编制并发送尽调清单','组织管理层访谈','协调现场尽调安排','汇总各中介尽调报告','编制综合尽调报告','尽调资料归档管理']
+                        }
+                    },
+                    '投资方案设计与决策': {
+                        modules: {
+                            '估值建模与交易结构设计': ['搭建DCF估值模型','执行可比公司法估值','执行可比交易法估值','执行清算价值法估值','设计交易结构','设计投资节奏','编制估值分析报告'],
+                            '投资条款设计': ['设计估值条款','设计对赌条款','设计回购条款','设计反稀释条款','设计公司治理条款','设计优先权利条款','设计上市对赌与强制随售条款','编制投资条款清单TS'],
+                            '投资决策流程': ['编制投资建议书','编制投资可行性研究报告','编制风险评估报告','准备投决会汇报材料','向投资决策委员会汇报项目','出具投决会决议文件','编制国有资产评估报告']
+                        }
+                    },
+                    '投资协议与交割': {
+                        modules: {
+                            '协议谈判与签署': ['起草股权投资协议SPA','起草股东协议SHA','起草公司章程修订案','Negotiating对赌条款细节','Negotiating回购条款细节','Negotiating治理条款细节','协调法务/外部律师审核','完成协议定稿并组织签署'],
+                            '交割执行': ['编制出资前提条件清单','核查交割条件满足情况','办理投资资金划转手续','办理工商变更登记','办理股权/出资证明书签发','更新基金投资台账','向投决会报告交割完成情况'],
+                            '投后交接': ['协助项目公司三会组建','推荐并落实外派董监高人选','制定投后管理方案','完成项目档案移交','制定投后首月/首季度跟踪计划','向投后管理团队进行项目交接']
+                        }
+                    }
+                }
+            },
+            '投后管理与项目退出': {
+                desc: '已投项目持续跟踪、外派董监高履职、风险管控、增值服务及退出',
+                subs: {
+                    '投后日常监控': {
+                        modules: {
+                            '运营数据跟踪': ['制定并更新投后管理方案','收集被投企业月度运营数据','编制月度运营数据跟踪表','监控关键经营指标异常波动','跟踪预算执行情况','审核被投企业重大合同'],
+                            '现场走访与检查': ['制定季度现场走访计划','执行投后现场走访','配合基金合伙人开展投后巡访','编制现场走访报告','跟踪走访发现问题整改落实','建立走访档案'],
+                            '信息披露与报告编制': ['督促被投企业按时提交运营报告','审核被投企业运营报告数据质量','编制季度投后管理报告','编制半年度/年度投后管理总结报告','按中基协要求完成基金信息披露','向合伙人/投决会汇报投后管理情况','处理LP临时信息查询']
+                        }
+                    },
+                    '公司治理与董监高履职': {
+                        modules: {
+                            '外派人员管理': ['制定外派董监高管理制度','推荐外派董事/监事/高管人选','组织外派人员履职培训','建立外派人员工作报告机制','开展外派人员定期述职评估','处理外派人员变更','维护外派人员津贴与费用报销'],
+                            '三会治理参与': ['参加被投企业股东会','参加被投企业董事会','参加被投企业监事会','行使重大事项表决权','审议被投企业关联交易','推动被投企业治理结构优化']
+                        }
+                    },
+                    '风险管理与处置': {
+                        modules: {
+                            '风险监控与预警': ['建立项目风险分级体系','设计风险预警指标体系','执行季度风险排查','编制风险监控报告','监控关联交易','监控资金挪用风险','监控担保链风险'],
+                            '风险事件处置': ['启动风险事件应急响应','制定风险处置预案','Negotiate与被投企业管理层','协调中介机构介入','执行对赌补偿','执行回购程序','处理重大风险事件上报']
+                        }
+                    },
+                    '增值服务与赋能': {
+                        modules: {
+                            '战略与运营赋能': ['协助被投企业制定战略规划','支持后续融资','协助IPO筹备','推动并购整合','提供财务优化建议','完善内控体系建设'],
+                            '资源对接': ['对接产业资源','对接政府资源','对接资本市场资源','支持人才招聘','组织已投企业生态圈活动']
+                        }
+                    },
+                    '项目退出管理': {
+                        modules: {
+                            'IPO退出': ['评估IPO可行性','制定IPO退出路径','选聘上市中介机构','协助IPO前合规整改','配合IPO审核问询','制定减持计划','执行减持操作','核算IPO退出收益并编制退出报告'],
+                            '并购/股权转让退出': ['筛选潜在并购方/受让方','执行国有产权交易合规流程','组织并购谈判','配合并购尽调','起草并购/股权转让协议','办理产权交易所挂牌、竞价','执行交易款项回收与工商变更'],
+                            '回购/清算退出': ['评估回购条款触发条件','向回购义务方发送回购通知','Negotiate回购方案','执行回购款项追索','制定清算退出方案','协调清算审计与资产评估','执行剩余财产分配'],
+                            '退出后评价': ['核算退出收益','编制项目全生命周期投资回报分析','编制退出后评价报告','更新基金业绩数据','归档项目全生命周期资料','组织投资复盘会议']
+                        }
+                    },
+                    '档案与信息管理': {
+                        modules: {
+                            '信息库建设': ['建立并维护在管基金及在投项目台账','建立项目信息库','建立专家库','建立投资与行业信息数据库','维护CRM系统']
+                        }
+                    },
+                    '投资规划与预算': {
+                        modules: {
+                            '年度投资计划编制': ['制定年度投资计划','编制年度投资预算','制定年度投资节奏计划','报送年度投资计划审批','年度投资计划执行跟踪','编制年度投资计划执行总结报告']
+                        }
+                    }
+                }
+            }
+        }
+    },
+    mid: {
+        label: '中台',
+        desc: '法律合规 · 风控管理 · 财务运营',
+        color: '#0d9488',
+        icon: 'fa-cogs',
+        count: '3条线 / 15子业务线 / 187项工作',
+        lines: {
+            '法律合规': {
+                desc: '投资业务全流程法律支持、合同管理、争议解决、国资合规、监管报送',
+                subs: {
+                    '投资业务法律支持': {
+                        modules: {
+                            '投资交易法律支持': ['起草/审核股权投资协议SPA','起草/审核股东协议SHA','起草/审核合伙协议/基金合同','审核对赌协议','审核回购协议','审核投资协议重大变更','出具投资交易法律意见书'],
+                            '尽职调查法律支持': ['编制法律尽调清单','审阅目标公司历史沿革文件','核查核心资产权属','审阅重大业务合同','检索诉讼仲裁/行政处罚记录','评估数据合规与网络安全','出具法律尽调报告'],
+                            '国有产权交易法律合规': ['审核国有产权进场交易方案','起草/审核产权交易合同','出具国有产权交易法律意见书','处理产权交易纠纷','跟踪国有产权交易法规变化']
+                        }
+                    },
+                    '合同管理': {
+                        modules: {
+                            '合同全生命周期管理': ['建立合同管理制度','起草对外合同模板','审核对外合同','建立合同台账','监控合同履行情况','管理合同变更/解除/终止','处理合同纠纷']
+                        }
+                    },
+                    '争议解决': {
+                        modules: {
+                            '诉讼与仲裁管理': ['处理投资争议协商与调解','管理仲裁案件','管理诉讼案件','管理执行案件','选聘并管理外部律师','建立诉讼仲裁台账'],
+                            '对赌/回购争议处理': ['评估对赌条款触发情况','向对赌义务方发送补偿通知','Negotiate补偿方案','评估回购条款触发条件','向回购义务方发送回购通知','处理对赌/回购诉讼仲裁']
+                        }
+                    },
+                    '监管合规与报送': {
+                        modules: {
+                            '国资监管合规': ['审核投资事项国资合规性','办理国资评估备案/核准','报送国资委重大投资事项','办理国有产权登记','配合国资委专项检查','跟踪国资监管法规变化'],
+                            '基金业协会合规': ['维护私募基金管理人登记信息','办理基金产品备案与重大事项变更备案','按时完成定期报告报送','报送重大事项报告','管理从业人员资格','组织合规自查并整改发现问题'],
+                            '关联交易与利益冲突管理': ['建立关联方识别机制','维护关联方名单','审查关联交易','执行关联交易审批流程','披露关联交易信息','建立利益冲突防范机制']
+                        }
+                    },
+                    '公司治理法律事务': {
+                        modules: {
+                            '公司治理文件管理': ['起草/修订公司章程','起草公司治理制度','起草董事会专门委员会工作规则','审核三会会议议案','出具公司治理法律意见书'],
+                            '用印管理': ['管理公章/合同章/财务章','审批投资业务用印','审批综合管理用印','审批对外报送材料用印','管理印章外带','办理印章废止与销毁']
+                        }
+                    }
+                }
+            },
+            '风险控制管理': {
+                desc: '投资风险、操作风险、声誉风险的全流程管控',
+                subs: {
+                    '风险管理体系建设': {
+                        modules: {
+                            '制度与架构': ['制定风险管理制度','建立风险偏好框架','设计风险管理组织架构','建设风险管理信息系统','培育风险管理文化','制定年度风险管理工作计划'],
+                            '风险识别与评估': ['建立投资风险识别清单','设计风险评估模型','开展年度全面风险评估','建立风险事件库','编制风险管理手册']
+                        }
+                    },
+                    '投资风险管控': {
+                        modules: {
+                            '投前风险审查': ['审查行业风险','审查企业风险','审查交易结构风险','审查合规风险','出具投前风险评估意见'],
+                            '投中风险监控': ['监控交割条件满足情况','监控资金用途合规性','监控投后过渡期风险','评估交割后即时风险变化'],
+                            '投后风险评估': ['建立项目风险分级体系','设计风险预警指标体系','执行季度风险排查','编制风险监控报告','监控关联交易、资金挪用、担保链风险'],
+                            '风险处置': ['启动风险事件应急响应','制定风险处置预案','协调中介机构介入','跟踪处置方案执行情况','编制风险处置报告']
+                        }
+                    },
+                    '操作与声誉风险管理': {
+                        modules: {
+                            '操作风险管控': ['识别操作流程风险点','设置关键控制点','建立操作风险事件报告机制','建立业务连续性计划','开展操作风险培训'],
+                            '声誉风险管理': ['开展舆情监测','制定舆情应对预案','管理投资者投诉','维护监管关系','编制声誉风险事件报告']
+                        }
+                    },
+                    '压力测试与报告': {
+                        modules: {
+                            '压力测试': ['设计压力测试情景','执行投资组合压力测试','执行基金层面压力测试','编制压力测试报告','跟踪压力测试整改落实情况'],
+                            '风险管理报告': ['编制月度风险监控简报','编制季度风险管理报告','编制年度风险管理报告','向投决会/合伙人/董事会汇报风险状况','报送监管机构风险报告']
+                        }
+                    }
+                }
+            },
+            '财务管理': {
+                desc: '公司本级及在管基金的全面财务管理',
+                subs: {
+                    '预算管理': {
+                        modules: {
+                            '年度预算编制': ['编制年度经营预算','编制投资业务预算','编制管理费用预算','编制资本性支出预算','汇总审核各部门预算','分解下达预算指标'],
+                            '预算执行与控制': ['监控预算执行情况','审批预算内支出','处理预算外/超预算支出','编制预算执行分析报告','组织预算调整','开展预算执行考核']
+                        }
+                    },
+                    '会计核算': {
+                        modules: {
+                            '日常核算': ['审核原始凭证','编制记账凭证','科目余额核对','银行对账','费用报销审核','固定资产核算','编制月度财务报表'],
+                            '投资业务核算': ['核算股权投资','核算基金投资','核算投资收益','计提投资减值准备','核算投资退出','编制投资业务专项报表'],
+                            '年度决算与审计': ['组织年度财务决算','编制年度财务报表','配合外部审计','办理审计报告披露','归档年度会计档案']
+                        }
+                    },
+                    '税务管理': {
+                        modules: {
+                            '日常税务申报': ['申报增值税','申报企业所得税','代扣代缴个人所得税','申报印花税','申报房产税/土地使用税','维护税务登记信息'],
+                            '税务筹划与优惠': ['申请创投企业税收优惠政策','申请地方税收返还','优化投资架构税务效率','规划退出税务方案','申请研发费用加计扣除','跟踪税收政策变化'],
+                            '税务风险管理': ['开展税务自查','应对税务稽查','处理税务处罚','建立税务风险预警机制','出具税务风险评估报告']
+                        }
+                    },
+                    '资金管理': {
+                        modules: {
+                            '资金计划与调度': ['编制资金收支计划','监控现金流','管理银行账户','执行资金调拨','管理理财产品','维护银行关系'],
+                            '基金资金管理': ['管理基金募集账户','执行基金投资出资','管理基金收益回收','核算基金收益分配','监控基金现金流']
+                        }
+                    },
+                    '财务分析与报告': {
+                        modules: {
+                            '财务分析': ['开展经营分析','开展投资业务分析','编制管理报表','开展对标分析','为决策提供数据支持'],
+                            '投后财务支持': ['审核被投企业财务报表','复核被投企业年审报告','支持投后估值','配合投后风险排查']
+                        }
+                    }
+                }
+            }
+        }
+    },
+    back: {
+        label: '后台',
+        desc: '公司治理 · 人力资源 · 行政保障 · 党建文化',
+        color: '#7c3aed',
+        icon: 'fa-building',
+        count: '4条线 / 18子业务线 / 189项工作',
+        lines: {
+            '公司治理与综合管理': {
+                desc: '法人治理、三会运作、决策权限管理、档案管理、信息化建设',
+                subs: {
+                    '法人治理': {
+                        modules: {
+                            '股东会管理': ['筹备年度股东会','筹备临时股东会','管理股东表决权','记录股东会决议','维护股东关系','管理股权变更登记','执行利润分配方案'],
+                            '董事会管理': ['筹备定期董事会','筹备临时董事会','管理董事任免','组织董事履职培训','评估董事履职情况','管理董事会专门委员会','报送董事会决议'],
+                            '监事会管理': ['筹备监事会会议','组织监事履职活动','跟踪监事意见建议','协调监事列席会议','管理监事任免']
+                        }
+                    },
+                    '决策权限管理': {
+                        modules: {
+                            '授权体系建设': ['制定投资决策权限划分表','制定经营管理授权清单','起草授权委托书','管理转授权','监督授权执行情况']
+                        }
+                    },
+                    '档案与信息管理': {
+                        modules: {
+                            '投资档案管理': ['建立投资档案管理制度','归档项目立项档案','归档尽职调查档案','归档投资决策档案','归档投资协议档案','归档投后管理档案','归档退出档案','管理档案调阅','开展档案数字化'],
+                            '综合档案管理': ['管理收发文档案','管理会议纪要档案','管理合同档案','管理人事档案','管理会计档案','管理印章档案'],
+                            '信息化建设': ['制定信息化规划','管理投资管理系统','管理财务系统','管理办公系统','管理网络安全','提供IT技术支持','管理软硬件资产']
+                        }
+                    }
+                }
+            },
+            '人力资源': {
+                desc: '组织管理、招聘配置、培训发展、薪酬绩效、员工关系',
+                subs: {
+                    '组织管理': {
+                        modules: {
+                            '组织架构与岗位管理': ['设计公司组织架构','编制部门职能说明书','编制岗位说明书','制定定岗定编方案','开展组织效能评估']
+                        }
+                    },
+                    '招聘配置': {
+                        modules: {
+                            '人员招聘': ['制定年度招聘计划','收集并审批招聘需求','管理招聘渠道','执行简历筛选','组织面试安排','执行背景调查','发放录用通知','办理入职手续','组织试用期考核'],
+                            '人员调配与离职': ['办理内部调动','组织晋升评审','处理降职/免职','办理离职手续','执行离职面谈','办理退休手续']
+                        }
+                    },
+                    '培训发展': {
+                        modules: {
+                            '培训体系建设': ['制定年度培训计划','组织新员工入职培训','组织专业技能培训','组织管理能力培训','安排外部培训','管理内部讲师队伍'],
+                            '人才发展': ['开展人才盘点','制定继任者计划','建立导师制','管理职业发展通道','组织业务能力考核']
+                        }
+                    },
+                    '薪酬绩效': {
+                        modules: {
+                            '薪酬管理': ['设计薪酬体系','开展薪酬调研','制定薪酬调整方案','核算月度工资','核算绩效奖金','管理社保公积金','管理补充福利','开具收入证明'],
+                            '绩效管理': ['制定绩效管理制度','设计绩效考核指标','组织绩效目标设定','执行中期绩效回顾','组织期末绩效评估','开展绩效面谈','处理绩效申诉','应用绩效结果']
+                        }
+                    },
+                    '员工关系': {
+                        modules: {
+                            '劳动合同管理': ['签订/续签劳动合同','管理劳动合同变更','处理劳动争议','管理特殊用工','建立劳动关系台账'],
+                            '员工服务': ['办理用工备案','管理员工档案','出具人事证明','处理员工咨询','组织员工活动','开展员工关怀']
+                        }
+                    }
+                }
+            },
+            '行政采购': {
+                desc: '办公环境运维、采购管理、固定资产管理、会议活动组织、后勤保障',
+                subs: {
+                    '办公环境运维': {
+                        modules: {
+                            '办公场所管理': ['管理办公场所租赁','组织办公空间装修','管理办公设施','采购办公用品','管理保洁绿化','管理安保消防','处理办公设施故障报修']
+                        }
+                    },
+                    '采购管理': {
+                        modules: {
+                            '采购制度与执行': ['制定采购管理制度','执行固定资产采购','执行服务类采购','执行货物类采购','执行工程类采购','管理采购合同台账'],
+                            '供应商管理': ['建立供应商准入机制','开展供应商绩效评价','管理供应商分级','处理供应商投诉与纠纷','维护供应商信息库']
+                        }
+                    },
+                    '固定资产管理': {
+                        modules: {
+                            '资产全生命周期管理': ['建立固定资产台账','执行资产领用与归还','组织资产盘点','计提资产折旧','处理资产处置','管理无形资产']
+                        }
+                    },
+                    '会议与活动管理': {
+                        modules: {
+                            '会议组织': ['组织内部会议','组织外部会议','组织线上会议','管理会议设备','归档会议资料'],
+                            '企业文化活动': ['策划年度团建活动','组织节日庆祝活动','组织文体活动','管理活动预算','评估活动效果']
+                        }
+                    },
+                    '后勤保障': {
+                        modules: {
+                            '行政服务': ['管理差旅订票','管理公务用车','管理员工餐饮','管理快递收发','管理接待工作','管理证照资质']
+                        }
+                    }
+                }
+            },
+            '党建与企业文化建设': {
+                desc: '坚持党的领导，加强党的建设，培育市场化投资文化',
+                subs: {
+                    '党建工作': {
+                        modules: {
+                            '党组织建设': ['筹建党支部/党总支','组织党支部换届','发展党员工作','管理党员组织关系','收缴与管理党费','填报党组织年报统计'],
+                            '党员教育管理': ['组织三会一课','策划主题党日活动','制定党员学习教育计划','组织民主评议党员','开展党员先锋岗评选','管理党建活动室'],
+                            '党风廉政建设': ['落实一岗双责','组织廉洁教育','开展廉政风险排查','执行廉政谈话','配合违纪问题查处','管理党风廉政建设台账'],
+                            '党建与业务融合': ['建立党建引领投资决策机制','设立党员攻坚项目','推动党员在投后管理中发挥作用','总结党建工作经验','报送党建工作信息']
+                        }
+                    },
+                    '群团工作': {
+                        modules: {
+                            '工会工作': ['工会组织建设与换届','筹备职工代表大会','落实职工福利','开展困难职工帮扶','组织职工文体活动']
+                        }
+                    },
+                    '企业文化建设': {
+                        modules: {
+                            '文化体系建设': ['提炼企业文化理念','编制企业文化手册','制定企业文化传播方案','开展企业文化评估'],
+                            '文化活动与品牌': ['策划年度团建活动','组织节日庆祝活动','开展企业文化宣讲','运营公司宣传平台','制作公司宣传材料','申报行业奖项','维护媒体关系'],
+                            '团队建设与能力提升': ['组织业务复盘会议','开展经验分享会','建立导师制','推动跨部门协作机制','营造团队氛围','培育市场化投资文化']
+                        }
+                    }
+                }
+            }
+        }
+    }
+};
+
+// ==========================================
+// 神经网络业务条线交互
+// ==========================================
+let activeNeuron = null;
+let neuralCanvas, neuralCtx;
+let canvasW, canvasH;
+let particles = [];
+let animFrame;
+
+let neuralCanvasInited = false;
+
+function initNeuralCanvas() {
+    if (neuralCanvasInited) return;
+    neuralCanvas = document.getElementById('neuralCanvas');
+    if (!neuralCanvas) return;
+    neuralCtx = neuralCanvas.getContext('2d');
+    window.addEventListener('resize', resizeNeuralCanvas);
+    // Retry until container has valid dimensions
+    requestAnimationFrame(() => {
+        resizeNeuralCanvas();
+        if (canvasW > 0 && canvasH > 0) {
+            neuralCanvasInited = true;
+            createParticles();
+            animateNeuralNetwork();
+        } else {
+            // Retry after a short delay if dimensions are still 0
+            setTimeout(initNeuralCanvas, 100);
+        }
+    });
+}
+
+function resizeNeuralCanvas() {
+    const container = document.getElementById('bizContainer');
+    if (!container || !neuralCanvas) return;
+    const w = container.offsetWidth;
+    const h = container.offsetHeight;
+    if (w === 0 || h === 0) return;
+    canvasW = w;
+    canvasH = h;
+    neuralCanvas.width = w * 2;
+    neuralCanvas.height = h * 2;
+    neuralCanvas.style.width = w + 'px';
+    neuralCanvas.style.height = h + 'px';
+    // Reset transform then scale to avoid accumulation
+    neuralCtx.setTransform(1, 0, 0, 1, 0, 0);
+    neuralCtx.scale(2, 2);
+}
+
+function createParticles() {
+    particles = [];
+    for (let i = 0; i < 40; i++) {
+        particles.push({
+            x: Math.random() * canvasW,
+            y: Math.random() * canvasH,
+            vx: (Math.random() - 0.5) * 0.3,
+            vy: (Math.random() - 0.5) * 0.3,
+            size: Math.random() * 2 + 0.5,
+            opacity: Math.random() * 0.5 + 0.2,
+            pulse: Math.random() * Math.PI * 2
+        });
+    }
+}
+
+function getNodePos(id) {
+    const el = document.getElementById(id);
+    if (!el) return null;
+    const rect = el.getBoundingClientRect();
+    const container = document.getElementById('bizContainer').getBoundingClientRect();
+    return {
+        x: rect.left + rect.width / 2 - container.left,
+        y: rect.top + rect.height / 2 - container.top
+    };
+}
+
+function drawConnection(p1, p2, color, opacity, width, animateOffset) {
+    const ctx = neuralCtx;
+    ctx.beginPath();
+    ctx.moveTo(p1.x, p1.y);
+
+    // Bezier curve for organic neural connection
+    const midX = (p1.x + p2.x) / 2 + (Math.random() - 0.5) * 30;
+    const midY = (p1.y + p2.y) / 2 + (Math.random() - 0.5) * 30;
+    ctx.quadraticCurveTo(midX, midY, p2.x, p2.y);
+
+    ctx.strokeStyle = color;
+    ctx.globalAlpha = opacity;
+    ctx.lineWidth = width;
+    ctx.stroke();
+
+    // Animated pulse along the line
+    const t = (Date.now() / 2000 + animateOffset) % 1;
+    const px = (1 - t) * (1 - t) * p1.x + 2 * (1 - t) * t * midX + t * t * p2.x;
+    const py = (1 - t) * (1 - t) * p1.y + 2 * (1 - t) * t * midY + t * t * p2.y;
+
+    ctx.beginPath();
+    ctx.arc(px, py, 3, 0, Math.PI * 2);
+    ctx.fillStyle = color;
+    ctx.globalAlpha = opacity * 1.5;
+    ctx.fill();
+    ctx.globalAlpha = 1;
+}
+
+function animateNeuralNetwork() {
+    if (!neuralCtx) return;
+    neuralCtx.clearRect(0, 0, canvasW, canvasH);
+
+    const time = Date.now() / 1000;
+
+    // Draw background connections between main nodes
+    const front = getNodePos('neuron-front');
+    const mid = getNodePos('neuron-mid');
+    const back = getNodePos('neuron-back');
+
+    if (front && mid && back) {
+        drawConnection(front, mid, '#3b82f6', 0.15, 1, 0);
+        drawConnection(mid, back, '#10b981', 0.15, 1, 0.33);
+        drawConnection(front, back, '#a855f7', 0.08, 0.5, 0.66);
+
+        // Draw connections to active category nodes
+        if (activeNeuron) {
+            const activeEl = document.getElementById('neuron-' + activeNeuron);
+            if (activeEl) {
+                const activePos = getNodePos('neuron-' + activeNeuron);
+                const cats = document.querySelectorAll('.category-node.visible');
+                cats.forEach((cat, idx) => {
+                    const catPos = getNodePos(cat.id);
+                    if (catPos && activePos) {
+                        const color = BIZ_DATA[activeNeuron].color;
+                        drawConnection(activePos, catPos, color, 0.25, 1.5, idx * 0.1);
+                    }
+                });
+            }
+        }
+    }
+
+    // Draw particles
+    particles.forEach(p => {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.pulse += 0.02;
+
+        if (p.x < 0) p.x = canvasW;
+        if (p.x > canvasW) p.x = 0;
+        if (p.y < 0) p.y = canvasH;
+        if (p.y > canvasH) p.y = 0;
+
+        const pulseOpacity = p.opacity * (0.5 + 0.5 * Math.sin(p.pulse));
+        neuralCtx.beginPath();
+        neuralCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        neuralCtx.fillStyle = `rgba(100, 120, 150, ${pulseOpacity})`;
+        neuralCtx.fill();
+    });
+
+    animFrame = requestAnimationFrame(animateNeuralNetwork);
+}
+
+// Slot positions: left=20%, center=50%, right=80%
+const SLOT_POS = {
+    left:   { left: '12%', top: '50%' },
+    center: { left: '50%', top: '50%' },
+    right:  { left: '88%', top: '50%' }
+};
+
+// Which slot each neuron currently occupies
+let neuronSlots = { front: 'left', mid: 'center', back: 'right' };
+
+const NEURON_HOME = { front: 'left', back: 'right' }; // mid has no fixed home
+
+function activateNeuron(type) {
+    if (activeNeuron === type) return;
+
+    // Immediately clear old categories when switching
+    if (activeNeuron !== null) {
+        document.getElementById('categoryNodes').innerHTML = '';
+    }
+
+    activeNeuron = type;
+
+    // type goes to center, others fill left/right by home position
+    const otherTypes = ['front', 'mid', 'back'].filter(t => t !== type);
+    const otherSlots = ['left', 'right'];
+
+    neuronSlots[type] = 'center';
+    otherTypes.forEach((t, idx) => {
+        const preferred = NEURON_HOME[t] || otherSlots[idx];
+        neuronSlots[t] = preferred;
+    });
+
+    // Apply positions and visual states
+    ['front', 'mid', 'back'].forEach(t => {
+        const node = document.getElementById('neuron-' + t);
+        const slot = neuronSlots[t];
+        const pos = SLOT_POS[slot];
+        node.style.left = pos.left;
+        node.style.top = pos.top;
+
+        if (slot === 'center') {
+            node.classList.add('active');
+            node.classList.remove('inactive');
+        } else {
+            node.classList.remove('active');
+            node.classList.add('inactive');
+        }
+    });
+
+    // Show reset button
+    document.getElementById('nnResetBtn').classList.add('show');
+
+    // Generate category nodes after position transition settles
+    setTimeout(() => generateCategoryNodes(type), 400);
+}
+
+function generateCategoryNodes(type) {
+    const container = document.getElementById('categoryNodes');
+    container.innerHTML = '';
+
+    const data = BIZ_DATA[type];
+    const lines = Object.keys(data.lines);
+
+    // Use percentage-based radius so it scales with zoom/resize
+    const radiusPct = 32;
+    const count = lines.length;
+    const startAngle = -Math.PI / 2;
+    const angleStep = (Math.PI * 2) / count;
+
+    lines.forEach((lineName, idx) => {
+        const angle = startAngle + angleStep * idx;
+        const leftPct = 50 + Math.cos(angle) * radiusPct;
+        const topPct = 50 + Math.sin(angle) * radiusPct;
+
+        const lineData = data.lines[lineName];
+        const subCount = Object.keys(lineData.subs).length;
+
+        // 计算工作内容总数
+        let totalWorks = 0;
+        Object.keys(lineData.subs).forEach(subName => {
+            const modules = lineData.subs[subName].modules;
+            Object.keys(modules).forEach(modName => {
+                totalWorks += modules[modName].length;
+            });
+        });
+
+        const node = document.createElement('div');
+        node.className = 'category-node';
+        node.id = 'cat-' + idx;
+        node.style.left = leftPct + '%';
+        node.style.top = topPct + '%';
+        node.style.color = data.color;
+        node.innerHTML = `<span>${lineName}</span><span class="cat-count">${totalWorks}项工作</span>`;
+        node.dataset.line = lineName;
+
+        // 点击打开右侧抽屉
+        node.onclick = () => openLineDrawer(type, lineName, data.color);
+        node.onmouseenter = () => node.style.transform = 'translate(-50%, -50%) scale(1.15)';
+        node.onmouseleave = () => node.style.transform = 'translate(-50%, -50%) scale(1)';
+
+        container.appendChild(node);
+
+        // Staggered animation
+        setTimeout(() => {
+            node.classList.add('visible');
+        }, 80 + idx * 70);
+    });
+}
+
+// 右侧抽屉面板功能
+function openLineDrawer(type, lineName, color) {
+    const drawer = document.getElementById('lineDrawer');
+    const overlay = document.getElementById('drawerOverlay');
+    const title = document.getElementById('drawerTitle');
+    const desc = document.getElementById('drawerDesc');
+    const body = document.getElementById('drawerBody');
+
+    const lineData = BIZ_DATA[type].lines[lineName];
+    const subs = lineData.subs;
+
+    // 设置标题和描述
+    title.textContent = lineName;
+    title.style.color = color;
+    desc.textContent = lineData.desc;
+
+    // 构建层级树内容
+    let html = '';
+    let subIdx = 0;
+    Object.keys(subs).forEach(subName => {
+        const modulesData = subs[subName].modules;
+        const moduleNames = Object.keys(modulesData);
+
+        // 计算子条线下的工作内容总数
+        let subTotalWorks = 0;
+        moduleNames.forEach(modName => {
+            subTotalWorks += modulesData[modName].length;
+        });
+
+        html += `
+            <div class="drawer-sub" style="margin-bottom:16px;">
+                <div class="drawer-sub-header" onclick="toggleDrawerSub('sub-${subIdx}')">
+                    <div class="drawer-sub-icon" style="color:${color};">▼</div>
+                    <div class="drawer-sub-title">${subName}</div>
+                    <div class="drawer-sub-count">${moduleNames.length}模块 · ${subTotalWorks}项</div>
+                </div>
+                <div class="drawer-sub-body" id="sub-${subIdx}">
+                    ${moduleNames.map((modName, modIdx) => {
+                        const works = modulesData[modName];
+                        return `
+                            <div class="drawer-mod">
+                                <div class="drawer-mod-header" onclick="toggleDrawerMod('mod-${subIdx}-${modIdx}')">
+                                    <div class="drawer-mod-icon" style="background:${color}20;color:${color};">▶</div>
+                                    <div class="drawer-mod-title">${modName}</div>
+                                    <div class="drawer-mod-count">${works.length}项</div>
+                                </div>
+                                <div class="drawer-mod-body" id="mod-${subIdx}-${modIdx}">
+                                    ${works.map(work => `
+                                        <div class="drawer-work">
+                                            <div class="drawer-work-dot" style="background:${color};"></div>
+                                            <div class="drawer-work-text">${work}</div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            </div>
+        `;
+        subIdx++;
+    });
+
+    body.innerHTML = html;
+
+    // 打开抽屉
+    drawer.classList.add('open');
+    overlay.classList.add('open');
+
+    // 关闭原有的小弹窗
+    closeTaskPopup();
+}
+
+function closeLineDrawer() {
+    document.getElementById('lineDrawer').classList.remove('open');
+    document.getElementById('drawerOverlay').classList.remove('open');
+}
+
+function toggleDrawerSub(id) {
+    const el = document.getElementById(id);
+    el.classList.toggle('expanded');
+}
+
+function toggleDrawerMod(id) {
+    const el = document.getElementById(id);
+    el.classList.toggle('expanded');
+}
+
+function closeTaskPopup() {
+    document.getElementById('taskPopup').classList.remove('show');
+}
+
+function resetNeuralNetwork() {
+    activeNeuron = null;
+    neuronSlots = { front: 'left', mid: 'center', back: 'right' };
+
+    ['front', 'mid', 'back'].forEach(t => {
+        const node = document.getElementById('neuron-' + t);
+        const pos = SLOT_POS[neuronSlots[t]];
+        node.style.left = pos.left;
+        node.style.top = pos.top;
+        node.classList.remove('active', 'inactive');
+    });
+
+    document.getElementById('nnResetBtn').classList.remove('show');
+    closeTaskPopup();
+    closeLineDrawer();
+
+    // Hide category nodes
+    const cats = document.querySelectorAll('.category-node');
+    cats.forEach(cat => {
+        cat.classList.remove('visible');
+        setTimeout(() => cat.remove(), 400);
+    });
+}
+
+// Init canvas when tab is shown
+document.addEventListener('DOMContentLoaded', () => {
+    // Observe tab visibility
+    const bizTab = document.getElementById('tab-business');
+    if (bizTab) {
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach(m => {
+                if (m.attributeName === 'class' && !bizTab.classList.contains('hidden')) {
+                    setTimeout(initNeuralCanvas, 100);
+                }
+            });
+        });
+        observer.observe(bizTab, { attributes: true });
+    }
+});
+
+// ==========================================
 // ==========================================
 // EXPORT HTML WITH CURRENT EDITS
 // ==========================================
@@ -7954,109 +9729,10 @@ function updateBizStats(data) {
     document.getElementById('bizNodeCount').textContent = total + ' 项';
 }
 
-function initBusinessGraph(data) {
-    const elem = document.getElementById('business3dGraph');
-    if (!elem) return;
-    
-    if (businessGraph) {
-        businessGraph._destructor();
-        businessGraph = null;
-    }
-    
-    businessGraph = ForceGraph3D({ controlType: 'orbit' })(elem)
-        .graphData(data)
-        .nodeAutoColorBy('group')
-        .nodeColor(node => node.color || '#999')
-        .nodeVal(node => node.val || 2)
-        .nodeLabel(node => {
-            if (node.group === 'content') return '工作内容: ' + node.id.split('##')[0];
-            if (node.group === 'dept') return '部门: ' + node.id;
-            if (node.group === 'post') return '岗位: ' + node.id;
-            return node.id;
-        })
-        .linkWidth(0.5)
-        .linkOpacity(0.35)
-        .backgroundColor('#f8fafc')
-        .showNavInfo(false)
-        .cameraPosition({ z: 180 })
-        .onNodeHover(node => elem.style.cursor = node ? 'pointer' : null)
-        .onNodeClick(node => {
-            // Highlight connections
-            const distance = 120;
-            const distRatio = 1 + distance/Math.hypot(node.x, node.y, node.z);
-            businessGraph.cameraPosition(
-                { x: node.x * distRatio, y: node.y * distRatio, z: node.z * distRatio },
-                node,
-                3000
-            );
-        });
-        
-    // Add text labels using SpriteText
-    businessGraph.nodeThreeObject(node => {
-        const sprite = new SpriteText(node.id.split('##')[0]);
-        sprite.color = node.group === 'content' ? '#475569' : '#1e293b';
-        sprite.textHeight = node.group === 'level' ? 5 : (node.group === 'dept' ? 3.5 : 2.5);
-        sprite.backgroundColor = node.group === 'content' ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0)';
-        sprite.padding = node.group === 'content' ? 2 : 0;
-        sprite.borderRadius = 3;
-        sprite.position.y = node.val * 1.5 + 2;
-        return sprite;
-    });
-    
-    updateBizStats(data);
-}
+// ==========================================
+// EXPORT HTML WITH CURRENT EDITS
+// ==========================================
 
-function importBusinessData() {
-    const text = document.getElementById('bizImportInput').value;
-    if (!text.trim()) { alert('请先输入工作内容'); return; }
-    const data = parseBusinessData(text);
-    businessGraphData = data;
-    initBusinessGraph(data);
-    // Save to cloud
-    syncAppData('businessData', data);
-}
-
-function loadBusinessDemo() {
-    const demo = `项目尽调报告编制 | 投资一部 | 投资经理
-行业研究与赛道分析 | 投资一部 | 行研员
-投后管理与退出实施 | 投资二部 | 投后经理
-PPP项目运营监控 | 投资二部 | 运营专员
-合同审查与风险评估 | 运营部 | 法务专员
-财务预算与决算编制 | 运营部 | 财务专员
-人员招聘与培训组织 | 综合部 | HR专员
-印章证照与档案管理 | 综合部 | 行政专员
-业务接待与会务组织 | 综合部 | 行政专员
-出纳管理与资金收付 | 运营部 | 出纳专员
-内控审计与合规检查 | 运营部 | 合规专员
-基金设立方案设计 | 投资一部 | 投资经理
-`.trim();
-    document.getElementById('bizImportInput').value = demo;
-    const data = parseBusinessData(demo);
-    businessGraphData = data;
-    initBusinessGraph(data);
-    syncAppData('businessData', data);
-}
-
-// Load saved business data on init
-try {
-    const savedBiz = window.appData && window.appData.businessData;
-    if (savedBiz && savedBiz.nodes && savedBiz.nodes.length) {
-        businessGraphData = savedBiz;
-        // Delay init until tab visible
-    }
-} catch(e) {}
-
-// Init demo when tab switched to business
-document.getElementById('nav-business').addEventListener('click', () => {
-    setTimeout(() => {
-        if (!businessGraphData.nodes.length) {
-            loadBusinessDemo();
-        } else {
-            initBusinessGraph(businessGraphData);
-        }
-    }, 100);
-});
 </script>
 
-
-</body></html>
+</body><div id="immersive-translate-popup" style="all: initial"></div></html>
