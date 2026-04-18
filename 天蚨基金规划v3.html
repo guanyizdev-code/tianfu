@@ -529,6 +529,10 @@
             0%, 100% { transform: scale(1); opacity: 0.2; }
             50% { transform: scale(1.15); opacity: 0.08; }
         }
+        @keyframes fadeIn {
+            0% { opacity: 0; transform: translateY(10px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
         .neuron-node .node-core {
             width: 130px; height: 130px;
             border-radius: 50%;
@@ -2488,8 +2492,14 @@ function initAppAfterAuth() {
             <div class="max-w-6xl mx-auto">
                 <div class="flex items-center justify-between mb-6">
                     <div>
-                        <h2 class="text-2xl font-bold text-slate-900">公司制度</h2>
-                        <p class="text-slate-500 mt-1">制度文件分类浏览、在线预览与下载</p>
+                        <h2 style="font-family:Geist,'Noto Sans SC',sans-serif;font-size:22px;font-weight:700;color:#1e293b;">公司制度</h2>
+                        <p style="font-family:Geist,'Noto Sans SC',sans-serif;font-size:17px;color:#475569;font-weight:500;margin-top:4px;">制度文件分类浏览、在线预览与下载、上传管理</p>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <input type="file" id="uploadFileInput" accept=".pdf,.doc,.docx,.xls,.xlsx" style="display:none;" onchange="handleFileUpload(event)">
+                        <button onclick="document.getElementById('uploadFileInput').click()" class="px-5 py-2.5 bg-blue-600 text-white rounded-xl font-medium text-sm hover:bg-blue-700 transition flex items-center gap-2 shadow-sm">
+                            <i class="fas fa-upload"></i> 上传文件
+                        </button>
                     </div>
                 </div>
 
@@ -8414,6 +8424,110 @@ const hbCatColors = {
     finance: 'bg-amber-100 text-amber-700',
     admin: 'bg-blue-100 text-blue-700'
 };
+
+// 文件上传处理
+function handleFileUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const fileName = file.name;
+    const ext = fileName.split('.').pop().toLowerCase();
+
+    // 检查文件类型
+    if (!['pdf', 'doc', 'docx', 'xls', 'xlsx'].includes(ext)) {
+        alert('仅支持 PDF、Word、Excel 文件格式');
+        return;
+    }
+
+    // 弹出选择分类的对话框
+    const categories = [
+        { id: 'governance', name: '公司治理' },
+        { id: 'invest', name: '投资风控' },
+        { id: 'hr', name: '人力资源' },
+        { id: 'finance', name: '财务资金' },
+        { id: 'admin', name: '行政综合' }
+    ];
+
+    let categoryOptions = categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+
+    // 创建上传对话框
+    const uploadModal = document.createElement('div');
+    uploadModal.id = 'uploadModal';
+    uploadModal.className = 'fixed inset-0 bg-black/50 flex items-center justify-center z-50';
+    uploadModal.innerHTML = `
+        <div class="bg-white rounded-2xl p-6 w-400 shadow-xl max-w-md">
+            <h3 class="text-lg font-bold text-slate-900 mb-4">上传制度文件</h3>
+            <div class="space-y-4">
+                <div>
+                    <label class="text-sm text-slate-600 mb-1 block">文件名称</label>
+                    <input type="text" id="uploadFileName" value="${fileName}" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm" placeholder="输入文件名称">
+                </div>
+                <div>
+                    <label class="text-sm text-slate-600 mb-1 block">文件分类</label>
+                    <select id="uploadCategory" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm">
+                        ${categoryOptions}
+                    </select>
+                </div>
+                <div>
+                    <label class="text-sm text-slate-600 mb-1 block">已选择文件</label>
+                    <div class="px-3 py-2 bg-slate-50 rounded-lg text-sm text-slate-700">
+                        <i class="fas ${ext === 'pdf' ? 'fa-file-pdf text-red-500' : 'fa-file-word text-blue-500'} mr-2"></i>
+                        ${fileName} (${(file.size / 1024).toFixed(1)} KB)
+                    </div>
+                </div>
+            </div>
+            <div class="flex gap-3 mt-6">
+                <button onclick="cancelUpload()" class="px-4 py-2 bg-slate-100 text-slate-600 rounded-lg text-sm hover:bg-slate-200">取消</button>
+                <button onclick="confirmUpload('${fileName}', '${ext}')" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 flex-1">确认上传</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(uploadModal);
+}
+
+function cancelUpload() {
+    const modal = document.getElementById('uploadModal');
+    if (modal) modal.remove();
+    document.getElementById('uploadFileInput').value = '';
+}
+
+function confirmUpload(fileName, ext) {
+    const displayName = document.getElementById('uploadFileName').value || fileName;
+    const category = document.getElementById('uploadCategory').value;
+
+    // 生成新ID
+    const newId = 'hb-' + Date.now().toString().slice(-4);
+
+    // 添加到数据列表
+    handbookFiles.push({
+        id: newId,
+        name: displayName,
+        cat: category,
+        file: fileName,
+        ext: ext
+    });
+
+    // 刷新显示
+    filterHandbook('all');
+
+    // 关闭对话框
+    cancelUpload();
+
+    // 显示成功提示
+    showToast('文件已成功上传：' + displayName);
+}
+
+function showToast(message) {
+    const toast = document.createElement('div');
+    toast.className = 'fixed bottom-6 right-6 bg-emerald-600 text-white px-5 py-3 rounded-xl shadow-lg z-50 animate-fade-in';
+    toast.innerHTML = `<i class="fas fa-check-circle mr-2"></i>${message}`;
+    toast.style.animation = 'fadeIn 0.3s ease';
+    document.body.appendChild(toast);
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
 
 function filterHandbook(cat) {
     document.querySelectorAll('.hb-filter').forEach(btn => {
