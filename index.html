@@ -2102,15 +2102,14 @@ function initAppAfterAuth() {
         </section>
         
         <!-- COUNCIL TAB -->
-        <section id="tab-council" class="tab-content h-full hidden">
-            <div class="w-full h-full relative p-8">
-              <!-- 议事机构标题 -->
-              <div style="position:absolute;top:28px;left:32px;z-index:20;">
-                    <h3 style="font-family:Geist,'Noto Sans SC',sans-serif;font-size:22px;font-weight:700;color:#1e293b;">议事机构</h3>
-                    <p style="font-family:Geist,'Noto Sans SC',sans-serif;font-size:17px;color:#475569;font-weight:500;line-height:1.7;letter-spacing:0.03em;margin-top:8px;">公司治理架构按照权力机构、治理核心、执行机构、业务部门四层级统筹划分，科学设置议事规则，保障决策科学、执行高效、监督有力。</p>
+        <section id="tab-council" class="tab-content hidden p-8 overflow-auto h-[calc(100vh-64px)]">
+            <div class="max-w-5xl mx-auto space-y-8">
+                <div class="text-center mb-10">
+                    <h2 style="font-family:Geist,'Noto Sans SC',sans-serif;font-size:22px;font-weight:700;color:#1e293b;">议事机构</h2>
                 </div>
+
                 <!-- Flow Diagram -->
-                <div class="rounded-3xl p-8 bg-white border border-slate-200 shadow-sm mt-20">
+                <div class="rounded-3xl p-8 bg-white border border-slate-200 shadow-sm">
                     <div class="flex flex-wrap items-center justify-center gap-4">
                         <div class="rounded-2xl p-5 shadow-sm border-t-4 border-red-500 min-w-[160px] text-center bg-white">
                             <div class="text-red-600 font-bold text-lg">党委会</div>
