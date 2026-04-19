@@ -1837,11 +1837,25 @@ function initAppAfterAuth() {
                 <input type="text" id="globalSearch" placeholder="搜索部门、岗位、权责..." class="pl-8 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-sm w-56 text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/40 transition">
             </div>
             <button onclick="toggleAnnotationMode()" id="annoBtn" class="px-4 py-2 bg-white hover:bg-slate-50 text-slate-700 rounded-full text-sm font-medium transition shadow-sm border border-slate-200 flex items-center gap-1.5">
-                <span class="text-amber-500 text-base leading-none">+</span>添加意见标注
+                <span class="text-amber-500 text-base leading-none">+</span>添加意见
             </button>
-            <button onclick="exportHtml()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-full text-sm font-medium transition shadow-sm flex items-center gap-1.5">
-                <i class="fas fa-download text-xs"></i>导出HTML
-            </button>
+            <!-- 管理下拉菜单 -->
+            <div class="relative">
+                <button onclick="toggleManageMenu()" id="manageBtn" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full text-sm font-medium transition flex items-center gap-1.5">
+                    <i class="fas fa-cog text-xs"></i>管理
+                </button>
+                <div id="manageMenu" class="absolute right-0 top-full mt-2 bg-white rounded-xl shadow-lg border border-slate-200 py-2 w-40 hidden z-50">
+                    <button onclick="editCurrentPage()" class="w-full px-4 py-2 text-left text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-2">
+                        <i class="fas fa-edit text-slate-500"></i>编辑本页
+                    </button>
+                    <button onclick="downloadCurrentPage('word')" class="w-full px-4 py-2 text-left text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-2">
+                        <i class="fas fa-file-word text-blue-600"></i>下载Word
+                    </button>
+                    <button onclick="downloadCurrentPage('excel')" class="w-full px-4 py-2 text-left text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-2">
+                        <i class="fas fa-file-excel text-green-600"></i>下载Excel
+                    </button>
+                </div>
+            </div>
         </div>
     </header>
 
@@ -2196,13 +2210,8 @@ function initAppAfterAuth() {
         <!-- COUNCIL TAB -->
         <section id="tab-council" class="tab-content hidden p-8 overflow-auto h-[calc(100vh-64px)]">
             <div class="max-w-6xl mx-auto space-y-8">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="text-center flex-1">
-                        <h2 style="font-family:Geist,'Noto Sans SC',sans-serif;font-size:22px;font-weight:700;color:#1e293b;">议事机构</h2>
-                    </div>
-                    <button onclick="enableCouncilEdit()" id="councilEditBtn" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 text-sm font-medium rounded-lg transition flex items-center gap-2">
-                        <i class="fas fa-edit"></i> 编辑内容
-                    </button>
+                <div class="text-center mb-4">
+                    <h2 style="font-family:Geist,'Noto Sans SC',sans-serif;font-size:22px;font-weight:700;color:#1e293b;">议事机构</h2>
                 </div>
                 <p style="font-family:Geist,'Noto Sans SC',sans-serif;font-size:14px;color:#64748b;text-align:center;" id="councilSubtitle">公司治理体系的核心决策与监督机制</p>
 
@@ -2533,9 +2542,6 @@ function initAppAfterAuth() {
                         <button onclick="filterAuthority('运营部')" class="auth-filter px-3 py-1.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 transition" data-dept="运营部">运营部</button>
                         <button onclick="filterAuthority('综合部')" class="auth-filter px-3 py-1.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 transition" data-dept="综合部">综合部</button>
                     </div>
-                    <button onclick="enableAuthorityEdit()" id="authEditBtn" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 text-sm font-medium rounded-lg transition flex items-center gap-2">
-                        <i class="fas fa-edit"></i> 编辑内容
-                    </button>
                 </div>
                 <div class="overflow-x-auto max-h-[calc(100vh-180px)]">
                     <table class="w-full text-sm apple-table">
@@ -2588,169 +2594,9 @@ function initAppAfterAuth() {
                     <button onclick="filterPosition('运营部')" class="pos-filter px-4 py-2 rounded-xl text-sm font-medium bg-slate-100 border border-slate-200 text-slate-600 hover:bg-slate-200 transition" data-pos="运营部">运营部</button>
                     <button onclick="filterPosition('综合部')" class="pos-filter px-4 py-2 rounded-xl text-sm font-medium bg-slate-100 border border-slate-200 text-slate-600 hover:bg-slate-200 transition" data-pos="综合部">综合部</button>
                 </div>
-                <div id="positionsGrid"><div class="space-y-10">
-            <div>
-                <div class="text-center pb-4 mb-6 border-b border-slate-200">
-                    <div class="text-lg font-bold text-slate-900">投资部</div>
-                    <div class="text-xs text-slate-500 mt-1">投资1部 / 投资2部</div>
-                </div>
-                <div class="flex flex-wrap justify-center gap-5">
-                    
-        <div ondblclick="openPositionEditModal('投资部', 0)" class="pos-card relative w-80 bg-white rounded-2xl p-5 shadow-sm border border-slate-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden cursor-pointer" style="animation-delay:0ms">
-            <div class="absolute top-0 left-0 right-0 h-1 bg-blue-500"></div>
-            <div class="flex items-start justify-between mb-4">
-                <div><h4 class="text-base font-bold text-slate-800">投资部部长</h4></div>
-                <div class="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 border border-blue-100">
-                    <i class="fas fa-user text-xs"></i>
-                </div>
+                <div id="positionsGrid"></div>
             </div>
-            <div class="space-y-2.5"><div class="flex items-start gap-2.5"><div class="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 flex-shrink-0"></div><p class="text-sm text-slate-600 leading-relaxed">按照公司投资策略和目标，制定部门年度投资计划</p></div><div class="flex items-start gap-2.5"><div class="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 flex-shrink-0"></div><p class="text-sm text-slate-600 leading-relaxed">带领团队开展产业研究、项目尽调、投资谈判与投后管理</p></div><div class="flex items-start gap-2.5"><div class="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 flex-shrink-0"></div><p class="text-sm text-slate-600 leading-relaxed">负责投资项目的立项、评审、实施、退出等全流程工作</p></div><div class="flex items-start gap-2.5"><div class="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 flex-shrink-0"></div><p class="text-sm text-slate-600 leading-relaxed">建立并维护项目信息库、专家库、行业信息数据库</p></div><div class="flex items-start gap-2.5"><div class="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 flex-shrink-0"></div><p class="text-sm text-slate-600 leading-relaxed">参与公司投资决策委员会，审议重大投资项目</p></div><div class="flex items-start gap-2.5"><div class="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 flex-shrink-0"></div><p class="text-sm text-slate-600 leading-relaxed">需具备备案投资总监资格</p></div></div>
-        </div>
-    
-        <div ondblclick="openPositionEditModal('投资部', 1)" class="pos-card relative w-80 bg-white rounded-2xl p-5 shadow-sm border border-slate-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden cursor-pointer" style="animation-delay:80ms">
-            <div class="absolute top-0 left-0 right-0 h-1 bg-blue-500"></div>
-            <div class="flex items-start justify-between mb-4">
-                <div><h4 class="text-base font-bold text-slate-800">高级投资经理</h4></div>
-                <div class="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 border border-blue-100">
-                    <i class="fas fa-user text-xs"></i>
-                </div>
-            </div>
-            <div class="space-y-2.5"><div class="flex items-start gap-2.5"><div class="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 flex-shrink-0"></div><p class="text-sm text-slate-600 leading-relaxed">起草编制投资管理相关制度和流程体系</p></div><div class="flex items-start gap-2.5"><div class="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 flex-shrink-0"></div><p class="text-sm text-slate-600 leading-relaxed">持续跟踪政治经济形势，开展战略性新兴产业和地方重点产业研究</p></div><div class="flex items-start gap-2.5"><div class="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 flex-shrink-0"></div><p class="text-sm text-slate-600 leading-relaxed">组织编制行业分析、投资论证报告、尽职调查报告</p></div><div class="flex items-start gap-2.5"><div class="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 flex-shrink-0"></div><p class="text-sm text-slate-600 leading-relaxed">开展投资协议、章程、三会组建等商务谈判</p></div><div class="flex items-start gap-2.5"><div class="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 flex-shrink-0"></div><p class="text-sm text-slate-600 leading-relaxed">制定投后管理方案，参加所投项目公司三会</p></div></div>
-        </div>
-    
-        <div ondblclick="openPositionEditModal('投资部', 2)" class="pos-card relative w-80 bg-white rounded-2xl p-5 shadow-sm border border-slate-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden cursor-pointer" style="animation-delay:160ms">
-            <div class="absolute top-0 left-0 right-0 h-1 bg-blue-500"></div>
-            <div class="flex items-start justify-between mb-4">
-                <div><h4 class="text-base font-bold text-slate-800">行业研究员/分析师</h4></div>
-                <div class="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 border border-blue-100">
-                    <i class="fas fa-user text-xs"></i>
-                </div>
-            </div>
-            <div class="space-y-2.5"><div class="flex items-start gap-2.5"><div class="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 flex-shrink-0"></div><p class="text-sm text-slate-600 leading-relaxed">收集、整理并分析国家战略性新兴产业政策和地方重点产业政策</p></div><div class="flex items-start gap-2.5"><div class="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 flex-shrink-0"></div><p class="text-sm text-slate-600 leading-relaxed">跟踪国内外政治经济形势，撰写行业研究报告</p></div><div class="flex items-start gap-2.5"><div class="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 flex-shrink-0"></div><p class="text-sm text-slate-600 leading-relaxed">建立和维护行业数据库、企业数据库</p></div><div class="flex items-start gap-2.5"><div class="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 flex-shrink-0"></div><p class="text-sm text-slate-600 leading-relaxed">为投资项目提供行业分析和政策研究支持</p></div><div class="flex items-start gap-2.5"><div class="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 flex-shrink-0"></div><p class="text-sm text-slate-600 leading-relaxed">参与投资项目的初步调研和立项论证</p></div></div>
-        </div>
-    
-                </div>
-            </div>
-        
-            <div>
-                <div class="text-center pb-4 mb-6 border-b border-slate-200">
-                    <div class="text-lg font-bold text-slate-900">运营部</div>
-                    <div class="text-xs text-slate-500 mt-1">中台业务</div>
-                </div>
-                <div class="flex flex-wrap justify-center gap-5">
-                    
-        <div ondblclick="openPositionEditModal('运营部', 0)" class="pos-card relative w-80 bg-white rounded-2xl p-5 shadow-sm border border-slate-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden cursor-pointer" style="animation-delay:0ms">
-            <div class="absolute top-0 left-0 right-0 h-1 bg-emerald-500"></div>
-            <div class="flex items-start justify-between mb-4">
-                <div><h4 class="text-base font-bold text-slate-800">运营部部长</h4></div>
-                <div class="w-9 h-9 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 border border-emerald-100">
-                    <i class="fas fa-user text-xs"></i>
-                </div>
-            </div>
-            <div class="space-y-2.5"><div class="flex items-start gap-2.5"><div class="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-2 flex-shrink-0"></div><p class="text-sm text-slate-600 leading-relaxed">承接原监事会职能，建立并完善公司风险合规管理体系</p></div><div class="flex items-start gap-2.5"><div class="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-2 flex-shrink-0"></div><p class="text-sm text-slate-600 leading-relaxed">负责财务管理工作，组织编制财务预算、决算，监督预算执行</p></div><div class="flex items-start gap-2.5"><div class="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-2 flex-shrink-0"></div><p class="text-sm text-slate-600 leading-relaxed">负责法务事务管理，审核合同、提供法律咨询、处理法律纠纷</p></div><div class="flex items-start gap-2.5"><div class="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-2 flex-shrink-0"></div><p class="text-sm text-slate-600 leading-relaxed">负责风控管理，组织开展全面风险识别与评估</p></div><div class="flex items-start gap-2.5"><div class="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-2 flex-shrink-0"></div><p class="text-sm text-slate-600 leading-relaxed">需具备备案风控总监资格</p></div></div>
-        </div>
-    
-        <div ondblclick="openPositionEditModal('运营部', 1)" class="pos-card relative w-80 bg-white rounded-2xl p-5 shadow-sm border border-slate-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden cursor-pointer" style="animation-delay:80ms">
-            <div class="absolute top-0 left-0 right-0 h-1 bg-emerald-500"></div>
-            <div class="flex items-start justify-between mb-4">
-                <div><h4 class="text-base font-bold text-slate-800">财务经理</h4></div>
-                <div class="w-9 h-9 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 border border-emerald-100">
-                    <i class="fas fa-user text-xs"></i>
-                </div>
-            </div>
-            <div class="space-y-2.5"><div class="flex items-start gap-2.5"><div class="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-2 flex-shrink-0"></div><p class="text-sm text-slate-600 leading-relaxed">财务管理体系建设：制定财务管控模式、制度流程</p></div><div class="flex items-start gap-2.5"><div class="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-2 flex-shrink-0"></div><p class="text-sm text-slate-600 leading-relaxed">预算管理：组织编制年度财务预算，监督执行情况</p></div><div class="flex items-start gap-2.5"><div class="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-2 flex-shrink-0"></div><p class="text-sm text-slate-600 leading-relaxed">会计核算：负责会计账务处理，编制财务报表</p></div><div class="flex items-start gap-2.5"><div class="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-2 flex-shrink-0"></div><p class="text-sm text-slate-600 leading-relaxed">资金管理：编制资金预算、收支计划，合理利用闲置资金</p></div><div class="flex items-start gap-2.5"><div class="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-2 flex-shrink-0"></div><p class="text-sm text-slate-600 leading-relaxed">税务筹划、融资管理、资产管理</p></div><div class="flex items-start gap-2.5"><div class="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-2 flex-shrink-0"></div><p class="text-sm text-slate-600 leading-relaxed">出纳管理、票据管理、资金日报编制</p></div><div class="flex items-start gap-2.5"><div class="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-2 flex-shrink-0"></div><p class="text-sm text-slate-600 leading-relaxed">固定资产台账、盘点、使用监督</p></div></div>
-        </div>
-    
-        <div ondblclick="openPositionEditModal('运营部', 2)" class="pos-card relative w-80 bg-white rounded-2xl p-5 shadow-sm border border-slate-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden cursor-pointer" style="animation-delay:160ms">
-            <div class="absolute top-0 left-0 right-0 h-1 bg-emerald-500"></div>
-            <div class="flex items-start justify-between mb-4">
-                <div><h4 class="text-base font-bold text-slate-800">中台经理</h4></div>
-                <div class="w-9 h-9 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 border border-emerald-100">
-                    <i class="fas fa-user text-xs"></i>
-                </div>
-            </div>
-            <div class="space-y-2.5"><div class="flex items-start gap-2.5"><div class="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-2 flex-shrink-0"></div><p class="text-sm text-slate-600 leading-relaxed">协助运营部部长建立和完善中台业务流程</p></div><div class="flex items-start gap-2.5"><div class="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-2 flex-shrink-0"></div><p class="text-sm text-slate-600 leading-relaxed">负责财务、法务、风控等中台业务的整合与协调</p></div><div class="flex items-start gap-2.5"><div class="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-2 flex-shrink-0"></div><p class="text-sm text-slate-600 leading-relaxed">组织中台业务培训和制度宣贯</p></div><div class="flex items-start gap-2.5"><div class="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-2 flex-shrink-0"></div><p class="text-sm text-slate-600 leading-relaxed">对中台业务数据进行汇总分析，为管理层决策提供支持</p></div></div>
-        </div>
-    
-        <div ondblclick="openPositionEditModal('运营部', 3)" class="pos-card relative w-80 bg-white rounded-2xl p-5 shadow-sm border border-slate-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden cursor-pointer" style="animation-delay:240ms">
-            <div class="absolute top-0 left-0 right-0 h-1 bg-emerald-500"></div>
-            <div class="flex items-start justify-between mb-4">
-                <div><h4 class="text-base font-bold text-slate-800">合规风控经理</h4></div>
-                <div class="w-9 h-9 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 border border-emerald-100">
-                    <i class="fas fa-user text-xs"></i>
-                </div>
-            </div>
-            <div class="space-y-2.5"><div class="flex items-start gap-2.5"><div class="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-2 flex-shrink-0"></div><p class="text-sm text-slate-600 leading-relaxed">建立和完善公司风险管理与合规管理体系</p></div><div class="flex items-start gap-2.5"><div class="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-2 flex-shrink-0"></div><p class="text-sm text-slate-600 leading-relaxed">负责对投资项目、基金项目进行风险审查和合规审查</p></div><div class="flex items-start gap-2.5"><div class="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-2 flex-shrink-0"></div><p class="text-sm text-slate-600 leading-relaxed">组织开展合规检查、合规培训和合规文化宣传</p></div><div class="flex items-start gap-2.5"><div class="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-2 flex-shrink-0"></div><p class="text-sm text-slate-600 leading-relaxed">跟踪监管动态，及时传达合规要求</p></div><div class="flex items-start gap-2.5"><div class="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-2 flex-shrink-0"></div><p class="text-sm text-slate-600 leading-relaxed">协助处理法务事务和法律纠纷</p></div></div>
-        </div>
-    
-        <div ondblclick="openPositionEditModal('运营部', 4)" class="pos-card relative w-80 bg-white rounded-2xl p-5 shadow-sm border border-slate-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden cursor-pointer" style="animation-delay:320ms">
-            <div class="absolute top-0 left-0 right-0 h-1 bg-emerald-500"></div>
-            <div class="flex items-start justify-between mb-4">
-                <div><h4 class="text-base font-bold text-slate-800">出纳员</h4></div>
-                <div class="w-9 h-9 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 border border-emerald-100">
-                    <i class="fas fa-user text-xs"></i>
-                </div>
-            </div>
-            <div class="space-y-2.5"><div class="flex items-start gap-2.5"><div class="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-2 flex-shrink-0"></div><p class="text-sm text-slate-600 leading-relaxed">办理日常现金收付业务，如报销、工资发放、货款支付</p></div><div class="flex items-start gap-2.5"><div class="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-2 flex-shrink-0"></div><p class="text-sm text-slate-600 leading-relaxed">管理银行票据，开具支票、汇票等</p></div><div class="flex items-start gap-2.5"><div class="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-2 flex-shrink-0"></div><p class="text-sm text-slate-600 leading-relaxed">定期核对银行对账单，编制银行存款余额调节表</p></div><div class="flex items-start gap-2.5"><div class="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-2 flex-shrink-0"></div><p class="text-sm text-slate-600 leading-relaxed">保管空白票据，建立票据领用登记台账</p></div><div class="flex items-start gap-2.5"><div class="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-2 flex-shrink-0"></div><p class="text-sm text-slate-600 leading-relaxed">编制资金日报，反映现金及银行存款收支明细</p></div></div>
-        </div>
-    
-                </div>
-            </div>
-        
-            <div>
-                <div class="text-center pb-4 mb-6 border-b border-slate-200">
-                    <div class="text-lg font-bold text-slate-900">综合部</div>
-                    <div class="text-xs text-slate-500 mt-1">后台业务</div>
-                </div>
-                <div class="flex flex-wrap justify-center gap-5">
-                    
-        <div ondblclick="openPositionEditModal('综合部', 0)" class="pos-card relative w-80 bg-white rounded-2xl p-5 shadow-sm border border-slate-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden cursor-pointer" style="animation-delay:0ms">
-            <div class="absolute top-0 left-0 right-0 h-1 bg-purple-500"></div>
-            <div class="flex items-start justify-between mb-4">
-                <div><h4 class="text-base font-bold text-slate-800">综合部部长</h4></div>
-                <div class="w-9 h-9 rounded-xl bg-purple-50 flex items-center justify-center text-purple-600 border border-purple-100">
-                    <i class="fas fa-user text-xs"></i>
-                </div>
-            </div>
-            <div class="space-y-2.5"><div class="flex items-start gap-2.5"><div class="w-1.5 h-1.5 rounded-full bg-purple-500 mt-2 flex-shrink-0"></div><p class="text-sm text-slate-600 leading-relaxed">统筹综合部全面工作，包括三会一层服务、人力资源、行政后勤</p></div><div class="flex items-start gap-2.5"><div class="w-1.5 h-1.5 rounded-full bg-purple-500 mt-2 flex-shrink-0"></div><p class="text-sm text-slate-600 leading-relaxed">组织董事会、监事会、股东会会议，督办决议落实</p></div><div class="flex items-start gap-2.5"><div class="w-1.5 h-1.5 rounded-full bg-purple-500 mt-2 flex-shrink-0"></div><p class="text-sm text-slate-600 leading-relaxed">负责公司印章、证照管理、工商变更及年检</p></div><div class="flex items-start gap-2.5"><div class="w-1.5 h-1.5 rounded-full bg-purple-500 mt-2 flex-shrink-0"></div><p class="text-sm text-slate-600 leading-relaxed">协调采购管理、固定资产管理、信息化建设</p></div><div class="flex items-start gap-2.5"><div class="w-1.5 h-1.5 rounded-full bg-purple-500 mt-2 flex-shrink-0"></div><p class="text-sm text-slate-600 leading-relaxed">负责安全生产、后勤保障和对外接待工作</p></div></div>
-        </div>
-    
-        <div ondblclick="openPositionEditModal('综合部', 1)" class="pos-card relative w-80 bg-white rounded-2xl p-5 shadow-sm border border-slate-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden cursor-pointer" style="animation-delay:80ms">
-            <div class="absolute top-0 left-0 right-0 h-1 bg-purple-500"></div>
-            <div class="flex items-start justify-between mb-4">
-                <div><h4 class="text-base font-bold text-slate-800">综合管理主管</h4></div>
-                <div class="w-9 h-9 rounded-xl bg-purple-50 flex items-center justify-center text-purple-600 border border-purple-100">
-                    <i class="fas fa-user text-xs"></i>
-                </div>
-            </div>
-            <div class="space-y-2.5"><div class="flex items-start gap-2.5"><div class="w-1.5 h-1.5 rounded-full bg-purple-500 mt-2 flex-shrink-0"></div><p class="text-sm text-slate-600 leading-relaxed">协助综合部部长开展人力资源管理工作</p></div><div class="flex items-start gap-2.5"><div class="w-1.5 h-1.5 rounded-full bg-purple-500 mt-2 flex-shrink-0"></div><p class="text-sm text-slate-600 leading-relaxed">负责招聘、培训、绩效、薪酬福利等人事事务的具体执行</p></div><div class="flex items-start gap-2.5"><div class="w-1.5 h-1.5 rounded-full bg-purple-500 mt-2 flex-shrink-0"></div><p class="text-sm text-slate-600 leading-relaxed">管理员工档案、劳动合同、社保公积金等人事资料</p></div><div class="flex items-start gap-2.5"><div class="w-1.5 h-1.5 rounded-full bg-purple-500 mt-2 flex-shrink-0"></div><p class="text-sm text-slate-600 leading-relaxed">协调组织公司培训和企业文化活动</p></div></div>
-        </div>
-    
-        <div ondblclick="openPositionEditModal('综合部', 2)" class="pos-card relative w-80 bg-white rounded-2xl p-5 shadow-sm border border-slate-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden cursor-pointer" style="animation-delay:160ms">
-            <div class="absolute top-0 left-0 right-0 h-1 bg-purple-500"></div>
-            <div class="flex items-start justify-between mb-4">
-                <div><h4 class="text-base font-bold text-slate-800">行政专员</h4></div>
-                <div class="w-9 h-9 rounded-xl bg-purple-50 flex items-center justify-center text-purple-600 border border-purple-100">
-                    <i class="fas fa-user text-xs"></i>
-                </div>
-            </div>
-            <div class="space-y-2.5"><div class="flex items-start gap-2.5"><div class="w-1.5 h-1.5 rounded-full bg-purple-500 mt-2 flex-shrink-0"></div><p class="text-sm text-slate-600 leading-relaxed">制定公司章程修正案、三会一层议事规则</p></div><div class="flex items-start gap-2.5"><div class="w-1.5 h-1.5 rounded-full bg-purple-500 mt-2 flex-shrink-0"></div><p class="text-sm text-slate-600 leading-relaxed">组织董监事会、股东会会议，检查决议落实情况</p></div><div class="flex items-start gap-2.5"><div class="w-1.5 h-1.5 rounded-full bg-purple-500 mt-2 flex-shrink-0"></div><p class="text-sm text-slate-600 leading-relaxed">印章管理、证照年检、工商变更及登记</p></div><div class="flex items-start gap-2.5"><div class="w-1.5 h-1.5 rounded-full bg-purple-500 mt-2 flex-shrink-0"></div><p class="text-sm text-slate-600 leading-relaxed">会议服务、物业管理、安全卫生管理</p></div><div class="flex items-start gap-2.5"><div class="w-1.5 h-1.5 rounded-full bg-purple-500 mt-2 flex-shrink-0"></div><p class="text-sm text-slate-600 leading-relaxed">采购管理、固定资产管理、信息化维护</p></div><div class="flex items-start gap-2.5"><div class="w-1.5 h-1.5 rounded-full bg-purple-500 mt-2 flex-shrink-0"></div><p class="text-sm text-slate-600 leading-relaxed">前台接待、信件快递管理、文印事务</p></div></div>
-        </div>
-    
-        <div ondblclick="openPositionEditModal('综合部', 3)" class="pos-card relative w-80 bg-white rounded-2xl p-5 shadow-sm border border-slate-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden cursor-pointer" style="animation-delay:240ms">
-            <div class="absolute top-0 left-0 right-0 h-1 bg-purple-500"></div>
-            <div class="flex items-start justify-between mb-4">
-                <div><h4 class="text-base font-bold text-slate-800">前台</h4></div>
-                <div class="w-9 h-9 rounded-xl bg-purple-50 flex items-center justify-center text-purple-600 border border-purple-100">
-                    <i class="fas fa-user text-xs"></i>
-                </div>
-            </div>
-            <div class="space-y-2.5"><div class="flex items-start gap-2.5"><div class="w-1.5 h-1.5 rounded-full bg-purple-500 mt-2 flex-shrink-0"></div><p class="text-sm text-slate-600 leading-relaxed">负责迎送访客，保持专业仪态，做好访客登记与引导</p></div><div class="flex items-start gap-2.5"><div class="w-1.5 h-1.5 rounded-full bg-purple-500 mt-2 flex-shrink-0"></div><p class="text-sm text-slate-600 leading-relaxed">为客人准备会议材料及茶水饮品</p></div><div class="flex items-start gap-2.5"><div class="w-1.5 h-1.5 rounded-full bg-purple-500 mt-2 flex-shrink-0"></div><p class="text-sm text-slate-600 leading-relaxed">维护前台、接待区及公共区域的整洁与秩序</p></div><div class="flex items-start gap-2.5"><div class="w-1.5 h-1.5 rounded-full bg-purple-500 mt-2 flex-shrink-0"></div><p class="text-sm text-slate-600 leading-relaxed">协助会议组织、设备调试、会后清理</p></div><div class="flex items-start gap-2.5"><div class="w-1.5 h-1.5 rounded-full bg-purple-500 mt-2 flex-shrink-0"></div><p class="text-sm text-slate-600 leading-relaxed">管理信件快递签收登记分发，处理文印事务</p></div><div class="flex items-start gap-2.5"><div class="w-1.5 h-1.5 rounded-full bg-purple-500 mt-2 flex-shrink-0"></div><p class="text-sm text-slate-600 leading-relaxed">接听总机电话，做好转接及留言记录</p></div></div>
-        </div>
-    
-                </div>
-            </div>
-        </div></div>
+        </section>
             </div>
         </section>
 
@@ -9098,11 +8944,142 @@ function switchTab(tabId) {
     document.getElementById('tab-' + tabId).classList.remove('hidden');
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
     document.getElementById('nav-' + tabId).classList.add('active');
+
+    // 岗位设计页面需要重新渲染
+    if (tabId === 'positions') {
+        renderPositions('all');
+    }
 }
 
 function toggleMobileNav() {
     const menu = document.getElementById('mobileNavMenu');
     menu.classList.toggle('open');
+}
+
+function toggleManageMenu() {
+    const menu = document.getElementById('manageMenu');
+    menu.classList.toggle('hidden');
+}
+
+// 点击外部关闭管理菜单
+document.addEventListener('click', function(e) {
+    const manageBtn = document.getElementById('manageBtn');
+    const manageMenu = document.getElementById('manageMenu');
+    if (manageBtn && manageMenu && !manageBtn.contains(e.target) && !manageMenu.contains(e.target)) {
+        manageMenu.classList.add('hidden');
+    }
+});
+
+function editCurrentPage() {
+    document.getElementById('manageMenu').classList.add('hidden');
+    const currentTab = getCurrentTab();
+    switch(currentTab) {
+        case 'strategy': enableStrategyEdit(); break;
+        case 'council': enableCouncilEdit(); break;
+        case 'authority': enableAuthorityEdit(); break;
+        case 'positions': /* 双击卡片编辑 */ break;
+        case 'handbook': /* 文件管理 */ break;
+        default: alert('该页面暂不支持编辑');
+    }
+}
+
+function getCurrentTab() {
+    const activeBtn = document.querySelector('.tab-btn.active');
+    if (activeBtn && activeBtn.id) {
+        return activeBtn.id.replace('nav-', '');
+    }
+    return 'strategy';
+}
+
+function downloadCurrentPage(format) {
+    document.getElementById('manageMenu').classList.add('hidden');
+    const currentTab = getCurrentTab();
+
+    if (format === 'excel' && currentTab === 'authority') {
+        downloadAuthorityExcel();
+    } else {
+        downloadPageWord(currentTab);
+    }
+}
+
+function downloadAuthorityExcel() {
+    // 生成权责清单Excel
+    let csvContent = '\uFEFF'; // UTF-8 BOM
+    const headers = ['序号', '权责单位', '关键事项', '决策机构', '天蚨投资部', '天蚨风控部', '天蚨财务部', '天蚨综合部', '天蚨总办会', '天蚨总经理', '天蚨投决会', '天蚨董事长', '天蚨董事会', '天蚨股东会', '集团财务部', '集团合规部', '集团投资部', '集团风控总监', '集团财务总监', '集团分管领导', '集团总经理办公会', '集团总经理', '集团党委会', '集团董事长', '集团董事会', '市财政局', '备注'];
+    csvContent += headers.join(',') + '\n';
+
+    authorityData.forEach(row => {
+        const values = headers.map(h => {
+            let val = row[h] || '';
+            // 处理包含逗号或换行的内容
+            if (val.includes(',') || val.includes('\n')) {
+                val = '"' + val.replace(/"/g, '""') + '"';
+            }
+            return val;
+        });
+        csvContent += values.join(',') + '\n';
+    });
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = '权责清单.csv';
+    link.click();
+}
+
+function downloadPageWord(tabId) {
+    // 生成Word文档（实际上生成HTML格式，Word可以打开）
+    const tabContent = document.getElementById('tab-' + tabId);
+    const title = getTabTitle(tabId);
+
+    let content = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="UTF-8"><title>' + title + '</title></head><body>';
+    content += '<h1 style="text-align:center;font-size:24px;">' + title + '</h1>';
+    content += tabContent.innerHTML;
+    content += '</body></html>';
+
+    const blob = new Blob([content], { type: 'application/msword;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = title + '.doc';
+    link.click();
+}
+
+function getTabTitle(tabId) {
+    const titles = {
+        'strategy': '战略规划',
+        'org': '组织架构',
+        'council': '议事机构',
+        'business': '业务条线',
+        'authority': '权责清单',
+        'positions': '岗位设计',
+        'handbook': '制度设计'
+    };
+    return titles[tabId] || tabId;
+}
+
+// 战略规划编辑功能
+let strategyEditMode = false;
+function enableStrategyEdit() {
+    strategyEditMode = !strategyEditMode;
+    const section = document.getElementById('tab-strategy');
+
+    if (strategyEditMode) {
+        // 将所有可编辑区域变为输入框
+        section.querySelectorAll('[data-editable]').forEach(el => {
+            const text = el.textContent;
+            el.innerHTML = '<input type="text" value="' + text + '" class="strategy-edit-input px-2 py-1 border border-blue-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" style="width:100%;font-size:inherit;">';
+        });
+        alert('编辑模式已开启，请直接修改文本内容');
+    } else {
+        // 保存编辑内容
+        section.querySelectorAll('[data-editable]').forEach(el => {
+            const input = el.querySelector('.strategy-edit-input');
+            if (input) {
+                el.textContent = input.value;
+            }
+        });
+        alert('编辑已保存');
+    }
 }
 
 function getRoleBadge(text) {
