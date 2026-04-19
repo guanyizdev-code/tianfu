@@ -2,7 +2,7 @@
 <html lang="zh-CN"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>天蚨基金发展规划(20260419v1.02)</title>
+    <title>天蚨基金发展规划(20260419v1.03)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -1727,7 +1727,7 @@ function initAppAfterAuth() {
 <body class="text-slate-900">
 <div id="pwdOverlay">
 <div id="pwdBox">
-<h2>天蚨基金规划(20260419v1.02)</h2>
+<h2>天蚨基金规划(20260419v1.03)</h2>
 <p>请输入访问密码以继续</p>
 <input id="pwdInput" type="password" placeholder="请输入密码" onkeydown="if(event.key==='Enter')checkPassword()">
 <button id="pwdBtn" onclick="checkPassword()">进入系统</button>
@@ -3126,9 +3126,6 @@ function initAppAfterAuth() {
         </button>
         <button onclick="downloadCurrentPage('excel');closeManageModal()" class="w-full px-4 py-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-xl text-sm font-medium transition flex items-center gap-3">
             <i class="fas fa-file-excel text-emerald-600"></i>下载Excel
-        </button>
-        <button onclick="exportHtml();closeManageModal()" class="w-full px-4 py-3 bg-purple-50 hover:bg-purple-100 text-purple-700 rounded-xl text-sm font-medium transition flex items-center gap-3">
-            <i class="fas fa-code text-purple-600"></i>导出HTML
         </button>
     </div>
 </div>
@@ -9172,20 +9169,27 @@ function renderAuthorityTable(data, editMode = false) {
 let authEditMode = false;
 function enableAuthorityEdit() {
     authEditMode = !authEditMode;
-    const btn = document.getElementById('authEditBtn');
+
     if (authEditMode) {
-        btn.innerHTML = '<i class="fas fa-save"></i> 保存更改';
-        btn.classList.remove('bg-slate-100', 'text-slate-600', 'hover:bg-slate-200');
-        btn.classList.add('bg-blue-600', 'text-white', 'hover:bg-blue-700');
         renderAuthorityTable(authorityData, true);
+        // 显示编辑提示条
+        const tip = document.createElement('div');
+        tip.id = 'authEditTip';
+        tip.className = 'fixed top-20 right-4 bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm shadow-lg z-40 flex items-center gap-3';
+        tip.innerHTML = '<span>表格已进入编辑模式</span><button onclick="saveAuthorityEdit()" class="px-3 py-1 bg-white/20 rounded hover:bg-white/30 text-xs font-medium">保存更改</button>';
+        document.body.appendChild(tip);
     } else {
-        btn.innerHTML = '<i class="fas fa-edit"></i> 编辑内容';
-        btn.classList.remove('bg-blue-600', 'text-white', 'hover:bg-blue-700');
-        btn.classList.add('bg-slate-100', 'text-slate-600', 'hover:bg-slate-200');
         renderAuthorityTable(authorityData, false);
-        // 同步数据到远程
         syncAppData('authorityData', authorityData);
     }
+}
+
+function saveAuthorityEdit() {
+    authEditMode = false;
+    renderAuthorityTable(authorityData, false);
+    syncAppData('authorityData', authorityData);
+    const tip = document.getElementById('authEditTip');
+    if (tip) tip.remove();
 }
 
 function updateAuthData(rowIdx, col, value) {
@@ -9200,13 +9204,8 @@ let councilEditData = {};
 
 function enableCouncilEdit() {
     councilEditMode = !councilEditMode;
-    const btn = document.getElementById('councilEditBtn');
 
     if (councilEditMode) {
-        btn.innerHTML = '<i class="fas fa-save"></i> 保存更改';
-        btn.classList.remove('bg-slate-100', 'text-slate-600', 'hover:bg-slate-200');
-        btn.classList.add('bg-blue-600', 'text-white', 'hover:bg-blue-700');
-
         // 保存原始数据
         document.querySelectorAll('[data-council-key]').forEach(el => {
             const key = el.getAttribute('data-council-key');
@@ -9232,46 +9231,55 @@ function enableCouncilEdit() {
             }
         });
 
-        // 副标题也可编辑
-        const subtitle = document.getElementById('councilSubtitle');
-        if (subtitle) {
-            subtitle.innerHTML = '<input type="text" value="' + subtitle.textContent + '" class="council-edit-input px-2 py-1 border border-blue-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">';
-        }
-
         // 添加编辑样式
         const style = document.createElement('style');
         style.id = 'councilEditStyle';
         style.textContent = '.council-edit-input { background: white; }';
         document.head.appendChild(style);
 
+        // 显示编辑提示条
+        const tip = document.createElement('div');
+        tip.id = 'councilEditTip';
+        tip.className = 'fixed top-20 right-4 bg-violet-600 text-white px-4 py-2 rounded-lg text-sm shadow-lg z-40 flex items-center gap-3';
+        tip.innerHTML = '<span>已进入编辑模式</span><button onclick="saveCouncilEdit()" class="px-3 py-1 bg-white/20 rounded hover:bg-white/30 text-xs font-medium">保存更改</button>';
+        document.body.appendChild(tip);
+
     } else {
-        btn.innerHTML = '<i class="fas fa-edit"></i> 编辑内容';
-        btn.classList.remove('bg-blue-600', 'text-white', 'hover:bg-blue-700');
-        btn.classList.add('bg-slate-100', 'text-slate-600', 'hover:bg-slate-200');
+        saveCouncilEditContent();
+    }
+}
 
-        // 保存编辑后的内容
-        document.querySelectorAll('[data-council-key]').forEach(el => {
-            const key = el.getAttribute('data-council-key');
-            const inputs = el.querySelectorAll('.council-edit-input');
+function saveCouncilEdit() {
+    councilEditMode = false;
+    saveCouncilEditContent();
+    const tip = document.getElementById('councilEditTip');
+    if (tip) tip.remove();
+}
 
-            if (inputs.length > 1) {
-                // 列表内容
-                let html = '';
-                inputs.forEach(input => {
-                    html += '<li>• ' + input.value + '</li>';
-                });
-                el.innerHTML = html;
-            } else if (inputs.length === 1) {
-                el.textContent = inputs[0].value;
-            }
-        });
+function saveCouncilEditContent() {
+    // 移除编辑样式
+    const style = document.getElementById('councilEditStyle');
+    if (style) style.remove();
 
-        // 恢复副标题
-        const subtitle = document.getElementById('councilSubtitle');
-        if (subtitle) {
-            const input = subtitle.querySelector('.council-edit-input');
-            if (input) {
-                subtitle.textContent = input.value;
+    // 保存编辑后的内容
+    document.querySelectorAll('[data-council-key]').forEach(el => {
+        const inputs = el.querySelectorAll('.council-edit-input');
+
+        if (inputs.length > 1) {
+            // 列表内容
+            let html = '';
+            inputs.forEach(input => {
+                html += '<li>• ' + input.value + '</li>';
+            });
+            el.innerHTML = html;
+        } else if (inputs.length === 1) {
+            el.textContent = inputs[0].value;
+        }
+    });
+
+    // 同步数据
+    syncAppData('councilEditData', councilEditData);
+}
             }
         }
 
