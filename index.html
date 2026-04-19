@@ -2,7 +2,7 @@
 <html lang="zh-CN"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>天蚨基金发展规划(20260419v1.09)</title>
+    <title>天蚨基金发展规划(20260419v1.10)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -1728,7 +1728,7 @@ function initAppAfterAuth() {
 <body class="text-slate-900">
 <div id="pwdOverlay">
 <div id="pwdBox">
-<h2>天蚨基金规划(20260419v1.09)</h2>
+<h2>天蚨基金规划(20260419v1.10)</h2>
 <p>请输入访问密码以继续</p>
 <input id="pwdInput" type="password" placeholder="请输入密码" onkeydown="if(event.key==='Enter')checkPassword()">
 <button id="pwdBtn" onclick="checkPassword()">进入系统</button>
@@ -1809,9 +1809,8 @@ function initAppAfterAuth() {
 <div class="min-h-screen flex flex-col">
     <!-- Header -->
     <header class="h-16 glass-dark-header flex items-center justify-between px-6 z-50 fixed top-0 left-0 right-0">
-        <div class="flex items-center gap-4">
+        <div class="flex items-center">
             <img src="logo.jpg" alt="天蚨基金" class="w-9 h-9 rounded-xl object-cover shadow-lg">
-            <div class="font-semibold text-slate-900 text-sm whitespace-nowrap text-center">天蚨基金</div>
         </div>
 
         <!-- Mobile menu toggle button -->
@@ -10514,8 +10513,9 @@ function handleExcelUpload(event) {
             const parsedData = parseExcelToAuthorityData(jsonData);
 
             if (parsedData.length > 0) {
-                // 更新数据
-                authorityData = parsedData;
+                // 更新数据（authorityData是const，不能直接赋值，使用splice更新）
+                authorityData.length = 0;
+                parsedData.forEach(item => authorityData.push(item));
 
                 // 重新渲染表格
                 renderAuthorityTable(authorityData, false);
