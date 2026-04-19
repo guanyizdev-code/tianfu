@@ -1727,7 +1727,7 @@ function initAppAfterAuth() {
 <body class="text-slate-900">
 <div id="pwdOverlay">
 <div id="pwdBox">
-<h2>天蚨基金规划v3</h2>
+<h2>天蚨基金规划(20260419v5)</h2>
 <p>请输入访问密码以继续</p>
 <input id="pwdInput" type="password" placeholder="请输入密码" onkeydown="if(event.key==='Enter')checkPassword()">
 <button id="pwdBtn" onclick="checkPassword()">进入系统</button>
@@ -1837,7 +1837,10 @@ function initAppAfterAuth() {
                 <input type="text" id="globalSearch" placeholder="搜索部门、岗位、权责..." class="pl-8 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-sm w-56 text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/40 transition">
             </div>
             <button onclick="toggleAnnotationMode()" id="annoBtn" class="px-4 py-2 bg-white hover:bg-slate-50 text-slate-700 rounded-full text-sm font-medium transition shadow-sm border border-slate-200 flex items-center gap-1.5">
-                <span class="text-amber-500 text-base leading-none">+</span>添加意见标注
+                <span class="text-amber-500 text-base leading-none">+</span>添加意见
+            </button>
+            <button onclick="openManageModal()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full text-sm font-medium transition shadow-sm flex items-center gap-1.5">
+                <i class="fas fa-cog text-xs"></i>管理页面
             </button>
             <button onclick="exportHtml()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-full text-sm font-medium transition shadow-sm flex items-center gap-1.5">
                 <i class="fas fa-download text-xs"></i>导出HTML
@@ -3114,6 +3117,31 @@ function initAppAfterAuth() {
                 <i class="fas fa-download"></i> 下载文档
             </a>
         </div>
+    </div>
+</div>
+
+<!-- Manage Modal -->
+<div id="manageModalOverlay" class="fixed inset-0 bg-black/50 z-50 hidden" onclick="closeManageModal()"></div>
+<div id="manageModalPanel" class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-2xl shadow-2xl w-[400px] max-w-[90vw] z-50 hidden">
+    <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+        <h3 class="font-bold text-slate-900">管理页面</h3>
+        <button onclick="closeManageModal()" class="w-8 h-8 rounded-lg hover:bg-slate-100 flex items-center justify-center text-slate-500">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    <div class="p-5 space-y-3">
+        <button onclick="editCurrentPage();closeManageModal()" class="w-full px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-sm font-medium transition flex items-center gap-3">
+            <i class="fas fa-edit text-slate-500"></i>编辑本页
+        </button>
+        <button onclick="downloadCurrentPage('word');closeManageModal()" class="w-full px-4 py-3 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-xl text-sm font-medium transition flex items-center gap-3">
+            <i class="fas fa-file-word text-blue-600"></i>下载Word
+        </button>
+        <button onclick="downloadCurrentPage('excel');closeManageModal()" class="w-full px-4 py-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-xl text-sm font-medium transition flex items-center gap-3">
+            <i class="fas fa-file-excel text-emerald-600"></i>下载Excel
+        </button>
+        <button onclick="exportHtml();closeManageModal()" class="w-full px-4 py-3 bg-purple-50 hover:bg-purple-100 text-purple-700 rounded-xl text-sm font-medium transition flex items-center gap-3">
+            <i class="fas fa-code text-purple-600"></i>导出HTML
+        </button>
     </div>
 </div>
 
@@ -8625,7 +8653,7 @@ function toggleAnnotationMode() {
         btn.classList.add('bg-slate-800', 'text-white');
         document.body.style.cursor = 'crosshair';
     } else {
-        btn.innerHTML = '<i class="fas fa-sticky-note mr-1.5"></i>添加意见标注';
+        btn.innerHTML = '<i class="fas fa-sticky-note mr-1.5"></i>添加意见';
         btn.classList.add('bg-amber-400', 'text-amber-950');
         btn.classList.remove('bg-slate-800', 'text-white');
         document.body.style.cursor = 'default';
@@ -10191,7 +10219,8 @@ function showRightPanel(type, lineName, subName, color) {
         html += `<div><span style="font-size:15px;font-weight:700;color:#1e293b;">${modName}</span>`;
         html += `<span style="font-size:13px;color:${color};margin-left:8px;font-weight:600;">${works.length}项</span></div>`;
         html += `<span style="color:${color};font-size:14px;font-weight:bold;">▼</span></div>`;
-        html += `<div id="pm-${modIdx}" style="display:none;padding:12px 16px;border-top:1.5px solid ${color}20;background:${color}04;">`;
+        // 第一个模块默认展开
+        html += `<div id="pm-${modIdx}" style="display:${modIdx === 0 ? 'block' : 'none'};padding:12px 16px;border-top:1.5px solid ${color}20;background:${color}04;">`;
         works.forEach(w => {
             html += `<div style="display:flex;gap:8px;padding:8px 0;font-size:14px;color:#475569;line-height:1.5;"><span style="width:5px;height:5px;background:${color};border-radius:50%;margin-top:5px;"></span><span>${w}</span></div>`;
         });
@@ -10316,6 +10345,96 @@ document.addEventListener('DOMContentLoaded', () => {
 // ==========================================
 // EXPORT HTML WITH CURRENT EDITS
 // ==========================================
+// ==========================================
+// 管理页面功能
+// ==========================================
+function openManageModal() {
+    document.getElementById('manageModalOverlay').classList.remove('hidden');
+    document.getElementById('manageModalPanel').classList.remove('hidden');
+}
+
+function closeManageModal() {
+    document.getElementById('manageModalOverlay').classList.add('hidden');
+    document.getElementById('manageModalPanel').classList.add('hidden');
+}
+
+function getCurrentTab() {
+    const activeBtn = document.querySelector('.tab-btn.active');
+    if (activeBtn && activeBtn.id) {
+        return activeBtn.id.replace('nav-', '');
+    }
+    return 'strategy';
+}
+
+function editCurrentPage() {
+    const currentTab = getCurrentTab();
+    switch(currentTab) {
+        case 'strategy': enableEditMode('strategy'); break;
+        case 'council': enableCouncilEdit(); break;
+        case 'authority': enableAuthorityEdit(); break;
+        case 'positions': alert('双击卡片可编辑岗位设计'); break;
+        case 'handbook': alert('文件上传和管理功能可用'); break;
+        default: alert('该页面暂不支持编辑');
+    }
+}
+
+function downloadCurrentPage(format) {
+    const currentTab = getCurrentTab();
+    if (format === 'excel' && currentTab === 'authority') {
+        downloadAuthorityExcel();
+    } else {
+        downloadPageWord(currentTab);
+    }
+}
+
+function downloadAuthorityExcel() {
+    let csvContent = '\uFEFF';
+    const headers = ['序号', '权责单位', '关键事项', '决策机构', '天蚨投资部', '天蚨风控部', '天蚨财务部', '天蚨综合部', '天蚨总办会', '天蚨总经理', '天蚨投决会', '天蚨董事长', '天蚨董事会', '天蚨股东会', '集团财务部', '集团合规部', '集团投资部', '集团风控总监', '集团财务总监', '集团分管领导', '集团总经理办公会', '集团总经理', '集团党委会', '集团董事长', '集团董事会', '市财政局', '备注'];
+    csvContent += headers.join(',') + '\n';
+    authorityData.forEach(row => {
+        const values = headers.map(h => {
+            let val = row[h] || '';
+            if (val.includes(',') || val.includes('\n')) {
+                val = '"' + val.replace(/"/g, '""') + '"';
+            }
+            return val;
+        });
+        csvContent += values.join(',') + '\n';
+    });
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = '权责清单.csv';
+    link.click();
+}
+
+function downloadPageWord(tabId) {
+    const tabContent = document.getElementById('tab-' + tabId);
+    const title = getTabTitle(tabId);
+    let content = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="UTF-8"><title>' + title + '</title></head><body>';
+    content += '<h1 style="text-align:center;font-size:24px;">' + title + '</h1>';
+    content += tabContent.innerHTML;
+    content += '</body></html>';
+    const blob = new Blob([content], { type: 'application/msword;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = title + '.doc';
+    link.click();
+}
+
+function getTabTitle(tabId) {
+    const titles = {
+        'strategy': '战略规划',
+        'org': '组织架构',
+        'council': '议事机构',
+        'business': '业务条线',
+        'authority': '权责清单',
+        'positions': '岗位设计',
+        'handbook': '制度设计'
+    };
+    return titles[tabId] || tabId;
+}
+
 async function exportHtml() {
     const keys = Object.keys(window.appData.drawers || {});
     if (!keys.length) {
