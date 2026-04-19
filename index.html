@@ -2,7 +2,7 @@
 <html lang="zh-CN"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>天蚨基金发展规划(20260419v7)</title>
+    <title>天蚨基金发展规划(20260419v1.02)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -1727,7 +1727,7 @@ function initAppAfterAuth() {
 <body class="text-slate-900">
 <div id="pwdOverlay">
 <div id="pwdBox">
-<h2>天蚨基金规划(20260419v7)</h2>
+<h2>天蚨基金规划(20260419v1.02)</h2>
 <p>请输入访问密码以继续</p>
 <input id="pwdInput" type="password" placeholder="请输入密码" onkeydown="if(event.key==='Enter')checkPassword()">
 <button id="pwdBtn" onclick="checkPassword()">进入系统</button>
@@ -2196,10 +2196,9 @@ function initAppAfterAuth() {
         <!-- COUNCIL TAB -->
         <section id="tab-council" class="tab-content hidden p-8 overflow-auto h-[calc(100vh-64px)]">
             <div class="max-w-6xl mx-auto space-y-8">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="text-center mb-4">
-                        <h2 style="font-family:Geist,'Noto Sans SC',sans-serif;font-size:22px;font-weight:700;color:#1e293b;">议事机构</h2>
-                    </div>
+                <div class="text-center mb-6">
+                    <h2 style="font-family:Geist,'Noto Sans SC',sans-serif;font-size:22px;font-weight:700;color:#1e293b;">议事机构</h2>
+                </div>
 
                 <!-- 决策层级流程图 -->
                 <div class="rounded-3xl p-6 bg-gradient-to-r from-slate-50 to-blue-50 border border-slate-200 shadow-sm">
@@ -9882,6 +9881,17 @@ function initNeuralCanvas() {
     if (!neuralCanvas) return;
     neuralCtx = neuralCanvas.getContext('2d');
     window.addEventListener('resize', resizeNeuralCanvas);
+
+    // 点击空白区域返回原始状态
+    neuralCanvas.addEventListener('click', function(e) {
+        if (activeNeuron !== null) {
+            const clickedNode = e.target.closest('.neuron-node, .category-node');
+            if (!clickedNode) {
+                resetNeuralNetwork();
+            }
+        }
+    });
+
     // Retry until container has valid dimensions
     requestAnimationFrame(() => {
         resizeNeuralCanvas();
@@ -10302,15 +10312,14 @@ function resetNeuralNetwork() {
         node.classList.remove('active', 'inactive');
     });
 
-    document.getElementById('nnResetBtn').classList.remove('show');
     closeTaskPopup();
     closeRightPanel();
 
-    // Hide category nodes
+    // Hide and remove category nodes
     const cats = document.querySelectorAll('.category-node');
     cats.forEach(cat => {
         cat.classList.remove('visible');
-        setTimeout(() => cat.remove(), 400);
+        cat.remove();
     });
 }
 
