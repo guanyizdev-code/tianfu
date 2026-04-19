@@ -1243,6 +1243,7 @@ function checkPassword() {
 function initAppAfterAuth() {
     // Show strategy tab immediately so user sees content right away
     switchTab('strategy');
+    initGlobalSearch();
     fetchAppData().then(() => {
         renderOrgChart();
         drawConnections();
@@ -2192,66 +2193,268 @@ function initAppAfterAuth() {
         
         <!-- COUNCIL TAB -->
         <section id="tab-council" class="tab-content hidden p-8 overflow-auto h-[calc(100vh-64px)]">
-            <div class="max-w-5xl mx-auto space-y-8">
-                <div class="text-center mb-10">
+            <div class="max-w-6xl mx-auto space-y-8">
+                <div class="text-center mb-8">
                     <h2 style="font-family:Geist,'Noto Sans SC',sans-serif;font-size:22px;font-weight:700;color:#1e293b;">议事机构</h2>
+                    <p style="font-family:Geist,'Noto Sans SC',sans-serif;font-size:14px;color:#64748b;margin-top:8px;">公司治理体系的核心决策与监督机制</p>
                 </div>
 
-                <!-- Flow Diagram -->
-                <div class="rounded-3xl p-8 bg-white border border-slate-200 shadow-sm">
-                    <div class="flex flex-wrap items-center justify-center gap-4">
-                        <div class="rounded-2xl p-5 shadow-sm border-t-4 border-red-500 min-w-[160px] text-center bg-white">
-                            <div class="text-red-600 font-bold text-lg">党委会</div>
+                <!-- 决策层级流程图 -->
+                <div class="rounded-3xl p-6 bg-gradient-to-r from-slate-50 to-blue-50 border border-slate-200 shadow-sm">
+                    <div class="text-center mb-4 text-sm text-slate-500 font-medium">决策审批流程</div>
+                    <div class="flex flex-wrap items-center justify-center gap-3">
+                        <div class="rounded-xl p-4 shadow-md border-t-4 border-red-500 min-w-[140px] text-center bg-white transform hover:scale-105 transition">
+                            <div class="text-red-600 font-bold text-base">党委会</div>
                             <div class="text-xs text-slate-500 mt-1">前置研究</div>
-                            <div class="text-[10px] text-slate-400 mt-2">"把方向、管大局、保落实"</div>
                         </div>
-                        <div class="flex flex-col items-center text-slate-600">
-                            <i class="fas fa-arrow-right"></i>
-                            <span class="text-[10px] mt-1">重大事项审批</span>
-                        </div>
-                        <div class="rounded-2xl p-5 shadow-sm border-t-4 border-emerald-500 min-w-[160px] text-center bg-white">
-                            <div class="text-emerald-600 font-bold text-lg">总办会</div>
+                        <i class="fas fa-chevron-right text-slate-400"></i>
+                        <div class="rounded-xl p-4 shadow-md border-t-4 border-emerald-500 min-w-[140px] text-center bg-white transform hover:scale-105 transition">
+                            <div class="text-emerald-600 font-bold text-base">总办会</div>
                             <div class="text-xs text-slate-500 mt-1">经营落实</div>
-                            <div class="text-[10px] text-slate-400 mt-2">"谋经营、抓落实、强管理"</div>
                         </div>
-                        <div class="flex flex-col items-center text-slate-600">
-                            <i class="fas fa-arrow-right"></i>
-                            <span class="text-[10px] mt-1">战略决策</span>
-                        </div>
-                        <div class="rounded-2xl p-5 shadow-sm border-t-4 border-violet-500 min-w-[160px] text-center bg-white">
-                            <div class="text-violet-600 font-bold text-lg">董事会</div>
+                        <i class="fas fa-chevron-right text-slate-400"></i>
+                        <div class="rounded-xl p-4 shadow-md border-t-4 border-violet-500 min-w-[140px] text-center bg-white transform hover:scale-105 transition">
+                            <div class="text-violet-600 font-bold text-base">董事会</div>
                             <div class="text-xs text-slate-500 mt-1">战略决策</div>
-                            <div class="text-[10px] text-slate-400 mt-2">"定战略、作决策、防风险"</div>
                         </div>
-                        <div class="flex flex-col items-center text-slate-600">
-                            <i class="fas fa-arrow-right"></i>
-                            <span class="text-[10px] mt-1">最高权力</span>
-                        </div>
-                        <div class="rounded-2xl p-5 shadow-sm border-t-4 border-blue-500 min-w-[160px] text-center bg-white">
-                            <div class="text-blue-600 font-bold text-lg">股东会</div>
-                            <div class="text-xs text-slate-500 mt-1">最高权力机构</div>
-                            <div class="text-[10px] text-slate-400 mt-2">决定公司经营方针与投资计划</div>
+                        <i class="fas fa-chevron-right text-slate-400"></i>
+                        <div class="rounded-xl p-4 shadow-md border-t-4 border-blue-500 min-w-[140px] text-center bg-white transform hover:scale-105 transition">
+                            <div class="text-blue-600 font-bold text-base">股东会</div>
+                            <div class="text-xs text-slate-500 mt-1">最高权力</div>
                         </div>
                     </div>
                 </div>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100">
-                        <h3 class="font-bold text-slate-900 mb-4 flex items-center gap-2"><i class="fas fa-search-dollar text-amber-500"></i> 投资决策委员会</h3>
-                        <ul class="text-sm text-slate-600 space-y-2 list-disc list-inside">
-                            <li>审议股权直投项目的投资决策</li>
-                            <li>审议基金设立、增资、减资、清算方案</li>
-                            <li>审议基金投资项目的投资与退出</li>
-                            <li>审议基金合伙协议修订等重大事项</li>
-                        </ul>
-                    </div>
-                    <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100">
-                        <h3 class="font-bold text-slate-900 mb-4 flex items-center gap-2"><i class="fas fa-users text-blue-500"></i> 机构职责概览</h3>
+
+                <!-- 各机构详情卡片 -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+                    <!-- 股东会 -->
+                    <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 hover:shadow-md transition">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
+                                <i class="fas fa-building text-blue-600"></i>
+                            </div>
+                            <div>
+                                <div class="font-bold text-slate-900">股东会</div>
+                                <div class="text-xs text-slate-500">最高权力机构</div>
+                            </div>
+                        </div>
                         <div class="space-y-3 text-sm">
-                            <div class="flex gap-3"><span class="badge bg-amber-100 text-amber-700">权力</span><span class="text-slate-600">股东会：决定经营方针、投资计划、财务预算决算等重大事项</span></div>
-                            <div class="flex gap-3"><span class="badge bg-violet-100 text-violet-700">决策</span><span class="text-slate-600">董事会：制定经营计划、基本管理制度、高管任免方案</span></div>
-                            <div class="flex gap-3"><span class="badge bg-red-100 text-red-700">政治</span><span class="text-slate-600">党委会：前置研究重大经营管理事项，监督政策执行</span></div>
-                            <div class="flex gap-3"><span class="badge bg-emerald-100 text-emerald-700">执行</span><span class="text-slate-600">总办会：日常经营管理决策，协调部门工作</span></div>
+                            <div class="bg-slate-50 rounded-lg p-3">
+                                <div class="font-medium text-slate-700 mb-2">主要职权</div>
+                                <ul class="text-slate-600 space-y-1 text-xs">
+                                    <li>• 决定经营方针与投资计划</li>
+                                    <li>• 选举更换非职工董事监事</li>
+                                    <li>• 审批财务预算决算方案</li>
+                                    <li>• 决定增减注册资本</li>
+                                    <li>• 审批合并分立解散清算</li>
+                                </ul>
+                            </div>
+                            <div class="flex items-center gap-2 text-xs">
+                                <span class="px-2 py-1 bg-blue-50 text-blue-600 rounded">年度会议</span>
+                                <span class="px-2 py-1 bg-slate-100 text-slate-600 rounded">临时会议</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 董事会 -->
+                    <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 hover:shadow-md transition">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-10 h-10 rounded-xl bg-violet-100 flex items-center justify-center">
+                                <i class="fas fa-users-cog text-violet-600"></i>
+                            </div>
+                            <div>
+                                <div class="font-bold text-slate-900">董事会</div>
+                                <div class="text-xs text-slate-500">战略决策机构</div>
+                            </div>
+                        </div>
+                        <div class="space-y-3 text-sm">
+                            <div class="bg-slate-50 rounded-lg p-3">
+                                <div class="font-medium text-slate-700 mb-2">主要职权</div>
+                                <ul class="text-slate-600 space-y-1 text-xs">
+                                    <li>• 执行股东会决议</li>
+                                    <li>• 制定经营计划与投资方案</li>
+                                    <li>• 制定基本管理制度</li>
+                                    <li>• 决定内部管理机构设置</li>
+                                    <li>• 任免聘任解聘经理层</li>
+                                </ul>
+                            </div>
+                            <div class="flex items-center gap-2 text-xs">
+                                <span class="px-2 py-1 bg-violet-50 text-violet-600 rounded">定期会议</span>
+                                <span class="px-2 py-1 bg-slate-100 text-slate-600 rounded">每季至少1次</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 总办会 -->
+                    <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 hover:shadow-md transition">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center">
+                                <i class="fas fa-briefcase text-emerald-600"></i>
+                            </div>
+                            <div>
+                                <div class="font-bold text-slate-900">总办会</div>
+                                <div class="text-xs text-slate-500">日常经营决策</div>
+                            </div>
+                        </div>
+                        <div class="space-y-3 text-sm">
+                            <div class="bg-slate-50 rounded-lg p-3">
+                                <div class="font-medium text-slate-700 mb-2">主要职责</div>
+                                <ul class="text-slate-600 space-y-1 text-xs">
+                                    <li>• 落实董事会决策部署</li>
+                                    <li>• 组织日常经营管理</li>
+                                    <li>• 审议各部门工作方案</li>
+                                    <li>• 协调跨部门重要事项</li>
+                                    <li>• 审批权限内投资事项</li>
+                                </ul>
+                            </div>
+                            <div class="flex items-center gap-2 text-xs">
+                                <span class="px-2 py-1 bg-emerald-50 text-emerald-600 rounded">每周例会</span>
+                                <span class="px-2 py-1 bg-slate-100 text-slate-600 rounded">总经理主持</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 党委会 -->
+                    <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 hover:shadow-md transition">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center">
+                                <i class="fas fa-flag text-red-600"></i>
+                            </div>
+                            <div>
+                                <div class="font-bold text-slate-900">党委会</div>
+                                <div class="text-xs text-slate-500">政治核心保障</div>
+                            </div>
+                        </div>
+                        <div class="space-y-3 text-sm">
+                            <div class="bg-slate-50 rounded-lg p-3">
+                                <div class="font-medium text-slate-700 mb-2">主要职责</div>
+                                <ul class="text-slate-600 space-y-1 text-xs">
+                                    <li>• 前置研究重大事项</li>
+                                    <li>• 把方向管大局保落实</li>
+                                    <li>• 监督政策法规执行</li>
+                                    <li>• 把好选人用人关</li>
+                                    <li>• 参与企业重大决策</li>
+                                </ul>
+                            </div>
+                            <div class="flex items-center gap-2 text-xs">
+                                <span class="px-2 py-1 bg-red-50 text-red-600 rounded">前置程序</span>
+                                <span class="px-2 py-1 bg-slate-100 text-slate-600 rounded">党委书记主持</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 投资决策委员会 -->
+                <div class="bg-gradient-to-r from-amber-50 to-orange-50 rounded-3xl p-6 shadow-sm border border-amber-200">
+                    <div class="flex items-center gap-4 mb-5">
+                        <div class="w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center">
+                            <i class="fas fa-search-dollar text-amber-600 text-lg"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-slate-900 text-lg">投资决策委员会</h3>
+                            <p class="text-sm text-slate-500">专业投资审议与风险把控机构</p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                        <div class="bg-white rounded-xl p-4">
+                            <div class="font-medium text-slate-700 mb-3 flex items-center gap-2">
+                                <i class="fas fa-clipboard-list text-amber-500"></i> 审议事项
+                            </div>
+                            <ul class="text-sm text-slate-600 space-y-2">
+                                <li>• 股权直投项目投资决策</li>
+                                <li>• 基金设立增资减资清算</li>
+                                <li>• 基金项目投资与退出</li>
+                                <li>• 合伙协议修订等重大事项</li>
+                            </ul>
+                        </div>
+                        <div class="bg-white rounded-xl p-4">
+                            <div class="font-medium text-slate-700 mb-3 flex items-center gap-2">
+                                <i class="fas fa-user-tie text-amber-500"></i> 人员构成
+                            </div>
+                            <ul class="text-sm text-slate-600 space-y-2">
+                                <li>• 公司主要领导担任主任</li>
+                                <li>• 投资风控部门负责人</li>
+                                <li>• 外部行业专家顾问</li>
+                                <li>• 法务财务相关人员</li>
+                            </ul>
+                        </div>
+                        <div class="bg-white rounded-xl p-4">
+                            <div class="font-medium text-slate-700 mb-3 flex items-center gap-2">
+                                <i class="fas fa-gavel text-amber-500"></i> 决策规则
+                            </div>
+                            <ul class="text-sm text-slate-600 space-y-2">
+                                <li>• 参会委员超过2/3有效</li>
+                                <li>• 决议需参会委员过半通过</li>
+                                <li>• 重大事项需2/3以上同意</li>
+                                <li>• 形成书面会议纪要存档</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 监事会 -->
+                <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100">
+                    <div class="flex items-center gap-4 mb-5">
+                        <div class="w-12 h-12 rounded-xl bg-teal-100 flex items-center justify-center">
+                            <i class="fas fa-eye text-teal-600 text-lg"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-slate-900 text-lg">监事会</h3>
+                            <p class="text-sm text-slate-500">公司监督机构，保障合规运营</p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div class="bg-slate-50 rounded-xl p-4">
+                            <div class="font-medium text-slate-700 mb-3">监督职责</div>
+                            <ul class="text-sm text-slate-600 space-y-2">
+                                <li>• 监督董事高级管理人员履职</li>
+                                <li>• 检查公司财务状况</li>
+                                <li>• 对违规行为提出纠正建议</li>
+                                <li>• 向股东会提出提案建议</li>
+                            </ul>
+                        </div>
+                        <div class="bg-slate-50 rounded-xl p-4">
+                            <div class="font-medium text-slate-700 mb-3">履职方式</div>
+                            <ul class="text-sm text-slate-600 space-y-2">
+                                <li>• 列席董事会会议</li>
+                                <li>• 定期开展监督检查</li>
+                                <li>• 发现问题及时报告</li>
+                                <li>• 年度向股东会报告工作</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 会议管理规范 -->
+                <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100">
+                    <h3 class="font-bold text-slate-900 mb-4 flex items-center gap-2">
+                        <i class="fas fa-calendar-check text-slate-500"></i> 会议管理规范
+                    </h3>
+                    <div class="grid grid-cols-2 md:grid-cols-5 gap-4 text-center">
+                        <div class="bg-blue-50 rounded-xl p-4">
+                            <div class="text-blue-600 font-bold text-lg">股东会</div>
+                            <div class="text-xs text-slate-600 mt-2">每年至少1次</div>
+                            <div class="text-xs text-slate-500">提前20日通知</div>
+                        </div>
+                        <div class="bg-violet-50 rounded-xl p-4">
+                            <div class="text-violet-600 font-bold text-lg">董事会</div>
+                            <div class="text-xs text-slate-600 mt-2">每季至少1次</div>
+                            <div class="text-xs text-slate-500">提前10日通知</div>
+                        </div>
+                        <div class="bg-emerald-50 rounded-xl p-4">
+                            <div class="text-emerald-600 font-bold text-lg">总办会</div>
+                            <div class="text-xs text-slate-600 mt-2">每周召开</div>
+                            <div class="text-xs text-slate-500">固定时间地点</div>
+                        </div>
+                        <div class="bg-red-50 rounded-xl p-4">
+                            <div class="text-red-600 font-bold text-lg">党委会</div>
+                            <div class="text-xs text-slate-600 mt-2">按需召开</div>
+                            <div class="text-xs text-slate-500">重大事项前置</div>
+                        </div>
+                        <div class="bg-amber-50 rounded-xl p-4">
+                            <div class="text-amber-600 font-bold text-lg">投委会</div>
+                            <div class="text-xs text-slate-600 mt-2">项目需要时</div>
+                            <div class="text-xs text-slate-500">及时召开审议</div>
                         </div>
                     </div>
                 </div>
@@ -10006,6 +10209,161 @@ function updateBizStats(data) {
     document.getElementById('statBack').textContent = back;
     const total = data.nodes.filter(n => n.group === 'content').length;
     document.getElementById('bizNodeCount').textContent = total + ' 项';
+}
+
+// ==========================================
+// GLOBAL SEARCH
+// ==========================================
+function initGlobalSearch() {
+    const searchInput = document.getElementById('globalSearch');
+    if (!searchInput) return;
+
+    // 创建搜索结果下拉框
+    const searchResults = document.createElement('div');
+    searchResults.id = 'searchResults';
+    searchResults.className = 'absolute top-full left-0 right-0 mt-1 bg-white rounded-xl shadow-lg border border-slate-200 max-h-80 overflow-auto z-50 hidden';
+    searchResults.style.width = '400px';
+    searchInput.parentElement.appendChild(searchResults);
+
+    searchInput.addEventListener('input', function(e) {
+        const query = e.target.value.trim().toLowerCase();
+        if (query.length < 1) {
+            searchResults.classList.add('hidden');
+            return;
+        }
+        const results = performSearch(query);
+        displaySearchResults(results, searchResults);
+    });
+
+    searchInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            searchResults.classList.add('hidden');
+            searchInput.value = '';
+        }
+    });
+
+    // 点击外部关闭
+    document.addEventListener('click', function(e) {
+        if (!searchInput.parentElement.contains(e.target)) {
+            searchResults.classList.add('hidden');
+        }
+    });
+}
+
+function performSearch(query) {
+    const results = [];
+
+    // 搜索组织架构节点
+    orgNodes.forEach(node => {
+        if (node.title.toLowerCase().includes(query) ||
+            (node.subtitle && node.subtitle.toLowerCase().includes(query))) {
+            results.push({
+                type: 'org',
+                title: node.title,
+                desc: node.subtitle || '',
+                icon: node.icon || 'fa-sitemap',
+                color: node.color || '#3b82f6',
+                action: () => { switchTab('org'); highlightNode(node.id); }
+            });
+        }
+    });
+
+    // 搜索权责清单
+    authItems.forEach(item => {
+        if (item.title.toLowerCase().includes(query) ||
+            (item.items && item.items.some(i => i.toLowerCase().includes(query)))) {
+            results.push({
+                type: 'auth',
+                title: item.title,
+                desc: item.items ? item.items.join(', ') : '',
+                icon: 'fa-tasks',
+                color: '#64748b',
+                action: () => { switchTab('authority'); }
+            });
+        }
+    });
+
+    // 搜索岗位职责
+    positions.forEach(pos => {
+        if (pos.title.toLowerCase().includes(query) ||
+            (pos.responsibilities && pos.responsibilities.some(r => r.toLowerCase().includes(query)))) {
+            results.push({
+                type: 'position',
+                title: pos.title,
+                desc: pos.responsibilities ? pos.responsibilities.slice(0, 3).join(', ') : '',
+                icon: 'fa-user-tie',
+                color: '#8b5cf6',
+                action: () => { switchTab('positions'); highlightPosition(pos.id); }
+            });
+        }
+    });
+
+    // 搜索公司制度
+    handbookFiles.forEach(file => {
+        if (file.name.toLowerCase().includes(query)) {
+            results.push({
+                type: 'handbook',
+                title: file.name,
+                desc: hbCatNames[file.cat] || '',
+                icon: file.ext === 'pdf' ? 'fa-file-pdf' : 'fa-file-word',
+                color: file.ext === 'pdf' ? '#dc2626' : '#2563eb',
+                action: () => { switchTab('handbook'); openHbModal(file.id); }
+            });
+        }
+    });
+
+    return results.slice(0, 20);
+}
+
+function displaySearchResults(results, container) {
+    if (results.length === 0) {
+        container.innerHTML = '<div class="p-4 text-center text-slate-500 text-sm">未找到相关结果</div>';
+        container.classList.remove('hidden');
+        return;
+    }
+
+    const typeLabels = {
+        org: '组织架构',
+        auth: '权责清单',
+        position: '岗位职责',
+        handbook: '公司制度'
+    };
+
+    container.innerHTML = results.map(r => `
+        <div class="search-result-item p-3 hover:bg-slate-50 cursor-pointer border-b border-slate-100 last:border-0 flex items-center gap-3" onclick="(${r.action.toString()})(); document.getElementById('searchResults').classList.add('hidden'); document.getElementById('globalSearch').value = '';">
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background: ${r.color}15; color: ${r.color};">
+                <i class="fas ${r.icon} text-sm"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+                <div class="font-medium text-slate-900 text-sm truncate">${r.title}</div>
+                <div class="text-xs text-slate-500 truncate">${r.desc}</div>
+            </div>
+            <div class="text-xs text-slate-400 bg-slate-100 px-2 py-1 rounded">${typeLabels[r.type]}</div>
+        </div>
+    `).join('');
+    container.classList.remove('hidden');
+}
+
+function highlightNode(nodeId) {
+    setTimeout(() => {
+        const node = document.querySelector(`.org-node[data-id="${nodeId}"]`);
+        if (node) {
+            node.style.transition = 'all 0.3s';
+            node.style.boxShadow = '0 0 0 3px #3b82f6, 0 10px 40px rgba(59,130,246,0.3)';
+            setTimeout(() => { node.style.boxShadow = ''; }, 2000);
+        }
+    }, 300);
+}
+
+function highlightPosition(posId) {
+    setTimeout(() => {
+        const card = document.querySelector(`[data-position-id="${posId}"]`);
+        if (card) {
+            card.style.transition = 'all 0.3s';
+            card.style.boxShadow = '0 0 0 3px #8b5cf6, 0 10px 40px rgba(139,92,246,0.3)';
+            setTimeout(() => { card.style.boxShadow = ''; }, 2000);
+        }
+    }, 300);
 }
 
 // ==========================================
