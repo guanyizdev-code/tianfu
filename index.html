@@ -2,7 +2,7 @@
 <html lang="zh-CN"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>天蚨基金发展规划(20260419v1.03)</title>
+    <title>天蚨基金发展规划(20260419v1.04)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -1727,7 +1727,7 @@ function initAppAfterAuth() {
 <body class="text-slate-900">
 <div id="pwdOverlay">
 <div id="pwdBox">
-<h2>天蚨基金规划(20260419v1.03)</h2>
+<h2>天蚨基金规划(20260419v1.04)</h2>
 <p>请输入访问密码以继续</p>
 <input id="pwdInput" type="password" placeholder="请输入密码" onkeydown="if(event.key==='Enter')checkPassword()">
 <button id="pwdBtn" onclick="checkPassword()">进入系统</button>
@@ -9280,17 +9280,6 @@ function saveCouncilEditContent() {
     // 同步数据
     syncAppData('councilEditData', councilEditData);
 }
-            }
-        }
-
-        // 移除编辑样式
-        const style = document.getElementById('councilEditStyle');
-        if (style) style.remove();
-
-        // 同步数据
-        syncAppData('councilEditData', councilEditData);
-    }
-}
 
 function filterAuthority(dept) {
     document.querySelectorAll('.auth-filter').forEach(btn => {
@@ -10872,4 +10861,5 @@ function highlightPosition(posId) {
 
 </script>
 
-</body><div id="immersive-translate-popup" style="all: initial"></div></html>
+</body>
+</html>
