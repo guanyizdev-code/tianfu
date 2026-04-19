@@ -1860,63 +1860,65 @@ function initAppAfterAuth() {
     <main class="flex-1 pt-16 relative">
 
         <!-- STRATEGY TAB -->
-        <section id="tab-strategy" class="tab-content hidden p-8 overflow-auto h-[calc(100vh-64px)]">
-            <div class="max-w-4xl mx-auto space-y-8">
-                <div class="text-center mb-10">
-                    <h2 class="text-2xl font-bold text-slate-900">战略规划</h2>
-                    <p class="text-slate-500 mt-2">以长期主义价值发现与培育，实现国有资产保值增值与地方产业发展的共赢</p>
+        <section id=”tab-strategy” class=”tab-content hidden p-8 overflow-auto h-[calc(100vh-64px)]”>
+            <div class=”max-w-4xl mx-auto space-y-8”>
+                <div class=”text-center mb-10 flex items-center justify-center gap-4”>
+                    <h2 class=”text-2xl font-bold text-slate-900” data-editable=”strategy-title”>战略规划</h2>
+                    <button onclick=”enableEditMode('strategy')” class=”px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-medium rounded-lg transition flex items-center gap-1”>
+                        <i class=”fas fa-edit”></i> 编辑
+                    </button>
                 </div>
 
-                <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-100">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center"><i class="fas fa-crosshairs"></i></div>
-                        <h3 class="text-lg font-bold text-slate-900">公司定位：金控集团自有资金投资平台</h3>
+                <div class=”bg-white rounded-3xl p-5 shadow-sm border border-slate-100”>
+                    <div class=”flex items-center gap-3”>
+                        <div class=”w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center”><i class=”fas fa-crosshairs”></i></div>
+                        <h3 class=”text-lg font-bold text-slate-900” data-editable=”strategy-position”>公司定位：金控集团自有资金投资平台</h3>
                     </div>
                 </div>
 
-                <div class="bg-white rounded-3xl p-8 shadow-sm border border-slate-100">
-                    <div class="flex items-center gap-3 mb-6">
-                        <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center"><i class="fas fa-th-large"></i></div>
-                        <h3 class="text-lg font-bold text-slate-900">业务版图：2 主 2 辅投资矩阵</h3>
+                <div class=”bg-white rounded-3xl p-8 shadow-sm border border-slate-100”>
+                    <div class=”flex items-center gap-3 mb-6”>
+                        <div class=”w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center”><i class=”fas fa-th-large”></i></div>
+                        <h3 class=”text-lg font-bold text-slate-900” data-editable=”strategy-business-title”>业务版图：2 主 2 辅投资矩阵</h3>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                        <div class="rounded-2xl p-5 bg-gradient-to-br from-blue-50 to-white border border-blue-100">
-                            <div class="text-blue-700 font-bold mb-2">核心主业 · 集团战略新兴产业</div>
-                            <p class="text-sm text-slate-600 leading-relaxed">紧扣金控集团顶层设计，重点围绕符合集团战略发展布局的支柱产业，发挥“战略哨兵”作用。</p>
+                    <div class=”grid grid-cols-1 md:grid-cols-2 gap-5”>
+                        <div class=”rounded-2xl p-5 bg-gradient-to-br from-blue-50 to-white border border-blue-100”>
+                            <div class=”text-blue-700 font-bold mb-2” data-editable=”strategy-core1-title”>核心主业 · 集团战略新兴产业</div>
+                            <p class=”text-sm text-slate-600 leading-relaxed” data-editable=”strategy-core1-desc”>紧扣金控集团顶层设计，重点围绕符合集团战略发展布局的支柱产业，发挥”战略哨兵”作用。</p>
                         </div>
-                        <div class="rounded-2xl p-5 bg-gradient-to-br from-indigo-50 to-white border border-indigo-100">
-                            <div class="text-indigo-700 font-bold mb-2">核心主业 · 光电信息领航产业</div>
-                            <p class="text-sm text-slate-600 leading-relaxed">依托长春“光谷”底蕴，深耕精密仪器、半导体设备、激光应用等细分赛道，打造具有全国竞争力的硬科技投资名片。</p>
+                        <div class=”rounded-2xl p-5 bg-gradient-to-br from-indigo-50 to-white border border-indigo-100”>
+                            <div class=”text-indigo-700 font-bold mb-2” data-editable=”strategy-core2-title”>核心主业 · 光电信息领航产业</div>
+                            <p class=”text-sm text-slate-600 leading-relaxed” data-editable=”strategy-core2-desc”>依托长春”光谷”底蕴，深耕精密仪器、半导体设备、激光应用等细分赛道，打造具有全国竞争力的硬科技投资名片。</p>
                         </div>
-                        <div class="rounded-2xl p-5 bg-gradient-to-br from-amber-50 to-white border border-amber-100">
-                            <div class="text-amber-700 font-bold mb-2">辅助支撑 · 存量资本精细化运营（PPP在管）</div>
-                            <p class="text-sm text-slate-600 leading-relaxed">从“粗放管理”向“价值挖掘”转型，重点做好投后风险控制与现金流管理，确保底层资产安全。</p>
+                        <div class=”rounded-2xl p-5 bg-gradient-to-br from-amber-50 to-white border border-amber-100”>
+                            <div class=”text-amber-700 font-bold mb-2” data-editable=”strategy-support1-title”>辅助支撑 · 存量资本精细化运营（PPP在管）</div>
+                            <p class=”text-sm text-slate-600 leading-relaxed” data-editable=”strategy-support1-desc”>从”粗放管理”向”价值挖掘”转型，重点做好投后风险控制与现金流管理，确保底层资产安全。</p>
                         </div>
-                        <div class="rounded-2xl p-5 bg-gradient-to-br from-rose-50 to-white border border-rose-100">
-                            <div class="text-rose-700 font-bold mb-2">辅助支撑 · 不动产私募股权基金（REITs预研）</div>
-                            <p class="text-sm text-slate-600 leading-relaxed">聚焦工业厂房、产业园等生产性不动产，为未来通过公募 REITs 退出探索路径，扩大 AUM。</p>
+                        <div class=”rounded-2xl p-5 bg-gradient-to-br from-rose-50 to-white border border-rose-100”>
+                            <div class=”text-rose-700 font-bold mb-2” data-editable=”strategy-support2-title”>辅助支撑 · 不动产私募股权基金（REITs预研）</div>
+                            <p class=”text-sm text-slate-600 leading-relaxed” data-editable=”strategy-support2-desc”>聚焦工业厂房、产业园等生产性不动产，为未来通过公募 REITs 退出探索路径，扩大 AUM。</p>
                         </div>
                     </div>
                 </div>
 
-                <div class="bg-white rounded-3xl p-8 shadow-sm border border-slate-100">
-                    <div class="flex items-center gap-3 mb-4">
-                        <div class="w-10 h-10 rounded-xl bg-violet-50 text-violet-600 flex items-center justify-center"><i class="fas fa-gem"></i></div>
-                        <h3 class="text-lg font-bold text-slate-900">公司价值观</h3>
+                <div class=”bg-white rounded-3xl p-8 shadow-sm border border-slate-100”>
+                    <div class=”flex items-center gap-3 mb-4”>
+                        <div class=”w-10 h-10 rounded-xl bg-violet-50 text-violet-600 flex items-center justify-center”><i class=”fas fa-gem”></i></div>
+                        <h3 class=”text-lg font-bold text-slate-900” data-editable=”strategy-values-title”>公司价值观</h3>
                     </div>
-                    <p class="text-slate-700 leading-relaxed">坚持“耐心资本”立场，通过长期主义的价值发现与培育，实现国有资产保值增值与地方产业发展的共赢。</p>
+                    <p class=”text-slate-700 leading-relaxed” data-editable=”strategy-values-desc”>坚持”耐心资本”立场，通过长期主义的价值发现与培育，实现国有资产保值增值与地方产业发展的共赢。</p>
                 </div>
 
-                <div class="bg-white rounded-3xl p-8 shadow-sm border border-slate-100">
-                    <div class="flex items-center gap-3 mb-4">
-                        <div class="w-10 h-10 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center"><i class="fas fa-balance-scale"></i></div>
-                        <h3 class="text-lg font-bold text-slate-900">“弃短取长”决策机制</h3>
+                <div class=”bg-white rounded-3xl p-8 shadow-sm border border-slate-100”>
+                    <div class=”flex items-center gap-3 mb-4”>
+                        <div class=”w-10 h-10 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center”><i class=”fas fa-balance-scale”></i></div>
+                        <h3 class=”text-lg font-bold text-slate-900” data-editable=”strategy-mechanism-title”>”弃短取长”决策机制</h3>
                     </div>
-                    <p class="text-slate-700 leading-relaxed">在投资委（IC）评价体系中，将“产业协同度”和“长期技术壁垒”权重提升，降低对短期回购或 Pre-IPO 套利的依赖。</p>
+                    <p class=”text-slate-700 leading-relaxed” data-editable=”strategy-mechanism-desc”>在投资委（IC）评价体系中，将”产业协同度”和”长期技术壁垒”权重提升，降低对短期回购或 Pre-IPO 套利的依赖。</p>
                 </div>
 
-                <div class="rounded-2xl p-6 bg-gradient-to-r from-slate-900 to-slate-800 text-white text-center">
-                    <p class="text-sm opacity-90">以上战略规划为天蚨基金开展微观运营及制度设计提供根本遵循。</p>
+                <div class=”rounded-2xl p-6 bg-gradient-to-r from-slate-900 to-slate-800 text-white text-center”>
+                    <p class=”text-sm opacity-90” data-editable=”strategy-footer”>以上战略规划为天蚨基金开展微观运营及制度设计提供根本遵循。</p>
                 </div>
             </div>
         </section>
@@ -2194,10 +2196,13 @@ function initAppAfterAuth() {
         <!-- COUNCIL TAB -->
         <section id="tab-council" class="tab-content hidden p-8 overflow-auto h-[calc(100vh-64px)]">
             <div class="max-w-6xl mx-auto space-y-8">
-                <div class="text-center mb-8">
-                    <h2 style="font-family:Geist,'Noto Sans SC',sans-serif;font-size:22px;font-weight:700;color:#1e293b;">议事机构</h2>
-                    <p style="font-family:Geist,'Noto Sans SC',sans-serif;font-size:14px;color:#64748b;margin-top:8px;">公司治理体系的核心决策与监督机制</p>
+                <div class="text-center mb-8 flex items-center justify-center gap-4">
+                    <h2 style="font-family:Geist,'Noto Sans SC',sans-serif;font-size:22px;font-weight:700;color:#1e293b;" data-editable="council-title">议事机构</h2>
+                    <button onclick="enableEditMode('council')" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-medium rounded-lg transition flex items-center gap-1">
+                        <i class="fas fa-edit"></i> 编辑
+                    </button>
                 </div>
+                <p style="font-family:Geist,'Noto Sans SC',sans-serif;font-size:14px;color:#64748b;margin-top:8px;text-align:center;" data-editable="council-subtitle">公司治理体系的核心决策与监督机制</p>
 
                 <!-- 决策层级流程图 -->
                 <div class="rounded-3xl p-6 bg-gradient-to-r from-slate-50 to-blue-50 border border-slate-200 shadow-sm">
@@ -2781,8 +2786,7 @@ function initAppAfterAuth() {
                 <div class="flex items-center justify-between mb-6">
                     <div>
                         <h2 style="font-family:Geist,'Noto Sans SC',sans-serif;font-size:22px;font-weight:700;color:#1e293b;">公司制度</h2>
-                        <p style="font-family:Geist,'Noto Sans SC',sans-serif;font-size:17px;color:#475569;font-weight:500;margin-top:4px;">制度文件分类浏览、在线预览与下载、上传管理</p>
-                    </div>
+                </div>
                     <div class="flex items-center gap-3">
                         <input type="file" id="uploadFileInput" accept=".pdf,.doc,.docx,.xls,.xlsx" style="display:none;" onchange="handleFileUpload(event)">
                         <button onclick="document.getElementById('uploadFileInput').click()" class="px-5 py-2.5 bg-blue-600 text-white rounded-xl font-medium text-sm hover:bg-blue-700 transition flex items-center gap-2 shadow-sm">
@@ -3109,6 +3113,13 @@ function initAppAfterAuth() {
             </div>
         </div>
         <div class="flex items-center gap-2 flex-shrink-0 ml-3">
+            <input type="file" id="replaceFileInput" accept=".pdf,.doc,.docx,.xls,.xlsx" style="display:none;" onchange="handleReplaceFile(event)">
+            <button onclick="triggerReplaceFile()" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium rounded-lg transition flex items-center gap-1.5">
+                <i class="fas fa-sync-alt"></i> 替换
+            </button>
+            <button onclick="deleteHandbookFile()" class="px-3 py-2 bg-red-500 hover:bg-red-600 text-white text-xs font-medium rounded-lg transition flex items-center gap-1.5">
+                <i class="fas fa-trash"></i> 删除
+            </button>
             <a id="hbModalDownload" href="#" class="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-lg transition flex items-center gap-1.5" download="">
                 <i class="fas fa-download"></i> 下载
             </a>
@@ -3129,6 +3140,56 @@ function initAppAfterAuth() {
                 <i class="fas fa-download"></i> 下载文档
             </a>
         </div>
+    </div>
+</div>
+
+<!-- Edit Modal -->
+<div id="editModalOverlay" class="fixed inset-0 bg-black/50 z-50 hidden" onclick="closeEditModal()"></div>
+<div id="editModalPanel" class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-2xl shadow-2xl w-[600px] max-w-[90vw] z-50 hidden">
+    <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+        <h3 class="font-bold text-slate-900">编辑内容</h3>
+        <button onclick="closeEditModal()" class="w-8 h-8 rounded-lg hover:bg-slate-100 flex items-center justify-center text-slate-500">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    <div class="p-5">
+        <div class="mb-4">
+            <label class="text-sm text-slate-600 mb-2 block">内容文本</label>
+            <textarea id="editTextarea" class="w-full h-32 px-3 py-2 border border-slate-200 rounded-lg text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500/40" placeholder="输入内容..."></textarea>
+        </div>
+        <div class="mb-4">
+            <label class="text-sm text-slate-600 mb-2 block">字体大小</label>
+            <select id="editFontSize" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm">
+                <option value="12">12px</option>
+                <option value="14">14px</option>
+                <option value="16">16px</option>
+                <option value="18" selected>18px</option>
+                <option value="20">20px</option>
+                <option value="22">22px</option>
+                <option value="24">24px</option>
+            </select>
+        </div>
+        <div class="mb-4">
+            <label class="text-sm text-slate-600 mb-2 block">字体粗细</label>
+            <select id="editFontWeight" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm">
+                <option value="400">常规</option>
+                <option value="500">中等</option>
+                <option value="600">半粗</option>
+                <option value="700" selected>粗体</option>
+                <option value="800">特粗</option>
+            </select>
+        </div>
+        <div class="mb-4">
+            <label class="text-sm text-slate-600 mb-2 block">文字颜色</label>
+            <div class="flex gap-2">
+                <input type="color" id="editFontColor" value="#1e293b" class="w-10 h-10 rounded-lg border border-slate-200 cursor-pointer">
+                <input type="text" id="editFontColorText" value="#1e293b" class="flex-1 px-3 py-2 border border-slate-200 rounded-lg text-sm" placeholder="#1e293b">
+            </div>
+        </div>
+    </div>
+    <div class="p-5 border-t border-slate-100 flex gap-3 justify-end">
+        <button onclick="closeEditModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg text-sm font-medium">取消</button>
+        <button onclick="saveEditContent()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium">保存</button>
     </div>
 </div>
 
@@ -8854,6 +8915,7 @@ function filterHandbook(cat) {
 }
 
 function openHbModal(id) {
+    currentHbFileId = id;
     const f = handbookFiles.find(x => x.id === id);
     if (!f) return;
     const path = HANDBOOK_BASE + encodeURIComponent(f.file);
@@ -8885,10 +8947,173 @@ function openHbModal(id) {
     document.getElementById('hbModalPanel').classList.add('open');
 }
 
+let currentHbFileId = null;
+
+function triggerReplaceFile() {
+    document.getElementById('replaceFileInput').click();
+}
+
+function handleReplaceFile(event) {
+    const file = event.target.files[0];
+    if (!file || !currentHbFileId) return;
+
+    const oldFile = handbookFiles.find(x => x.id === currentHbFileId);
+    if (!oldFile) return;
+
+    const ext = file.name.split('.').pop().toLowerCase();
+    if (!['pdf', 'doc', 'docx', 'xls', 'xlsx'].includes(ext)) {
+        alert('仅支持 PDF、Word、Excel 文件格式');
+        return;
+    }
+
+    // 更新文件信息
+    oldFile.file = file.name;
+    oldFile.ext = ext;
+
+    // 提示用户需要手动将新文件放入 docs 目录
+    alert(`文件已更新为：${file.name}\n请确保将新文件放入 docs 目录中，并重新部署。\n文件将在导出 HTML 后生效。`);
+
+    closeHbModal();
+    filterHandbook(document.querySelector('.hb-filter.bg-blue-600')?.dataset.cat || 'all');
+}
+
+function deleteHandbookFile() {
+    if (!currentHbFileId) return;
+
+    const f = handbookFiles.find(x => x.id === currentHbFileId);
+    if (!f) return;
+
+    if (!confirm(`确定要删除"${f.name}"吗？\n删除后请同步删除 docs 目录中的对应文件。`)) return;
+
+    // 从数组中移除
+    const index = handbookFiles.findIndex(x => x.id === currentHbFileId);
+    if (index > -1) {
+        handbookFiles.splice(index, 1);
+    }
+
+    closeHbModal();
+    filterHandbook(document.querySelector('.hb-filter.bg-blue-600')?.dataset.cat || 'all');
+}
+
 function closeHbModal() {
     document.getElementById('hbModalOverlay').classList.remove('open');
     document.getElementById('hbModalPanel').classList.remove('open');
     document.getElementById('hbPdfFrame').src = '';
+}
+
+// ==========================================
+// EDIT MODE
+// ==========================================
+let currentEditTarget = null;
+
+function enableEditMode(section) {
+    // 让所有带有 data-editable 属性的元素可点击编辑
+    const sectionEl = document.getElementById('tab-' + section);
+    if (!sectionEl) return;
+
+    const editables = sectionEl.querySelectorAll('[data-editable]');
+    editables.forEach(el => {
+        el.style.cursor = 'pointer';
+        el.style.transition = 'all 0.2s';
+        el.classList.add('edit-highlight');
+        el.onclick = function(e) {
+            e.stopPropagation();
+            openEditModal(this.dataset.editable, this);
+        };
+    });
+
+    // 高亮显示可编辑元素
+    const style = document.createElement('style');
+    style.id = 'editModeStyle';
+    style.textContent = '.edit-highlight:hover { outline: 2px dashed #3b82f6; outline-offset: 2px; background-color: rgba(59,130,246,0.05); }';
+    document.head.appendChild(style);
+
+    // 显示提示
+    const tip = document.createElement('div');
+    tip.id = 'editModeTip';
+    tip.className = 'fixed top-20 right-4 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm shadow-lg z-40 flex items-center gap-3';
+    tip.innerHTML = '<span>点击蓝色框内的文字进行编辑</span><button onclick="disableEditMode()" class="px-2 py-1 bg-white/20 rounded hover:bg-white/30 text-xs">完成编辑</button>';
+    document.body.appendChild(tip);
+}
+
+function disableEditMode() {
+    // 移除编辑模式样式
+    const style = document.getElementById('editModeStyle');
+    if (style) style.remove();
+
+    const tip = document.getElementById('editModeTip');
+    if (tip) tip.remove();
+
+    // 移除所有编辑高亮
+    document.querySelectorAll('.edit-highlight').forEach(el => {
+        el.style.cursor = '';
+        el.classList.remove('edit-highlight');
+        el.onclick = null;
+    });
+}
+
+function openEditModal(key, element) {
+    currentEditTarget = { key, element };
+
+    const text = element.textContent || element.innerText || '';
+    document.getElementById('editTextarea').value = text;
+
+    // 获取当前样式
+    const computedStyle = window.getComputedStyle(element);
+    const fontSize = parseInt(computedStyle.fontSize) || 18;
+    const fontWeight = computedStyle.fontWeight || '700';
+    const color = computedStyle.color || '#1e293b';
+
+    document.getElementById('editFontSize').value = fontSize;
+    document.getElementById('editFontWeight').value = fontWeight;
+    document.getElementById('editFontColor').value = rgbToHex(color);
+    document.getElementById('editFontColorText').value = rgbToHex(color);
+
+    // 颜色输入同步
+    document.getElementById('editFontColor').oninput = function() {
+        document.getElementById('editFontColorText').value = this.value;
+    };
+    document.getElementById('editFontColorText').oninput = function() {
+        if (/^#[0-9A-Fa-f]{6}$/.test(this.value)) {
+            document.getElementById('editFontColor').value = this.value;
+        }
+    };
+
+    document.getElementById('editModalOverlay').classList.remove('hidden');
+    document.getElementById('editModalPanel').classList.remove('hidden');
+}
+
+function closeEditModal() {
+    document.getElementById('editModalOverlay').classList.add('hidden');
+    document.getElementById('editModalPanel').classList.add('hidden');
+    currentEditTarget = null;
+}
+
+function saveEditContent() {
+    if (!currentEditTarget) return;
+
+    const { element } = currentEditTarget;
+    const text = document.getElementById('editTextarea').value;
+    const fontSize = document.getElementById('editFontSize').value;
+    const fontWeight = document.getElementById('editFontWeight').value;
+    const color = document.getElementById('editFontColorText').value;
+
+    // 更新元素内容
+    element.textContent = text;
+    element.style.fontSize = fontSize + 'px';
+    element.style.fontWeight = fontWeight;
+    if (/^#[0-9A-Fa-f]{6}$/.test(color)) {
+        element.style.color = color;
+    }
+
+    closeEditModal();
+}
+
+function rgbToHex(rgb) {
+    if (/^#[0-9A-Fa-f]{6}$/.test(rgb)) return rgb;
+    const result = rgb.match(/\d+/g);
+    if (!result || result.length < 3) return '#1e293b';
+    return '#' + ((1 << 24) + (parseInt(result[0]) << 16) + (parseInt(result[1]) << 8) + parseInt(result[2])).toString(16).slice(1);
 }
 
 // ==========================================
