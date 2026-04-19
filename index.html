@@ -2,7 +2,7 @@
 <html lang="zh-CN"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>天蚨基金发展规划(20260419v1.04)</title>
+    <title>天蚨基金发展规划(20260419v1.05)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -1727,7 +1727,7 @@ function initAppAfterAuth() {
 <body class="text-slate-900">
 <div id="pwdOverlay">
 <div id="pwdBox">
-<h2>天蚨基金规划(20260419v1.04)</h2>
+<h2>天蚨基金规划(20260419v1.05)</h2>
 <p>请输入访问密码以继续</p>
 <input id="pwdInput" type="password" placeholder="请输入密码" onkeydown="if(event.key==='Enter')checkPassword()">
 <button id="pwdBtn" onclick="checkPassword()">进入系统</button>
@@ -9019,7 +9019,7 @@ function enableEditMode(section) {
     const tip = document.createElement('div');
     tip.id = 'editModeTip';
     tip.className = 'fixed top-20 right-4 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm shadow-lg z-40 flex items-center gap-3';
-    tip.innerHTML = '<span>点击蓝色框内的文字进行编辑</span><button onclick="disableEditMode()" class="px-2 py-1 bg-white/20 rounded hover:bg-white/30 text-xs">完成编辑</button>';
+    tip.innerHTML = '<span>已进入编辑模式</span><button onclick="disableEditMode()" class="px-3 py-1 bg-white/20 rounded hover:bg-white/30 text-xs font-medium">保存更改</button>';
     document.body.appendChild(tip);
 }
 
@@ -10077,9 +10077,6 @@ function activateNeuron(type) {
         }
     });
 
-    // Show reset button
-    document.getElementById('nnResetBtn').classList.add('show');
-
     // Generate category nodes after position transition settles
     setTimeout(() => generateCategoryNodes(type), 400);
 }
@@ -10125,27 +10122,24 @@ function expandSubNodes(type, lineName, lineIdx, color) {
     const lineData = BIZ_DATA[type].lines[lineName];
     const subs = Object.keys(lineData.subs);
 
-    container.querySelectorAll('.sub-node, .mod-node').forEach(n => n.remove());
+    // 先清理所有已有的子节点
+    container.querySelectorAll('.sub-node, .sub-wrapper').forEach(n => n.remove());
 
-    // 创建一个包裹容器，相对于二级卡片定位，这样窗口大小变化时位置不会变
+    // 获取二级卡片的位置信息
     const baseNode = document.getElementById('line-' + lineIdx);
     if (!baseNode) return;
 
-    // 使用百分比定位，相对于容器中心
-    const wrapper = document.createElement('div');
-    wrapper.className = 'sub-wrapper';
-    wrapper.id = 'sub-wrapper-' + lineIdx;
+    // 获取容器的尺寸用于计算
+    const bizContainer = document.getElementById('bizContainer');
+    const containerW = bizContainer ? bizContainer.offsetWidth : canvasW;
+    const containerH = bizContainer ? bizContainer.offsetHeight : canvasH;
 
-    // 获取二级卡片的百分比位置
-    const baseLeft = parseFloat(baseNode.style.left);
-    const baseTop = parseFloat(baseNode.style.top);
-
-    // 3级卡片参数
-    const cardWidth = 180; // 增加卡片宽度，防止文字溢出
-    const cardHeight = 40;
-    const gap = 18;
-    const rowGap = 14;
-    const cardsPerRow = Math.max(2, Math.min(4, subs.length)); // 每行最多4个
+    // 3级卡片参数 - 减小尺寸防止重叠
+    const cardWidth = 140;
+    const cardHeight = 36;
+    const gap = 12;
+    const rowGap = 12;
+    const cardsPerRow = Math.min(3, subs.length); // 每行最多3个
 
     subs.forEach((subName, subIdx) => {
         const row = Math.floor(subIdx / cardsPerRow);
@@ -10155,15 +10149,28 @@ function expandSubNodes(type, lineName, lineIdx, color) {
         // 计算这一行的偏移（居中）
         const rowOffset = (cardsInThisRow - 1) * (cardWidth + gap) / 2;
         const xOffset = col * (cardWidth + gap) - rowOffset;
-        const yOffset = 60 + row * (cardHeight + rowGap);
+        const yOffset = 50 + row * (cardHeight + rowGap);
 
         const node = document.createElement('div');
         node.className = 'sub-node';
-        // 使用百分比定位，相对于二级卡片中心偏移
-        const leftPct = baseLeft + xOffset * 100 / canvasW;
-        const topPct = baseTop + yOffset * 100 / canvasH;
 
-        node.style.cssText = `position:absolute;left:${leftPct}%;top:${topPct}%;padding:10px 14px;border-radius:16px;background:white;border:2px solid ${color};color:#1e293b;font-size:14px;font-weight:600;cursor:pointer;z-index:18;opacity:0;transition:all 0.4s cubic-bezier(0.34,1.56,0.64,1);white-space:nowrap;box-shadow:0 3px 15px ${color}30;box-sizing:border-box;width:${cardWidth}px;text-align:center;transform:translate(-50%,0);overflow:hidden;text-overflow:ellipsis;`;
+        // 获取baseNode的百分比位置
+        const baseLeft = parseFloat(baseNode.style.left);
+        const baseTop = parseFloat(baseNode.style.top);
+
+        // 计算绝对位置（像素），然后转换为百分比
+        const baseLeftPx = baseLeft * containerW / 100;
+        const baseTopPx = baseTop * containerH / 100;
+
+        // 新位置 = 基础位置 + 偏移
+        const newLeftPx = baseLeftPx + xOffset;
+        const newTopPx = baseTopPx + yOffset;
+
+        // 转换回百分比
+        const leftPct = Math.max(5, Math.min(90, newLeftPx * 100 / containerW));
+        const topPct = Math.max(5, Math.min(90, newTopPx * 100 / containerH));
+
+        node.style.cssText = `position:absolute;left:${leftPct}%;top:${topPct}%;padding:8px 12px;border-radius:14px;background:white;border:2px solid ${color};color:#1e293b;font-size:13px;font-weight:600;cursor:pointer;z-index:18;opacity:0;transition:all 0.35s cubic-bezier(0.34,1.56,0.64,1);white-space:nowrap;box-shadow:0 2px 12px ${color}25;box-sizing:border-box;width:${cardWidth}px;text-align:center;transform:translate(-50%,0);overflow:hidden;text-overflow:ellipsis;`;
 
         node.innerHTML = `<span style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${subName}</span>`;
         node.dataset.sub = subName;
@@ -10171,11 +10178,9 @@ function expandSubNodes(type, lineName, lineIdx, color) {
         node.dataset.type = type;
 
         node.onclick = (e) => { e.stopPropagation(); showRightPanel(type, lineName, subName, color); };
-        wrapper.appendChild(node);
-        setTimeout(() => node.style.opacity = '1', 80 + subIdx * 50);
+        container.appendChild(node);
+        setTimeout(() => node.style.opacity = '1', 60 + subIdx * 40);
     });
-
-    container.appendChild(wrapper);
 }
 
 // 右侧面板：点击3级卡片后弹出，显示4级工作模块
@@ -10312,12 +10317,14 @@ function resetNeuralNetwork() {
     closeTaskPopup();
     closeRightPanel();
 
-    // Hide and remove category nodes
-    const cats = document.querySelectorAll('.category-node');
-    cats.forEach(cat => {
-        cat.classList.remove('visible');
-        cat.remove();
-    });
+    // 清理所有动态生成的节点（2级、3级）
+    const container = document.getElementById('categoryNodes');
+    if (container) {
+        container.innerHTML = '';
+    }
+
+    // 也清理可能的残留节点
+    document.querySelectorAll('.category-node, .sub-node, .sub-wrapper, .mod-node').forEach(n => n.remove());
 }
 
 // Init canvas when tab is shown
