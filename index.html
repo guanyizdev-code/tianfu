@@ -2,7 +2,7 @@
 <html lang="zh-CN"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>天蚨基金发展规划 v3</title>
+    <title>天蚨基金发展规划(20260419v7)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -1727,7 +1727,7 @@ function initAppAfterAuth() {
 <body class="text-slate-900">
 <div id="pwdOverlay">
 <div id="pwdBox">
-<h2>天蚨基金规划(20260419v5)</h2>
+<h2>天蚨基金规划(20260419v7)</h2>
 <p>请输入访问密码以继续</p>
 <input id="pwdInput" type="password" placeholder="请输入密码" onkeydown="if(event.key==='Enter')checkPassword()">
 <button id="pwdBtn" onclick="checkPassword()">进入系统</button>
@@ -1865,11 +1865,8 @@ function initAppAfterAuth() {
         <!-- STRATEGY TAB -->
         <section id="tab-strategy" class="tab-content hidden p-8 overflow-auto h-[calc(100vh-64px)]">
             <div class="max-w-4xl mx-auto space-y-8">
-                <div class="text-center mb-10 flex items-center justify-center gap-4">
+                <div class="text-center mb-10">
                     <h2 class="text-2xl font-bold text-slate-900" data-editable="strategy-title">战略规划</h2>
-                    <button onclick="enableEditMode('strategy')" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-medium rounded-lg transition flex items-center gap-1">
-                        <i class="fas fa-edit"></i> 编辑
-                    </button>
                 </div>
 
                 <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-100">
@@ -2200,14 +2197,9 @@ function initAppAfterAuth() {
         <section id="tab-council" class="tab-content hidden p-8 overflow-auto h-[calc(100vh-64px)]">
             <div class="max-w-6xl mx-auto space-y-8">
                 <div class="flex items-center justify-between mb-4">
-                    <div class="text-center flex-1">
+                    <div class="text-center mb-4">
                         <h2 style="font-family:Geist,'Noto Sans SC',sans-serif;font-size:22px;font-weight:700;color:#1e293b;">议事机构</h2>
                     </div>
-                    <button onclick="enableCouncilEdit()" id="councilEditBtn" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 text-sm font-medium rounded-lg transition flex items-center gap-2">
-                        <i class="fas fa-edit"></i> 编辑内容
-                    </button>
-                </div>
-                <p style="font-family:Geist,'Noto Sans SC',sans-serif;font-size:14px;color:#64748b;text-align:center;" id="councilSubtitle">公司治理体系的核心决策与监督机制</p>
 
                 <!-- 决策层级流程图 -->
                 <div class="rounded-3xl p-6 bg-gradient-to-r from-slate-50 to-blue-50 border border-slate-200 shadow-sm">
@@ -2536,9 +2528,6 @@ function initAppAfterAuth() {
                         <button onclick="filterAuthority('运营部')" class="auth-filter px-3 py-1.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 transition" data-dept="运营部">运营部</button>
                         <button onclick="filterAuthority('综合部')" class="auth-filter px-3 py-1.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 transition" data-dept="综合部">综合部</button>
                     </div>
-                    <button onclick="enableAuthorityEdit()" id="authEditBtn" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 text-sm font-medium rounded-lg transition flex items-center gap-2">
-                        <i class="fas fa-edit"></i> 编辑内容
-                    </button>
                 </div>
                 <div class="overflow-x-auto max-h-[calc(100vh-180px)]">
                     <table class="w-full text-sm apple-table">
@@ -10219,8 +10208,8 @@ function showRightPanel(type, lineName, subName, color) {
         html += `<div><span style="font-size:15px;font-weight:700;color:#1e293b;">${modName}</span>`;
         html += `<span style="font-size:13px;color:${color};margin-left:8px;font-weight:600;">${works.length}项</span></div>`;
         html += `<span style="color:${color};font-size:14px;font-weight:bold;">▼</span></div>`;
-        // 第一个模块默认展开
-        html += `<div id="pm-${modIdx}" style="display:${modIdx === 0 ? 'block' : 'none'};padding:12px 16px;border-top:1.5px solid ${color}20;background:${color}04;">`;
+        // 所有模块默认展开
+        html += `<div id="pm-${modIdx}" style="display:block;padding:12px 16px;border-top:1.5px solid ${color}20;background:${color}04;">`;
         works.forEach(w => {
             html += `<div style="display:flex;gap:8px;padding:8px 0;font-size:14px;color:#475569;line-height:1.5;"><span style="width:5px;height:5px;background:${color};border-radius:50%;margin-top:5px;"></span><span>${w}</span></div>`;
         });
