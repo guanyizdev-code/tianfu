@@ -1854,6 +1854,9 @@ function initAppAfterAuth() {
                     <button onclick="downloadCurrentPage('excel')" class="w-full px-4 py-2 text-left text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-2">
                         <i class="fas fa-file-excel text-green-600"></i>下载Excel
                     </button>
+                    <button onclick="exportCurrentHtml()" class="w-full px-4 py-2 text-left text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-2">
+                        <i class="fas fa-code text-purple-600"></i>导出HTML
+                    </button>
                 </div>
             </div>
         </div>
@@ -1876,11 +1879,8 @@ function initAppAfterAuth() {
         <!-- STRATEGY TAB -->
         <section id="tab-strategy" class="tab-content hidden p-8 overflow-auto h-[calc(100vh-64px)]">
             <div class="max-w-4xl mx-auto space-y-8">
-                <div class="text-center mb-10 flex items-center justify-center gap-4">
+                <div class="text-center mb-10">
                     <h2 class="text-2xl font-bold text-slate-900" data-editable="strategy-title">战略规划</h2>
-                    <button onclick="enableEditMode('strategy')" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-medium rounded-lg transition flex items-center gap-1">
-                        <i class="fas fa-edit"></i> 编辑
-                    </button>
                 </div>
 
                 <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-100">
@@ -2213,7 +2213,6 @@ function initAppAfterAuth() {
                 <div class="text-center mb-4">
                     <h2 style="font-family:Geist,'Noto Sans SC',sans-serif;font-size:22px;font-weight:700;color:#1e293b;">议事机构</h2>
                 </div>
-                <p style="font-family:Geist,'Noto Sans SC',sans-serif;font-size:14px;color:#64748b;text-align:center;" id="councilSubtitle">公司治理体系的核心决策与监督机制</p>
 
                 <!-- 决策层级流程图 -->
                 <div class="rounded-3xl p-6 bg-gradient-to-r from-slate-50 to-blue-50 border border-slate-200 shadow-sm">
@@ -2453,11 +2452,8 @@ function initAppAfterAuth() {
                     <p style="font-family:Geist,'Noto Sans SC',sans-serif;font-size:17px;color:#1e293b;font-weight:600;line-height:1.7;letter-spacing:0.03em;">公司业务架构按照前台、中台、后台统筹划分，共计 11 条主线业务、47 条子线业务，覆盖 730 项精细化具体工作事项。</p>
                 </div>
 
-                <button id="nnResetBtn" class="nn-reset-btn" onclick="resetNeuralNetwork()">
-                    <i class="fas fa-undo mr-1.5"></i>返回
-                </button>
-
-                <!-- 主神经元节点 -->
+                <!-- 返回按钮已取消，点击空白区域自动返回 -->
+                <div id="categoryNodes"></div>
                 <div id="neuron-front" class="neuron-node" style="left:20%;top:50%;color:#3b82f6;"
                      onclick="activateNeuron('front')">
                     <div class="node-ring" style="color:#3b82f6;"></div>
@@ -2624,8 +2620,9 @@ function initAppAfterAuth() {
                     <button onclick="filterHandbook('admin')" class="hb-filter px-4 py-2 rounded-xl text-sm font-medium bg-slate-100 border border-slate-200 text-slate-600 hover:bg-slate-200 transition" data-cat="admin">行政综合</button>
                 </div>
 
-                <div id="handbookGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div class="hb-card" onclick="openHbModal('hb-01')">
+                <div id="handbookGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+
+                <div id="handbookEmpty" class="p-10 text-center text-slate-400 hidden">
             <div class="hb-icon docx">
                 <i class="fas fa-file-word"></i>
             </div>
@@ -2635,285 +2632,9 @@ function initAppAfterAuth() {
                 <span class="hb-badge bg-emerald-100 text-emerald-700">投资风控</span>
             </div>
         </div>
-    
-        <div class="hb-card" onclick="openHbModal('hb-02')">
-            <div class="hb-icon pdf">
-                <i class="fas fa-file-pdf"></i>
-            </div>
-            <div class="flex-1 min-w-0">
-                <div class="hb-title">员工薪酬管理办法（试行）最终稿</div>
-                <div class="hb-meta">PDF · 人力资源</div>
-                <span class="hb-badge bg-rose-100 text-rose-700">人力资源</span>
-            </div>
-        </div>
-    
-        <div class="hb-card" onclick="openHbModal('hb-03')">
-            <div class="hb-icon pdf">
-                <i class="fas fa-file-pdf"></i>
-            </div>
-            <div class="flex-1 min-w-0">
-                <div class="hb-title">绩效考核办法（试行）</div>
-                <div class="hb-meta">PDF · 人力资源</div>
-                <span class="hb-badge bg-rose-100 text-rose-700">人力资源</span>
-            </div>
-        </div>
-    
-        <div class="hb-card" onclick="openHbModal('hb-04')">
-            <div class="hb-icon pdf">
-                <i class="fas fa-file-pdf"></i>
-            </div>
-            <div class="flex-1 min-w-0">
-                <div class="hb-title">董事会议事规则</div>
-                <div class="hb-meta">PDF · 公司治理</div>
-                <span class="hb-badge bg-violet-100 text-violet-700">公司治理</span>
-            </div>
-        </div>
-    
-        <div class="hb-card" onclick="openHbModal('hb-05')">
-            <div class="hb-icon pdf">
-                <i class="fas fa-file-pdf"></i>
-            </div>
-            <div class="flex-1 min-w-0">
-                <div class="hb-title">监事会议事规则</div>
-                <div class="hb-meta">PDF · 公司治理</div>
-                <span class="hb-badge bg-violet-100 text-violet-700">公司治理</span>
-            </div>
-        </div>
-    
-        <div class="hb-card" onclick="openHbModal('hb-06')">
-            <div class="hb-icon pdf">
-                <i class="fas fa-file-pdf"></i>
-            </div>
-            <div class="flex-1 min-w-0">
-                <div class="hb-title">保密制度</div>
-                <div class="hb-meta">PDF · 行政综合</div>
-                <span class="hb-badge bg-blue-100 text-blue-700">行政综合</span>
-            </div>
-        </div>
-    
-        <div class="hb-card" onclick="openHbModal('hb-07')">
-            <div class="hb-icon pdf">
-                <i class="fas fa-file-pdf"></i>
-            </div>
-            <div class="flex-1 min-w-0">
-                <div class="hb-title">内部控制管理制度</div>
-                <div class="hb-meta">PDF · 行政综合</div>
-                <span class="hb-badge bg-blue-100 text-blue-700">行政综合</span>
-            </div>
-        </div>
-    
-        <div class="hb-card" onclick="openHbModal('hb-08')">
-            <div class="hb-icon pdf">
-                <i class="fas fa-file-pdf"></i>
-            </div>
-            <div class="flex-1 min-w-0">
-                <div class="hb-title">税务管理制度</div>
-                <div class="hb-meta">PDF · 财务资金</div>
-                <span class="hb-badge bg-amber-100 text-amber-700">财务资金</span>
-            </div>
-        </div>
-    
-        <div class="hb-card" onclick="openHbModal('hb-09')">
-            <div class="hb-icon pdf">
-                <i class="fas fa-file-pdf"></i>
-            </div>
-            <div class="flex-1 min-w-0">
-                <div class="hb-title">投资管理制度</div>
-                <div class="hb-meta">PDF · 投资风控</div>
-                <span class="hb-badge bg-emerald-100 text-emerald-700">投资风控</span>
-            </div>
-        </div>
-    
-        <div class="hb-card" onclick="openHbModal('hb-10')">
-            <div class="hb-icon pdf">
-                <i class="fas fa-file-pdf"></i>
-            </div>
-            <div class="flex-1 min-w-0">
-                <div class="hb-title">信息披露管理办法</div>
-                <div class="hb-meta">PDF · 公司治理</div>
-                <span class="hb-badge bg-violet-100 text-violet-700">公司治理</span>
-            </div>
-        </div>
-    
-        <div class="hb-card" onclick="openHbModal('hb-11')">
-            <div class="hb-icon pdf">
-                <i class="fas fa-file-pdf"></i>
-            </div>
-            <div class="flex-1 min-w-0">
-                <div class="hb-title">财务管理制度（试行版）</div>
-                <div class="hb-meta">PDF · 财务资金</div>
-                <span class="hb-badge bg-amber-100 text-amber-700">财务资金</span>
-            </div>
-        </div>
-    
-        <div class="hb-card" onclick="openHbModal('hb-12')">
-            <div class="hb-icon pdf">
-                <i class="fas fa-file-pdf"></i>
-            </div>
-            <div class="flex-1 min-w-0">
-                <div class="hb-title">财务相关表格（试行版）</div>
-                <div class="hb-meta">PDF · 财务资金</div>
-                <span class="hb-badge bg-amber-100 text-amber-700">财务资金</span>
-            </div>
-        </div>
-    
-        <div class="hb-card" onclick="openHbModal('hb-13')">
-            <div class="hb-icon pdf">
-                <i class="fas fa-file-pdf"></i>
-            </div>
-            <div class="flex-1 min-w-0">
-                <div class="hb-title">会计基本制度（试行版）</div>
-                <div class="hb-meta">PDF · 财务资金</div>
-                <span class="hb-badge bg-amber-100 text-amber-700">财务资金</span>
-            </div>
-        </div>
-    
-        <div class="hb-card" onclick="openHbModal('hb-14')">
-            <div class="hb-icon pdf">
-                <i class="fas fa-file-pdf"></i>
-            </div>
-            <div class="flex-1 min-w-0">
-                <div class="hb-title">出纳管理制度（试行版）</div>
-                <div class="hb-meta">PDF · 财务资金</div>
-                <span class="hb-badge bg-amber-100 text-amber-700">财务资金</span>
-            </div>
-        </div>
-    
-        <div class="hb-card" onclick="openHbModal('hb-15')">
-            <div class="hb-icon pdf">
-                <i class="fas fa-file-pdf"></i>
-            </div>
-            <div class="flex-1 min-w-0">
-                <div class="hb-title">差旅费管理办法（试行版）</div>
-                <div class="hb-meta">PDF · 财务资金</div>
-                <span class="hb-badge bg-amber-100 text-amber-700">财务资金</span>
-            </div>
-        </div>
-    
-        <div class="hb-card" onclick="openHbModal('hb-16')">
-            <div class="hb-icon pdf">
-                <i class="fas fa-file-pdf"></i>
-            </div>
-            <div class="flex-1 min-w-0">
-                <div class="hb-title">资金支付管理办法（试行版）</div>
-                <div class="hb-meta">PDF · 财务资金</div>
-                <span class="hb-badge bg-amber-100 text-amber-700">财务资金</span>
-            </div>
-        </div>
-    
-        <div class="hb-card" onclick="openHbModal('hb-17')">
-            <div class="hb-icon pdf">
-                <i class="fas fa-file-pdf"></i>
-            </div>
-            <div class="flex-1 min-w-0">
-                <div class="hb-title">资金管理办法（试行版）</div>
-                <div class="hb-meta">PDF · 财务资金</div>
-                <span class="hb-badge bg-amber-100 text-amber-700">财务资金</span>
-            </div>
-        </div>
-    
-        <div class="hb-card" onclick="openHbModal('hb-18')">
-            <div class="hb-icon pdf">
-                <i class="fas fa-file-pdf"></i>
-            </div>
-            <div class="flex-1 min-w-0">
-                <div class="hb-title">合同审查管理办法（试行版）</div>
-                <div class="hb-meta">PDF · 投资风控</div>
-                <span class="hb-badge bg-emerald-100 text-emerald-700">投资风控</span>
-            </div>
-        </div>
-    
-        <div class="hb-card" onclick="openHbModal('hb-19')">
-            <div class="hb-icon pdf">
-                <i class="fas fa-file-pdf"></i>
-            </div>
-            <div class="flex-1 min-w-0">
-                <div class="hb-title">项目投资尽职调查管理办法</div>
-                <div class="hb-meta">PDF · 投资风控</div>
-                <span class="hb-badge bg-emerald-100 text-emerald-700">投资风控</span>
-            </div>
-        </div>
-    
-        <div class="hb-card" onclick="openHbModal('hb-20')">
-            <div class="hb-icon pdf">
-                <i class="fas fa-file-pdf"></i>
-            </div>
-            <div class="flex-1 min-w-0">
-                <div class="hb-title">投资尽职调查报告模板V3</div>
-                <div class="hb-meta">PDF · 投资风控</div>
-                <span class="hb-badge bg-emerald-100 text-emerald-700">投资风控</span>
-            </div>
-        </div>
-    
-        <div class="hb-card" onclick="openHbModal('hb-21')">
-            <div class="hb-icon pdf">
-                <i class="fas fa-file-pdf"></i>
-            </div>
-            <div class="flex-1 min-w-0">
-                <div class="hb-title">项目尽职调查工作底稿目录V3</div>
-                <div class="hb-meta">PDF · 投资风控</div>
-                <span class="hb-badge bg-emerald-100 text-emerald-700">投资风控</span>
-            </div>
-        </div>
-    
-        <div class="hb-card" onclick="openHbModal('hb-22')">
-            <div class="hb-icon pdf">
-                <i class="fas fa-file-pdf"></i>
-            </div>
-            <div class="flex-1 min-w-0">
-                <div class="hb-title">考勤管理办法（试行版）</div>
-                <div class="hb-meta">PDF · 人力资源</div>
-                <span class="hb-badge bg-rose-100 text-rose-700">人力资源</span>
-            </div>
-        </div>
-    
-        <div class="hb-card" onclick="openHbModal('hb-23')">
-            <div class="hb-icon pdf">
-                <i class="fas fa-file-pdf"></i>
-            </div>
-            <div class="flex-1 min-w-0">
-                <div class="hb-title">业务接待管理</div>
-                <div class="hb-meta">PDF · 行政综合</div>
-                <span class="hb-badge bg-blue-100 text-blue-700">行政综合</span>
-            </div>
-        </div>
-    
-        <div class="hb-card" onclick="openHbModal('hb-24')">
-            <div class="hb-icon pdf">
-                <i class="fas fa-file-pdf"></i>
-            </div>
-            <div class="flex-1 min-w-0">
-                <div class="hb-title">印章证件管理制度（试行版）</div>
-                <div class="hb-meta">PDF · 行政综合</div>
-                <span class="hb-badge bg-blue-100 text-blue-700">行政综合</span>
-            </div>
-        </div>
-    
-        <div class="hb-card" onclick="openHbModal('hb-25')">
-            <div class="hb-icon pdf">
-                <i class="fas fa-file-pdf"></i>
-            </div>
-            <div class="flex-1 min-w-0">
-                <div class="hb-title">采购流程及管理制度（试行版）</div>
-                <div class="hb-meta">PDF · 行政综合</div>
-                <span class="hb-badge bg-blue-100 text-blue-700">行政综合</span>
-            </div>
-        </div>
-    
-        <div class="hb-card" onclick="openHbModal('hb-26')">
-            <div class="hb-icon pdf">
-                <i class="fas fa-file-pdf"></i>
-            </div>
-            <div class="flex-1 min-w-0">
-                <div class="hb-title">员工行为规范</div>
-                <div class="hb-meta">PDF · 人力资源</div>
-                <span class="hb-badge bg-rose-100 text-rose-700">人力资源</span>
-            </div>
         </div>
     </div>
 
-                <div id="handbookEmpty" class="p-10 text-center text-slate-400 hidden">
-                    <i class="fas fa-folder-open text-3xl mb-3 opacity-30"></i>
                     <p>该分类下暂无制度文件</p>
                 </div>
             </div>
@@ -8974,13 +8695,18 @@ function editCurrentPage() {
     document.getElementById('manageMenu').classList.add('hidden');
     const currentTab = getCurrentTab();
     switch(currentTab) {
-        case 'strategy': enableStrategyEdit(); break;
+        case 'strategy': enableEditMode('strategy'); break;
         case 'council': enableCouncilEdit(); break;
         case 'authority': enableAuthorityEdit(); break;
-        case 'positions': /* 双击卡片编辑 */ break;
-        case 'handbook': /* 文件管理 */ break;
+        case 'positions': alert('双击卡片可编辑岗位设计'); break;
+        case 'handbook': alert('文件上传和管理功能可用'); break;
         default: alert('该页面暂不支持编辑');
     }
+}
+
+function exportCurrentHtml() {
+    document.getElementById('manageMenu').classList.add('hidden');
+    exportHtml();
 }
 
 function getCurrentTab() {
@@ -9842,6 +9568,16 @@ function initNeuralCanvas() {
     if (!neuralCanvas) return;
     neuralCtx = neuralCanvas.getContext('2d');
     window.addEventListener('resize', resizeNeuralCanvas);
+
+    // 点击空白区域返回
+    neuralCanvas.addEventListener('click', function(e) {
+        // 检查是否点击了节点
+        const clickedNode = e.target.closest('.neuron-node, .category-node');
+        if (!clickedNode && activeNeuron !== null) {
+            resetNeuralNetwork();
+        }
+    });
+
     // Retry until container has valid dimensions
     requestAnimationFrame(() => {
         resizeNeuralCanvas();
