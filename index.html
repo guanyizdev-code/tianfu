@@ -2556,12 +2556,17 @@ function initAppAfterAuth() {
         </section>
         <section id="tab-authority" class="tab-content hidden p-6 overflow-auto h-[calc(100vh-64px)]">
             <div class="rounded-3xl shadow-sm bg-white border border-slate-200">
-                <div class="p-5 border-b border-slate-100 flex flex-wrap items-center gap-3">
-                    <span class="text-sm font-semibold text-slate-700">筛选类别：</span>
-                    <button onclick="filterAuthority('all')" class="auth-filter px-3 py-1.5 rounded-full text-xs font-medium bg-blue-600 text-white transition" data-dept="all">全部</button>
-                    <button onclick="filterAuthority('投资部')" class="auth-filter px-3 py-1.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 transition" data-dept="投资部">投资部</button>
-                    <button onclick="filterAuthority('运营部')" class="auth-filter px-3 py-1.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 transition" data-dept="运营部">运营部</button>
-                    <button onclick="filterAuthority('综合部')" class="auth-filter px-3 py-1.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 transition" data-dept="综合部">综合部</button>
+                <div class="p-5 border-b border-slate-100 flex flex-wrap items-center justify-between gap-3">
+                    <div class="flex flex-wrap items-center gap-3">
+                        <span class="text-sm font-semibold text-slate-700">筛选类别：</span>
+                        <button onclick="filterAuthority('all')" class="auth-filter px-3 py-1.5 rounded-full text-xs font-medium bg-blue-600 text-white transition" data-dept="all">全部</button>
+                        <button onclick="filterAuthority('投资部')" class="auth-filter px-3 py-1.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 transition" data-dept="投资部">投资部</button>
+                        <button onclick="filterAuthority('运营部')" class="auth-filter px-3 py-1.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 transition" data-dept="运营部">运营部</button>
+                        <button onclick="filterAuthority('综合部')" class="auth-filter px-3 py-1.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 transition" data-dept="综合部">综合部</button>
+                    </div>
+                    <button onclick="enableAuthorityEdit()" id="authEditBtn" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 text-sm font-medium rounded-lg transition flex items-center gap-2">
+                        <i class="fas fa-edit"></i> 编辑内容
+                    </button>
                 </div>
                 <div class="overflow-x-auto max-h-[calc(100vh-180px)]">
                     <table class="w-full text-sm apple-table">
@@ -9144,46 +9149,64 @@ function getRoleBadge(text) {
     return `<span class="badge ${cls}">${text}</span>`;
 }
 
-function renderAuthorityTable(data) {
+function renderAuthorityTable(data, editMode = false) {
     const tbody = document.getElementById('authorityTable');
     let html = '';
-    data.forEach(row => {
+    data.forEach((row, idx) => {
         const isHeader = !row['关键事项'] && (row['序号'].includes('、') || row['序号'].match(/^\d+\.\d+$/));
         if (isHeader) {
-            html += `<tr style="background:rgba(248,250,252,0.95);"><td colspan="27" class="px-4 py-2 font-bold text-slate-700 text-sm">${row['序号']} ${row['权责单位']}</td></tr>`;
+            html += `<tr style="background:rgba(248,250,252,0.95);" data-row-idx="${idx}"><td colspan="27" class="px-4 py-2 font-bold text-slate-700 text-sm" data-auth-editable="header-${idx}">${row['序号']} ${row['权责单位']}</td></tr>`;
             return;
         }
-        html += `<tr class="hover:bg-slate-50 transition">`;
-        html += `<td class="px-4 py-3 text-slate-500 font-mono text-xs">${row['序号']}</td>`;
-        html += `<td class="px-4 py-3 font-medium text-slate-800 text-xs">${row['权责单位']}</td>`;
-        html += `<td class="px-4 py-3 text-slate-700 text-xs whitespace-normal min-w-[180px]">${row['关键事项']}</td>`;
-        html += `<td class="px-4 py-3">${getRoleBadge(row['决策机构'])}</td>`;
-        html += `<td class="px-4 py-3">${getRoleBadge(row['天蚨投资部'])}</td>`;
-        html += `<td class="px-4 py-3">${getRoleBadge(row['天蚨风控部'])}</td>`;
-        html += `<td class="px-4 py-3">${getRoleBadge(row['天蚨财务部'])}</td>`;
-        html += `<td class="px-4 py-3">${getRoleBadge(row['天蚨综合部'])}</td>`;
-        html += `<td class="px-4 py-3">${getRoleBadge(row['天蚨总办会'])}</td>`;
-        html += `<td class="px-4 py-3">${getRoleBadge(row['天蚨总经理'])}</td>`;
-        html += `<td class="px-4 py-3">${getRoleBadge(row['天蚨投决会'])}</td>`;
-        html += `<td class="px-4 py-3">${getRoleBadge(row['天蚨董事长'])}</td>`;
-        html += `<td class="px-4 py-3">${getRoleBadge(row['天蚨董事会'])}</td>`;
-        html += `<td class="px-4 py-3">${getRoleBadge(row['天蚨股东会'])}</td>`;
-        html += `<td class="px-4 py-3">${getRoleBadge(row['集团财务部'])}</td>`;
-        html += `<td class="px-4 py-3">${getRoleBadge(row['集团合规部'])}</td>`;
-        html += `<td class="px-4 py-3">${getRoleBadge(row['集团投资部'])}</td>`;
-        html += `<td class="px-4 py-3">${getRoleBadge(row['集团风控总监'])}</td>`;
-        html += `<td class="px-4 py-3">${getRoleBadge(row['集团财务总监'])}</td>`;
-        html += `<td class="px-4 py-3">${getRoleBadge(row['集团分管领导'])}</td>`;
-        html += `<td class="px-4 py-3">${getRoleBadge(row['集团总经理办公会'])}</td>`;
-        html += `<td class="px-4 py-3">${getRoleBadge(row['集团总经理'])}</td>`;
-        html += `<td class="px-4 py-3">${getRoleBadge(row['集团党委会'])}</td>`;
-        html += `<td class="px-4 py-3">${getRoleBadge(row['集团董事长'])}</td>`;
-        html += `<td class="px-4 py-3">${getRoleBadge(row['集团董事会'])}</td>`;
-        html += `<td class="px-4 py-3">${getRoleBadge(row['市财政局'])}</td>`;
-        html += `<td class="px-4 py-3 text-xs text-slate-500 whitespace-normal max-w-[120px]">${row['备注']}</td>`;
+        html += `<tr class="hover:bg-slate-50 transition" data-row-idx="${idx}">`;
+        const cols = ['序号', '权责单位', '关键事项', '决策机构', '天蚨投资部', '天蚨风控部', '天蚨财务部', '天蚨综合部', '天蚨总办会', '天蚨总经理', '天蚨投决会', '天蚨董事长', '天蚨董事会', '天蚨股东会', '集团财务部', '集团合规部', '集团投资部', '集团风控总监', '集团财务总监', '集团分管领导', '集团总经理办公会', '集团总经理', '集团党委会', '集团董事长', '集团董事会', '市财政局', '备注'];
+        cols.forEach((col, colIdx) => {
+            const value = row[col] || '';
+            if (colIdx < 3 || colIdx === 26) {
+                // 文本列可直接编辑
+                if (editMode) {
+                    html += `<td class="px-4 py-3 text-xs" data-auth-col="${col}" data-auth-row="${idx}"><input type="text" value="${value}" class="w-full px-2 py-1 border border-blue-300 rounded text-xs focus:outline-none focus:ring-2 focus:ring-blue-500" onchange="updateAuthData(${idx}, '${col}', this.value)"></td>`;
+                } else {
+                    const cls = colIdx === 0 ? 'text-slate-500 font-mono' : (colIdx === 1 ? 'font-medium text-slate-800' : 'text-slate-700 whitespace-normal min-w-[180px]');
+                    html += `<td class="px-4 py-3 ${cls} text-xs">${value}</td>`;
+                }
+            } else {
+                // 角色列使用徽章显示
+                if (editMode) {
+                    html += `<td class="px-4 py-3" data-auth-col="${col}" data-auth-row="${idx}"><input type="text" value="${value}" class="w-full px-2 py-1 border border-blue-300 rounded text-xs focus:outline-none focus:ring-2 focus:ring-blue-500" onchange="updateAuthData(${idx}, '${col}', this.value)"></td>`;
+                } else {
+                    html += `<td class="px-4 py-3">${getRoleBadge(value)}</td>`;
+                }
+            }
+        });
         html += `</tr>`;
     });
     tbody.innerHTML = html;
+}
+
+let authEditMode = false;
+function enableAuthorityEdit() {
+    authEditMode = !authEditMode;
+    const btn = document.getElementById('authEditBtn');
+    if (authEditMode) {
+        btn.innerHTML = '<i class="fas fa-save"></i> 保存更改';
+        btn.classList.remove('bg-slate-100', 'text-slate-600', 'hover:bg-slate-200');
+        btn.classList.add('bg-blue-600', 'text-white', 'hover:bg-blue-700');
+        renderAuthorityTable(authorityData, true);
+    } else {
+        btn.innerHTML = '<i class="fas fa-edit"></i> 编辑内容';
+        btn.classList.remove('bg-blue-600', 'text-white', 'hover:bg-blue-700');
+        btn.classList.add('bg-slate-100', 'text-slate-600', 'hover:bg-slate-200');
+        renderAuthorityTable(authorityData, false);
+        // 同步数据到远程
+        syncAppData('authorityData', authorityData);
+    }
+}
+
+function updateAuthData(rowIdx, col, value) {
+    if (authorityData[rowIdx]) {
+        authorityData[rowIdx][col] = value;
+    }
 }
 
 function filterAuthority(dept) {
@@ -9204,7 +9227,7 @@ function filterAuthority(dept) {
             filtered = authorityData.filter(item => item.category === '五、综合管理类');
         }
     }
-    renderAuthorityTable(filtered);
+    renderAuthorityTable(filtered, authEditMode);
 }
 
 let currentPosFilter = 'all';
@@ -10478,6 +10501,38 @@ function initGlobalSearch() {
 function performSearch(query) {
     const results = [];
 
+    // 搜索战略规划内容
+    document.querySelectorAll('#tab-strategy [data-editable]').forEach(el => {
+        const text = el.textContent.toLowerCase();
+        if (text.includes(query)) {
+            const key = el.getAttribute('data-editable');
+            results.push({
+                type: 'strategy',
+                title: el.textContent.slice(0, 50),
+                desc: '战略规划',
+                icon: 'fa-bullseye',
+                color: '#3b82f6',
+                action: () => { switchTab('strategy'); }
+            });
+        }
+    });
+
+    // 搜索议事机构内容
+    document.querySelectorAll('#tab-council [data-editable]').forEach(el => {
+        const text = el.textContent.toLowerCase();
+        if (text.includes(query)) {
+            const key = el.getAttribute('data-editable');
+            results.push({
+                type: 'council',
+                title: el.textContent.slice(0, 50),
+                desc: '议事机构',
+                icon: 'fa-landmark',
+                color: '#6366f1',
+                action: () => { switchTab('council'); }
+            });
+        }
+    });
+
     // 搜索组织架构节点
     orgNodes.forEach(node => {
         if (node.title.toLowerCase().includes(query) ||
@@ -10493,35 +10548,54 @@ function performSearch(query) {
         }
     });
 
-    // 搜索权责清单
-    authItems.forEach(item => {
-        if (item.title.toLowerCase().includes(query) ||
-            (item.items && item.items.some(i => i.toLowerCase().includes(query)))) {
-            results.push({
-                type: 'auth',
-                title: item.title,
-                desc: item.items ? item.items.join(', ') : '',
-                icon: 'fa-tasks',
-                color: '#64748b',
-                action: () => { switchTab('authority'); }
-            });
-        }
+    // 搜索权责清单数据
+    authorityData.forEach(item => {
+        const keys = ['序号', '权责单位', '关键事项', '备注', '决策机构'];
+        keys.forEach(key => {
+            if (item[key] && item[key].toLowerCase().includes(query)) {
+                results.push({
+                    type: 'auth',
+                    title: item['关键事项'] || item['序号'] || item['权责单位'],
+                    desc: item['权责单位'] || '',
+                    icon: 'fa-tasks',
+                    color: '#64748b',
+                    action: () => { switchTab('authority'); highlightAuthorityRow(item['序号']); }
+                });
+            }
+        });
     });
 
     // 搜索岗位职责
-    positions.forEach(pos => {
-        if (pos.title.toLowerCase().includes(query) ||
-            (pos.responsibilities && pos.responsibilities.some(r => r.toLowerCase().includes(query)))) {
-            results.push({
-                type: 'position',
-                title: pos.title,
-                desc: pos.responsibilities ? pos.responsibilities.slice(0, 3).join(', ') : '',
-                icon: 'fa-user-tie',
-                color: '#8b5cf6',
-                action: () => { switchTab('positions'); highlightPosition(pos.id); }
+    if (typeof positionGroups !== 'undefined') {
+        Object.keys(positionGroups).forEach(dept => {
+            positionGroups[dept].items.forEach(pos => {
+                if (pos.title && pos.title.toLowerCase().includes(query)) {
+                    results.push({
+                        type: 'position',
+                        title: pos.title,
+                        desc: dept,
+                        icon: 'fa-user-tie',
+                        color: '#8b5cf6',
+                        action: () => { switchTab('positions'); }
+                    });
+                }
+                if (pos.responsibilities) {
+                    pos.responsibilities.forEach(r => {
+                        if (r.toLowerCase().includes(query)) {
+                            results.push({
+                                type: 'position',
+                                title: pos.title,
+                                desc: r.slice(0, 30),
+                                icon: 'fa-user-tie',
+                                color: '#8b5cf6',
+                                action: () => { switchTab('positions'); }
+                            });
+                        }
+                    });
+                }
             });
-        }
-    });
+        });
+    }
 
     // 搜索公司制度
     handbookFiles.forEach(file => {
@@ -10540,6 +10614,21 @@ function performSearch(query) {
     return results.slice(0, 20);
 }
 
+function highlightAuthorityRow(seq) {
+    setTimeout(() => {
+        const rows = document.querySelectorAll('#authorityTable tr');
+        rows.forEach(row => {
+            const seqCell = row.querySelector('td:first-child');
+            if (seqCell && seqCell.textContent.trim() === seq) {
+                row.style.transition = 'all 0.3s';
+                row.style.background = '#dbeafe';
+                row.style.boxShadow = '0 0 0 2px #3b82f6';
+                setTimeout(() => { row.style.background = ''; row.style.boxShadow = ''; }, 2000);
+            }
+        });
+    }, 300);
+}
+
 function displaySearchResults(results, container) {
     if (results.length === 0) {
         container.innerHTML = '<div class="p-4 text-center text-slate-500 text-sm">未找到相关结果</div>';
@@ -10548,6 +10637,8 @@ function displaySearchResults(results, container) {
     }
 
     const typeLabels = {
+        strategy: '战略规划',
+        council: '议事机构',
         org: '组织架构',
         auth: '权责清单',
         position: '岗位职责',
