@@ -1243,7 +1243,6 @@ function checkPassword() {
 function initAppAfterAuth() {
     // Show strategy tab immediately so user sees content right away
     switchTab('strategy');
-    initGlobalSearch();
     fetchAppData().then(() => {
         renderOrgChart();
         drawConnections();
@@ -1862,43 +1861,39 @@ function initAppAfterAuth() {
         <!-- STRATEGY TAB -->
         <section id="tab-strategy" class="tab-content hidden p-8 overflow-auto h-[calc(100vh-64px)]">
             <div class="max-w-4xl mx-auto space-y-8">
-                <div class="flex items-center justify-between mb-8">
-                    <div class="text-center flex-1">
-                        <h2 class="text-2xl font-bold text-slate-900" data-editable="strategy-title">战略规划</h2>
-                    </div>
-                    <button onclick="enableEditMode('strategy')" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition flex items-center gap-2 shadow-sm">
-                        <i class="fas fa-edit"></i> 编辑内容
-                    </button>
+                <div class="text-center mb-10">
+                    <h2 class="text-2xl font-bold text-slate-900">战略规划</h2>
+                    <p class="text-slate-500 mt-2">以长期主义价值发现与培育，实现国有资产保值增值与地方产业发展的共赢</p>
                 </div>
 
                 <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-100">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center"><i class="fas fa-crosshairs"></i></div>
-                        <h3 class="text-lg font-bold text-slate-900" data-editable="strategy-position">公司定位：金控集团自有资金投资平台</h3>
+                        <h3 class="text-lg font-bold text-slate-900">公司定位：金控集团自有资金投资平台</h3>
                     </div>
                 </div>
 
                 <div class="bg-white rounded-3xl p-8 shadow-sm border border-slate-100">
                     <div class="flex items-center gap-3 mb-6">
                         <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center"><i class="fas fa-th-large"></i></div>
-                        <h3 class="text-lg font-bold text-slate-900" data-editable="strategy-business-title">业务版图：2 主 2 辅投资矩阵</h3>
+                        <h3 class="text-lg font-bold text-slate-900">业务版图：2 主 2 辅投资矩阵</h3>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <div class="rounded-2xl p-5 bg-gradient-to-br from-blue-50 to-white border border-blue-100">
-                            <div class="text-blue-700 font-bold mb-2" data-editable="strategy-core1-title">核心主业 · 集团战略新兴产业</div>
-                            <p class="text-sm text-slate-600 leading-relaxed" data-editable="strategy-core1-desc">紧扣金控集团顶层设计，重点围绕符合集团战略发展布局的支柱产业，发挥"战略哨兵"作用。</p>
+                            <div class="text-blue-700 font-bold mb-2">核心主业 · 集团战略新兴产业</div>
+                            <p class="text-sm text-slate-600 leading-relaxed">紧扣金控集团顶层设计，重点围绕符合集团战略发展布局的支柱产业，发挥“战略哨兵”作用。</p>
                         </div>
                         <div class="rounded-2xl p-5 bg-gradient-to-br from-indigo-50 to-white border border-indigo-100">
-                            <div class="text-indigo-700 font-bold mb-2" data-editable="strategy-core2-title">核心主业 · 光电信息领航产业</div>
-                            <p class="text-sm text-slate-600 leading-relaxed" data-editable="strategy-core2-desc">依托长春"光谷"底蕴，深耕精密仪器、半导体设备、激光应用等细分赛道，打造具有全国竞争力的硬科技投资名片。</p>
+                            <div class="text-indigo-700 font-bold mb-2">核心主业 · 光电信息领航产业</div>
+                            <p class="text-sm text-slate-600 leading-relaxed">依托长春“光谷”底蕴，深耕精密仪器、半导体设备、激光应用等细分赛道，打造具有全国竞争力的硬科技投资名片。</p>
                         </div>
                         <div class="rounded-2xl p-5 bg-gradient-to-br from-amber-50 to-white border border-amber-100">
-                            <div class="text-amber-700 font-bold mb-2" data-editable="strategy-support1-title">辅助支撑 · 存量资本精细化运营（PPP在管）</div>
-                            <p class="text-sm text-slate-600 leading-relaxed" data-editable="strategy-support1-desc">从"粗放管理"向"价值挖掘"转型，重点做好投后风险控制与现金流管理，确保底层资产安全。</p>
+                            <div class="text-amber-700 font-bold mb-2">辅助支撑 · 存量资本精细化运营（PPP在管）</div>
+                            <p class="text-sm text-slate-600 leading-relaxed">从“粗放管理”向“价值挖掘”转型，重点做好投后风险控制与现金流管理，确保底层资产安全。</p>
                         </div>
                         <div class="rounded-2xl p-5 bg-gradient-to-br from-rose-50 to-white border border-rose-100">
-                            <div class="text-rose-700 font-bold mb-2" data-editable="strategy-support2-title">辅助支撑 · 不动产私募股权基金（REITs预研）</div>
-                            <p class="text-sm text-slate-600 leading-relaxed" data-editable="strategy-support2-desc">聚焦工业厂房、产业园等生产性不动产，为未来通过公募 REITs 退出探索路径，扩大 AUM。</p>
+                            <div class="text-rose-700 font-bold mb-2">辅助支撑 · 不动产私募股权基金（REITs预研）</div>
+                            <p class="text-sm text-slate-600 leading-relaxed">聚焦工业厂房、产业园等生产性不动产，为未来通过公募 REITs 退出探索路径，扩大 AUM。</p>
                         </div>
                     </div>
                 </div>
@@ -1906,21 +1901,21 @@ function initAppAfterAuth() {
                 <div class="bg-white rounded-3xl p-8 shadow-sm border border-slate-100">
                     <div class="flex items-center gap-3 mb-4">
                         <div class="w-10 h-10 rounded-xl bg-violet-50 text-violet-600 flex items-center justify-center"><i class="fas fa-gem"></i></div>
-                        <h3 class="text-lg font-bold text-slate-900" data-editable="strategy-values-title">公司价值观</h3>
+                        <h3 class="text-lg font-bold text-slate-900">公司价值观</h3>
                     </div>
-                    <p class="text-slate-700 leading-relaxed" data-editable="strategy-values-desc">坚持"耐心资本"立场，通过长期主义的价值发现与培育，实现国有资产保值增值与地方产业发展的共赢。</p>
+                    <p class="text-slate-700 leading-relaxed">坚持“耐心资本”立场，通过长期主义的价值发现与培育，实现国有资产保值增值与地方产业发展的共赢。</p>
                 </div>
 
                 <div class="bg-white rounded-3xl p-8 shadow-sm border border-slate-100">
                     <div class="flex items-center gap-3 mb-4">
                         <div class="w-10 h-10 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center"><i class="fas fa-balance-scale"></i></div>
-                        <h3 class="text-lg font-bold text-slate-900" data-editable="strategy-mechanism-title">"弃短取长"决策机制</h3>
+                        <h3 class="text-lg font-bold text-slate-900">“弃短取长”决策机制</h3>
                     </div>
-                    <p class="text-slate-700 leading-relaxed" data-editable="strategy-mechanism-desc">在投资委（IC）评价体系中，将"产业协同度"和"长期技术壁垒"权重提升，降低对短期回购或 Pre-IPO 套利的依赖。</p>
+                    <p class="text-slate-700 leading-relaxed">在投资委（IC）评价体系中，将“产业协同度”和“长期技术壁垒”权重提升，降低对短期回购或 Pre-IPO 套利的依赖。</p>
                 </div>
 
                 <div class="rounded-2xl p-6 bg-gradient-to-r from-slate-900 to-slate-800 text-white text-center">
-                    <p class="text-sm opacity-90" data-editable="strategy-footer">以上战略规划为天蚨基金开展微观运营及制度设计提供根本遵循。</p>
+                    <p class="text-sm opacity-90">以上战略规划为天蚨基金开展微观运营及制度设计提供根本遵循。</p>
                 </div>
             </div>
         </section>
@@ -2069,7 +2064,7 @@ function initAppAfterAuth() {
                 <div class="popover-body">
                     <div class="popover-section">
                         <div class="popover-section-title">核心职能</div>
-                        <div class="popover-editable" contenteditable="true" data-field="coreFunction" data-placeholder="点击输入核心职能">负责对公司各类投资项目进行专业审查与独立评估，聚焦投资可行性、财务回报、合规性及战略匹配度，实行"专业评审、集体表决、利益回避"。按权限对投前尽调、交易结构、估值定价、风险预案进行多维度论证；对超权限或重大投资项目出具评审意见后，按程序提交董事会/股东会决策；同步建立投后跟踪与退出评估机制。</div>
+                        <div class="popover-editable" contenteditable="true" data-field="coreFunction" data-placeholder="点击输入核心职能">负责对公司各类投资项目进行专业审查与独立评估，聚焦投资可行性、财务回报、合规性及战略匹配度，实行“专业评审、集体表决、利益回避”。按权限对投前尽调、交易结构、估值定价、风险预案进行多维度论证；对超权限或重大投资项目出具评审意见后，按程序提交董事会/股东会决策；同步建立投后跟踪与退出评估机制。</div>
                     </div>
                     <div class="popover-section">
                         <div class="popover-section-title">工作内容</div>
@@ -2197,262 +2192,66 @@ function initAppAfterAuth() {
         
         <!-- COUNCIL TAB -->
         <section id="tab-council" class="tab-content hidden p-8 overflow-auto h-[calc(100vh-64px)]">
-            <div class="max-w-6xl mx-auto space-y-8">
-                <div class="flex items-center justify-between mb-6">
-                    <div>
-                        <h2 style="font-family:Geist,'Noto Sans SC',sans-serif;font-size:22px;font-weight:700;color:#1e293b;" data-editable="council-title">议事机构</h2>
-                        <p style="font-family:Geist,'Noto Sans SC',sans-serif;font-size:14px;color:#64748b;margin-top:4px;" data-editable="council-subtitle">公司治理体系的核心决策与监督机制</p>
-                    </div>
-                    <button onclick="enableEditMode('council')" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition flex items-center gap-2 shadow-sm">
-                        <i class="fas fa-edit"></i> 编辑内容
-                    </button>
+            <div class="max-w-5xl mx-auto space-y-8">
+                <div class="text-center mb-10">
+                    <h2 style="font-family:Geist,'Noto Sans SC',sans-serif;font-size:22px;font-weight:700;color:#1e293b;">议事机构</h2>
                 </div>
 
-                <!-- 决策层级流程图 -->
-                <div class="rounded-3xl p-6 bg-gradient-to-r from-slate-50 to-blue-50 border border-slate-200 shadow-sm">
-                    <div class="text-center mb-4 text-sm text-slate-500 font-medium">决策审批流程</div>
-                    <div class="flex flex-wrap items-center justify-center gap-3">
-                        <div class="rounded-xl p-4 shadow-md border-t-4 border-red-500 min-w-[140px] text-center bg-white transform hover:scale-105 transition">
-                            <div class="text-red-600 font-bold text-base">党委会</div>
-                            <div class="text-xs text-slate-500 mt-1">前置研究</div>
-                        </div>
-                        <i class="fas fa-chevron-right text-slate-400"></i>
-                        <div class="rounded-xl p-4 shadow-md border-t-4 border-emerald-500 min-w-[140px] text-center bg-white transform hover:scale-105 transition">
-                            <div class="text-emerald-600 font-bold text-base">总办会</div>
-                            <div class="text-xs text-slate-500 mt-1">经营落实</div>
-                        </div>
-                        <i class="fas fa-chevron-right text-slate-400"></i>
-                        <div class="rounded-xl p-4 shadow-md border-t-4 border-violet-500 min-w-[140px] text-center bg-white transform hover:scale-105 transition">
-                            <div class="text-violet-600 font-bold text-base">董事会</div>
-                            <div class="text-xs text-slate-500 mt-1">战略决策</div>
-                        </div>
-                        <i class="fas fa-chevron-right text-slate-400"></i>
-                        <div class="rounded-xl p-4 shadow-md border-t-4 border-blue-500 min-w-[140px] text-center bg-white transform hover:scale-105 transition">
-                            <div class="text-blue-600 font-bold text-base">股东会</div>
-                            <div class="text-xs text-slate-500 mt-1">最高权力</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 各机构详情卡片 -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-                    <!-- 股东会 -->
-                    <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 hover:shadow-md transition">
-                        <div class="flex items-center gap-3 mb-4">
-                            <div class="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
-                                <i class="fas fa-building text-blue-600"></i>
-                            </div>
-                            <div>
-                                <div class="font-bold text-slate-900" data-editable="council-gudonghui-title">股东会</div>
-                                <div class="text-xs text-slate-500" data-editable="council-gudonghui-subtitle">最高权力机构</div>
-                            </div>
-                        </div>
-                        <div class="space-y-3 text-sm">
-                            <div class="bg-slate-50 rounded-lg p-3">
-                                <div class="font-medium text-slate-700 mb-2" data-editable="council-gudonghui-duty-title">主要职权</div>
-                                <ul class="text-slate-600 space-y-1 text-xs" data-editable="council-gudonghui-duty">
-                                    <li>• 决定经营方针与投资计划</li>
-                                    <li>• 选举更换非职工董事监事</li>
-                                    <li>• 审批财务预算决算方案</li>
-                                    <li>• 决定增减注册资本</li>
-                                    <li>• 审批合并分立解散清算</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 董事会 -->
-                    <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 hover:shadow-md transition">
-                        <div class="flex items-center gap-3 mb-4">
-                            <div class="w-10 h-10 rounded-xl bg-violet-100 flex items-center justify-center">
-                                <i class="fas fa-users-cog text-violet-600"></i>
-                            </div>
-                            <div>
-                                <div class="font-bold text-slate-900" data-editable="council-dongshihui-title">董事会</div>
-                                <div class="text-xs text-slate-500" data-editable="council-dongshihui-subtitle">战略决策机构</div>
-                            </div>
-                        </div>
-                        <div class="space-y-3 text-sm">
-                            <div class="bg-slate-50 rounded-lg p-3">
-                                <div class="font-medium text-slate-700 mb-2" data-editable="council-dongshihui-duty-title">主要职权</div>
-                                <ul class="text-slate-600 space-y-1 text-xs" data-editable="council-dongshihui-duty">
-                                    <li>• 执行股东会决议</li>
-                                    <li>• 制定经营计划与投资方案</li>
-                                    <li>• 制定基本管理制度</li>
-                                    <li>• 决定内部管理机构设置</li>
-                                    <li>• 任免聘任解聘经理层</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 总办会 -->
-                    <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 hover:shadow-md transition">
-                        <div class="flex items-center gap-3 mb-4">
-                            <div class="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center">
-                                <i class="fas fa-briefcase text-emerald-600"></i>
-                            </div>
-                            <div>
-                                <div class="font-bold text-slate-900" data-editable="council-zongbanhui-title">总办会</div>
-                                <div class="text-xs text-slate-500" data-editable="council-zongbanhui-subtitle">日常经营决策</div>
-                            </div>
-                        </div>
-                        <div class="space-y-3 text-sm">
-                            <div class="bg-slate-50 rounded-lg p-3">
-                                <div class="font-medium text-slate-700 mb-2" data-editable="council-zongbanhui-duty-title">主要职责</div>
-                                <ul class="text-slate-600 space-y-1 text-xs" data-editable="council-zongbanhui-duty">
-                                    <li>• 落实董事会决策部署</li>
-                                    <li>• 组织日常经营管理</li>
-                                    <li>• 审议各部门工作方案</li>
-                                    <li>• 协调跨部门重要事项</li>
-                                    <li>• 审批权限内投资事项</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 党委会 -->
-                    <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 hover:shadow-md transition">
-                        <div class="flex items-center gap-3 mb-4">
-                            <div class="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center">
-                                <i class="fas fa-flag text-red-600"></i>
-                            </div>
-                            <div>
-                                <div class="font-bold text-slate-900" data-editable="council-dangweihui-title">党委会</div>
-                                <div class="text-xs text-slate-500" data-editable="council-dangweihui-subtitle">政治核心保障</div>
-                            </div>
-                        </div>
-                        <div class="space-y-3 text-sm">
-                            <div class="bg-slate-50 rounded-lg p-3">
-                                <div class="font-medium text-slate-700 mb-2" data-editable="council-dangweihui-duty-title">主要职责</div>
-                                <ul class="text-slate-600 space-y-1 text-xs" data-editable="council-dangweihui-duty">
-                                    <li>• 前置研究重大事项</li>
-                                    <li>• 把方向管大局保落实</li>
-                                    <li>• 监督政策法规执行</li>
-                                    <li>• 把好选人用人关</li>
-                                    <li>• 参与企业重大决策</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                                <span class="px-2 py-1 bg-slate-100 text-slate-600 rounded">党委书记主持</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 投资决策委员会 -->
-                <div class="bg-gradient-to-r from-amber-50 to-orange-50 rounded-3xl p-6 shadow-sm border border-amber-200">
-                    <div class="flex items-center gap-4 mb-5">
-                        <div class="w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center">
-                            <i class="fas fa-search-dollar text-amber-600 text-lg"></i>
-                        </div>
-                        <div>
-                            <h3 class="font-bold text-slate-900 text-lg" data-editable="council-touweihui-title">投资决策委员会</h3>
-                            <p class="text-sm text-slate-500" data-editable="council-touweihui-subtitle">专业投资审议与风险把控机构</p>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-                        <div class="bg-white rounded-xl p-4">
-                            <div class="font-medium text-slate-700 mb-3 flex items-center gap-2">
-                                <i class="fas fa-clipboard-list text-amber-500"></i> <span data-editable="council-touweihui-shenyi-title">审议事项</span>
-                            </div>
-                            <ul class="text-sm text-slate-600 space-y-2" data-editable="council-touweihui-shenyi-content">
-                                <li>• 股权直投项目投资决策</li>
-                                <li>• 基金设立增资减资清算</li>
-                                <li>• 基金项目投资与退出</li>
-                                <li>• 合伙协议修订等重大事项</li>
-                            </ul>
-                        </div>
-                        <div class="bg-white rounded-xl p-4">
-                            <div class="font-medium text-slate-700 mb-3 flex items-center gap-2">
-                                <i class="fas fa-user-tie text-amber-500"></i> <span data-editable="council-touweihui-renyuan-title">人员构成</span>
-                            </div>
-                            <ul class="text-sm text-slate-600 space-y-2" data-editable="council-touweihui-renyuan-content">
-                                <li>• 公司主要领导担任主任</li>
-                                <li>• 投资风控部门负责人</li>
-                                <li>• 外部行业专家顾问</li>
-                                <li>• 法务财务相关人员</li>
-                            </ul>
-                        </div>
-                        <div class="bg-white rounded-xl p-4">
-                            <div class="font-medium text-slate-700 mb-3 flex items-center gap-2">
-                                <i class="fas fa-gavel text-amber-500"></i> <span data-editable="council-touweihui-guize-title">决策规则</span>
-                            </div>
-                            <ul class="text-sm text-slate-600 space-y-2" data-editable="council-touweihui-guize-content">
-                                <li>• 参会委员超过2/3有效</li>
-                                <li>• 决议需参会委员过半通过</li>
-                                <li>• 重大事项需2/3以上同意</li>
-                                <li>• 形成书面会议纪要存档</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 监事会 -->
-                <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100">
-                    <div class="flex items-center gap-4 mb-5">
-                        <div class="w-12 h-12 rounded-xl bg-teal-100 flex items-center justify-center">
-                            <i class="fas fa-eye text-teal-600 text-lg"></i>
-                        </div>
-                        <div>
-                            <h3 class="font-bold text-slate-900 text-lg" data-editable="council-jianshihui-title">监事会</h3>
-                            <p class="text-sm text-slate-500" data-editable="council-jianshihui-subtitle">公司监督机构，保障合规运营</p>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                        <div class="bg-slate-50 rounded-xl p-4">
-                            <div class="font-medium text-slate-700 mb-3" data-editable="council-jianshihui-jiandu-title">监督职责</div>
-                            <ul class="text-sm text-slate-600 space-y-2" data-editable="council-jianshihui-jiandu-content">
-                                <li>• 监督董事高级管理人员履职</li>
-                                <li>• 检查公司财务状况</li>
-                                <li>• 对违规行为提出纠正建议</li>
-                                <li>• 向股东会提出提案建议</li>
-                            </ul>
-                        </div>
-                        <div class="bg-slate-50 rounded-xl p-4">
-                            <div class="font-medium text-slate-700 mb-3" data-editable="council-jianshihui-lvxing-title">履职方式</div>
-                            <ul class="text-sm text-slate-600 space-y-2" data-editable="council-jianshihui-lvxing-content">
-                                <li>• 列席董事会会议</li>
-                                <li>• 定期开展监督检查</li>
-                                <li>• 发现问题及时报告</li>
-                                <li>• 年度向股东会报告工作</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 会议管理规范 -->
-                <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100">
-                    <h3 class="font-bold text-slate-900 mb-4 flex items-center gap-2">
-                        <i class="fas fa-calendar-check text-slate-500"></i> 会议管理规范
-                    </h3>
-                    <div class="grid grid-cols-2 md:grid-cols-5 gap-4 text-center">
-                        <div class="bg-blue-50 rounded-xl p-4">
-                            <div class="text-blue-600 font-bold text-lg">股东会</div>
-                            <div class="text-xs text-slate-600 mt-2">每年至少1次</div>
-                            <div class="text-xs text-slate-500">提前20日通知</div>
-                        </div>
-                        <div class="bg-violet-50 rounded-xl p-4">
-                            <div class="text-violet-600 font-bold text-lg">董事会</div>
-                            <div class="text-xs text-slate-600 mt-2">每季至少1次</div>
-                            <div class="text-xs text-slate-500">提前10日通知</div>
-                        </div>
-                        <div class="bg-emerald-50 rounded-xl p-4">
-                            <div class="text-emerald-600 font-bold text-lg">总办会</div>
-                            <div class="text-xs text-slate-600 mt-2">每周召开</div>
-                            <div class="text-xs text-slate-500">固定时间地点</div>
-                        </div>
-                        <div class="bg-red-50 rounded-xl p-4">
+                <!-- Flow Diagram -->
+                <div class="rounded-3xl p-8 bg-white border border-slate-200 shadow-sm">
+                    <div class="flex flex-wrap items-center justify-center gap-4">
+                        <div class="rounded-2xl p-5 shadow-sm border-t-4 border-red-500 min-w-[160px] text-center bg-white">
                             <div class="text-red-600 font-bold text-lg">党委会</div>
-                            <div class="text-xs text-slate-600 mt-2">按需召开</div>
-                            <div class="text-xs text-slate-500">重大事项前置</div>
+                            <div class="text-xs text-slate-500 mt-1">前置研究</div>
+                            <div class="text-[10px] text-slate-400 mt-2">"把方向、管大局、保落实"</div>
                         </div>
-                        <div class="bg-amber-50 rounded-xl p-4">
-                            <div class="text-amber-600 font-bold text-lg">投委会</div>
-                            <div class="text-xs text-slate-600 mt-2">项目需要时</div>
-                            <div class="text-xs text-slate-500">及时召开审议</div>
+                        <div class="flex flex-col items-center text-slate-600">
+                            <i class="fas fa-arrow-right"></i>
+                            <span class="text-[10px] mt-1">重大事项审批</span>
+                        </div>
+                        <div class="rounded-2xl p-5 shadow-sm border-t-4 border-emerald-500 min-w-[160px] text-center bg-white">
+                            <div class="text-emerald-600 font-bold text-lg">总办会</div>
+                            <div class="text-xs text-slate-500 mt-1">经营落实</div>
+                            <div class="text-[10px] text-slate-400 mt-2">"谋经营、抓落实、强管理"</div>
+                        </div>
+                        <div class="flex flex-col items-center text-slate-600">
+                            <i class="fas fa-arrow-right"></i>
+                            <span class="text-[10px] mt-1">战略决策</span>
+                        </div>
+                        <div class="rounded-2xl p-5 shadow-sm border-t-4 border-violet-500 min-w-[160px] text-center bg-white">
+                            <div class="text-violet-600 font-bold text-lg">董事会</div>
+                            <div class="text-xs text-slate-500 mt-1">战略决策</div>
+                            <div class="text-[10px] text-slate-400 mt-2">"定战略、作决策、防风险"</div>
+                        </div>
+                        <div class="flex flex-col items-center text-slate-600">
+                            <i class="fas fa-arrow-right"></i>
+                            <span class="text-[10px] mt-1">最高权力</span>
+                        </div>
+                        <div class="rounded-2xl p-5 shadow-sm border-t-4 border-blue-500 min-w-[160px] text-center bg-white">
+                            <div class="text-blue-600 font-bold text-lg">股东会</div>
+                            <div class="text-xs text-slate-500 mt-1">最高权力机构</div>
+                            <div class="text-[10px] text-slate-400 mt-2">决定公司经营方针与投资计划</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100">
+                        <h3 class="font-bold text-slate-900 mb-4 flex items-center gap-2"><i class="fas fa-search-dollar text-amber-500"></i> 投资决策委员会</h3>
+                        <ul class="text-sm text-slate-600 space-y-2 list-disc list-inside">
+                            <li>审议股权直投项目的投资决策</li>
+                            <li>审议基金设立、增资、减资、清算方案</li>
+                            <li>审议基金投资项目的投资与退出</li>
+                            <li>审议基金合伙协议修订等重大事项</li>
+                        </ul>
+                    </div>
+                    <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100">
+                        <h3 class="font-bold text-slate-900 mb-4 flex items-center gap-2"><i class="fas fa-users text-blue-500"></i> 机构职责概览</h3>
+                        <div class="space-y-3 text-sm">
+                            <div class="flex gap-3"><span class="badge bg-amber-100 text-amber-700">权力</span><span class="text-slate-600">股东会：决定经营方针、投资计划、财务预算决算等重大事项</span></div>
+                            <div class="flex gap-3"><span class="badge bg-violet-100 text-violet-700">决策</span><span class="text-slate-600">董事会：制定经营计划、基本管理制度、高管任免方案</span></div>
+                            <div class="flex gap-3"><span class="badge bg-red-100 text-red-700">政治</span><span class="text-slate-600">党委会：前置研究重大经营管理事项，监督政策执行</span></div>
+                            <div class="flex gap-3"><span class="badge bg-emerald-100 text-emerald-700">执行</span><span class="text-slate-600">总办会：日常经营管理决策，协调部门工作</span></div>
                         </div>
                     </div>
                 </div>
@@ -2779,7 +2578,8 @@ function initAppAfterAuth() {
                 <div class="flex items-center justify-between mb-6">
                     <div>
                         <h2 style="font-family:Geist,'Noto Sans SC',sans-serif;font-size:22px;font-weight:700;color:#1e293b;">公司制度</h2>
-                </div>
+                        <p style="font-family:Geist,'Noto Sans SC',sans-serif;font-size:17px;color:#475569;font-weight:500;margin-top:4px;">制度文件分类浏览、在线预览与下载、上传管理</p>
+                    </div>
                     <div class="flex items-center gap-3">
                         <input type="file" id="uploadFileInput" accept=".pdf,.doc,.docx,.xls,.xlsx" style="display:none;" onchange="handleFileUpload(event)">
                         <button onclick="document.getElementById('uploadFileInput').click()" class="px-5 py-2.5 bg-blue-600 text-white rounded-xl font-medium text-sm hover:bg-blue-700 transition flex items-center gap-2 shadow-sm">
@@ -3106,13 +2906,6 @@ function initAppAfterAuth() {
             </div>
         </div>
         <div class="flex items-center gap-2 flex-shrink-0 ml-3">
-            <input type="file" id="replaceFileInput" accept=".pdf,.doc,.docx,.xls,.xlsx" style="display:none;" onchange="handleReplaceFile(event)">
-            <button onclick="triggerReplaceFile()" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium rounded-lg transition flex items-center gap-1.5">
-                <i class="fas fa-sync-alt"></i> 替换
-            </button>
-            <button onclick="deleteHandbookFile()" class="px-3 py-2 bg-red-500 hover:bg-red-600 text-white text-xs font-medium rounded-lg transition flex items-center gap-1.5">
-                <i class="fas fa-trash"></i> 删除
-            </button>
             <a id="hbModalDownload" href="#" class="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-lg transition flex items-center gap-1.5" download="">
                 <i class="fas fa-download"></i> 下载
             </a>
@@ -3133,56 +2926,6 @@ function initAppAfterAuth() {
                 <i class="fas fa-download"></i> 下载文档
             </a>
         </div>
-    </div>
-</div>
-
-<!-- Edit Modal -->
-<div id="editModalOverlay" class="fixed inset-0 bg-black/50 z-50 hidden" onclick="closeEditModal()"></div>
-<div id="editModalPanel" class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-2xl shadow-2xl w-[600px] max-w-[90vw] z-50 hidden">
-    <div class="p-5 border-b border-slate-100 flex items-center justify-between">
-        <h3 class="font-bold text-slate-900">编辑内容</h3>
-        <button onclick="closeEditModal()" class="w-8 h-8 rounded-lg hover:bg-slate-100 flex items-center justify-center text-slate-500">
-            <i class="fas fa-times"></i>
-        </button>
-    </div>
-    <div class="p-5">
-        <div class="mb-4">
-            <label class="text-sm text-slate-600 mb-2 block">内容文本</label>
-            <textarea id="editTextarea" class="w-full h-32 px-3 py-2 border border-slate-200 rounded-lg text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500/40" placeholder="输入内容..."></textarea>
-        </div>
-        <div class="mb-4">
-            <label class="text-sm text-slate-600 mb-2 block">字体大小</label>
-            <select id="editFontSize" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm">
-                <option value="12">12px</option>
-                <option value="14">14px</option>
-                <option value="16">16px</option>
-                <option value="18" selected>18px</option>
-                <option value="20">20px</option>
-                <option value="22">22px</option>
-                <option value="24">24px</option>
-            </select>
-        </div>
-        <div class="mb-4">
-            <label class="text-sm text-slate-600 mb-2 block">字体粗细</label>
-            <select id="editFontWeight" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm">
-                <option value="400">常规</option>
-                <option value="500">中等</option>
-                <option value="600">半粗</option>
-                <option value="700" selected>粗体</option>
-                <option value="800">特粗</option>
-            </select>
-        </div>
-        <div class="mb-4">
-            <label class="text-sm text-slate-600 mb-2 block">文字颜色</label>
-            <div class="flex gap-2">
-                <input type="color" id="editFontColor" value="#1e293b" class="w-10 h-10 rounded-lg border border-slate-200 cursor-pointer">
-                <input type="text" id="editFontColorText" value="#1e293b" class="flex-1 px-3 py-2 border border-slate-200 rounded-lg text-sm" placeholder="#1e293b">
-            </div>
-        </div>
-    </div>
-    <div class="p-5 border-t border-slate-100 flex gap-3 justify-end">
-        <button onclick="closeEditModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg text-sm font-medium">取消</button>
-        <button onclick="saveEditContent()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium">保存</button>
     </div>
 </div>
 
@@ -7971,8 +7714,8 @@ const defaultNodeData = {
     },
     touweihui: {
         motto: '审项目、控风险、定价值',
-        summary: '负责对公司各类投资项目进行专业审查与独立评估，聚焦投资可行性、财务回报、合规性及战略匹配度，实行"专业评审、集体表决、利益回避"。',
-        coreFunction: '负责对公司各类投资项目进行专业审查与独立评估，聚焦投资可行性、财务回报、合规性及战略匹配度，实行"专业评审、集体表决、利益回避"。按权限对投前尽调、交易结构、估值定价、风险预案进行多维度论证；对超权限或重大投资项目出具评审意见后，按程序提交董事会/股东会决策；同步建立投后跟踪与退出评估机制。',
+        summary: '负责对公司各类投资项目进行专业审查与独立评估，聚焦投资可行性、财务回报、合规性及战略匹配度，实行“专业评审、集体表决、利益回避”。',
+        coreFunction: '负责对公司各类投资项目进行专业审查与独立评估，聚焦投资可行性、财务回报、合规性及战略匹配度，实行“专业评审、集体表决、利益回避”。按权限对投前尽调、交易结构、估值定价、风险预案进行多维度论证；对超权限或重大投资项目出具评审意见后，按程序提交董事会/股东会决策；同步建立投后跟踪与退出评估机制。',
         childTitle: '决策支持机构',
         positions: '投资决策委员会主任\n委员',
         duties: '审议股权直投项目的投资决策。\n审议基金设立、增资、减资、清算方案。\n审议基金投资项目的投资与退出。\n审议基金合伙协议修订等重大事项。\n对重大投资风险进行评估与把控。',
@@ -8908,7 +8651,6 @@ function filterHandbook(cat) {
 }
 
 function openHbModal(id) {
-    currentHbFileId = id;
     const f = handbookFiles.find(x => x.id === id);
     if (!f) return;
     const path = HANDBOOK_BASE + encodeURIComponent(f.file);
@@ -8940,173 +8682,10 @@ function openHbModal(id) {
     document.getElementById('hbModalPanel').classList.add('open');
 }
 
-let currentHbFileId = null;
-
-function triggerReplaceFile() {
-    document.getElementById('replaceFileInput').click();
-}
-
-function handleReplaceFile(event) {
-    const file = event.target.files[0];
-    if (!file || !currentHbFileId) return;
-
-    const oldFile = handbookFiles.find(x => x.id === currentHbFileId);
-    if (!oldFile) return;
-
-    const ext = file.name.split('.').pop().toLowerCase();
-    if (!['pdf', 'doc', 'docx', 'xls', 'xlsx'].includes(ext)) {
-        alert('仅支持 PDF、Word、Excel 文件格式');
-        return;
-    }
-
-    // 更新文件信息
-    oldFile.file = file.name;
-    oldFile.ext = ext;
-
-    // 提示用户需要手动将新文件放入 docs 目录
-    alert(`文件已更新为：${file.name}\n请确保将新文件放入 docs 目录中，并重新部署。\n文件将在导出 HTML 后生效。`);
-
-    closeHbModal();
-    filterHandbook(document.querySelector('.hb-filter.bg-blue-600')?.dataset.cat || 'all');
-}
-
-function deleteHandbookFile() {
-    if (!currentHbFileId) return;
-
-    const f = handbookFiles.find(x => x.id === currentHbFileId);
-    if (!f) return;
-
-    if (!confirm(`确定要删除"${f.name}"吗？\n删除后请同步删除 docs 目录中的对应文件。`)) return;
-
-    // 从数组中移除
-    const index = handbookFiles.findIndex(x => x.id === currentHbFileId);
-    if (index > -1) {
-        handbookFiles.splice(index, 1);
-    }
-
-    closeHbModal();
-    filterHandbook(document.querySelector('.hb-filter.bg-blue-600')?.dataset.cat || 'all');
-}
-
 function closeHbModal() {
     document.getElementById('hbModalOverlay').classList.remove('open');
     document.getElementById('hbModalPanel').classList.remove('open');
     document.getElementById('hbPdfFrame').src = '';
-}
-
-// ==========================================
-// EDIT MODE
-// ==========================================
-let currentEditTarget = null;
-
-function enableEditMode(section) {
-    // 让所有带有 data-editable 属性的元素可点击编辑
-    const sectionEl = document.getElementById('tab-' + section);
-    if (!sectionEl) return;
-
-    const editables = sectionEl.querySelectorAll('[data-editable]');
-    editables.forEach(el => {
-        el.style.cursor = 'pointer';
-        el.style.transition = 'all 0.2s';
-        el.classList.add('edit-highlight');
-        el.onclick = function(e) {
-            e.stopPropagation();
-            openEditModal(this.dataset.editable, this);
-        };
-    });
-
-    // 高亮显示可编辑元素
-    const style = document.createElement('style');
-    style.id = 'editModeStyle';
-    style.textContent = '.edit-highlight:hover { outline: 2px dashed #3b82f6; outline-offset: 2px; background-color: rgba(59,130,246,0.05); }';
-    document.head.appendChild(style);
-
-    // 显示提示
-    const tip = document.createElement('div');
-    tip.id = 'editModeTip';
-    tip.className = 'fixed top-20 right-4 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm shadow-lg z-40 flex items-center gap-3';
-    tip.innerHTML = '<span>点击蓝色框内的文字进行编辑</span><button onclick="disableEditMode()" class="px-2 py-1 bg-white/20 rounded hover:bg-white/30 text-xs">完成编辑</button>';
-    document.body.appendChild(tip);
-}
-
-function disableEditMode() {
-    // 移除编辑模式样式
-    const style = document.getElementById('editModeStyle');
-    if (style) style.remove();
-
-    const tip = document.getElementById('editModeTip');
-    if (tip) tip.remove();
-
-    // 移除所有编辑高亮
-    document.querySelectorAll('.edit-highlight').forEach(el => {
-        el.style.cursor = '';
-        el.classList.remove('edit-highlight');
-        el.onclick = null;
-    });
-}
-
-function openEditModal(key, element) {
-    currentEditTarget = { key, element };
-
-    const text = element.textContent || element.innerText || '';
-    document.getElementById('editTextarea').value = text;
-
-    // 获取当前样式
-    const computedStyle = window.getComputedStyle(element);
-    const fontSize = parseInt(computedStyle.fontSize) || 18;
-    const fontWeight = computedStyle.fontWeight || '700';
-    const color = computedStyle.color || '#1e293b';
-
-    document.getElementById('editFontSize').value = fontSize;
-    document.getElementById('editFontWeight').value = fontWeight;
-    document.getElementById('editFontColor').value = rgbToHex(color);
-    document.getElementById('editFontColorText').value = rgbToHex(color);
-
-    // 颜色输入同步
-    document.getElementById('editFontColor').oninput = function() {
-        document.getElementById('editFontColorText').value = this.value;
-    };
-    document.getElementById('editFontColorText').oninput = function() {
-        if (/^#[0-9A-Fa-f]{6}$/.test(this.value)) {
-            document.getElementById('editFontColor').value = this.value;
-        }
-    };
-
-    document.getElementById('editModalOverlay').classList.remove('hidden');
-    document.getElementById('editModalPanel').classList.remove('hidden');
-}
-
-function closeEditModal() {
-    document.getElementById('editModalOverlay').classList.add('hidden');
-    document.getElementById('editModalPanel').classList.add('hidden');
-    currentEditTarget = null;
-}
-
-function saveEditContent() {
-    if (!currentEditTarget) return;
-
-    const { element } = currentEditTarget;
-    const text = document.getElementById('editTextarea').value;
-    const fontSize = document.getElementById('editFontSize').value;
-    const fontWeight = document.getElementById('editFontWeight').value;
-    const color = document.getElementById('editFontColorText').value;
-
-    // 更新元素内容
-    element.textContent = text;
-    element.style.fontSize = fontSize + 'px';
-    element.style.fontWeight = fontWeight;
-    if (/^#[0-9A-Fa-f]{6}$/.test(color)) {
-        element.style.color = color;
-    }
-
-    closeEditModal();
-}
-
-function rgbToHex(rgb) {
-    if (/^#[0-9A-Fa-f]{6}$/.test(rgb)) return rgb;
-    const result = rgb.match(/\d+/g);
-    if (!result || result.length < 3) return '#1e293b';
-    return '#' + ((1 << 24) + (parseInt(result[0]) << 16) + (parseInt(result[1]) << 8) + parseInt(result[2])).toString(16).slice(1);
 }
 
 // ==========================================
@@ -10430,165 +10009,9 @@ function updateBizStats(data) {
 }
 
 // ==========================================
-// GLOBAL SEARCH
-// ==========================================
-function initGlobalSearch() {
-    const searchInput = document.getElementById('globalSearch');
-    if (!searchInput) return;
-
-    // 创建搜索结果下拉框
-    const searchResults = document.createElement('div');
-    searchResults.id = 'searchResults';
-    searchResults.className = 'absolute top-full left-0 right-0 mt-1 bg-white rounded-xl shadow-lg border border-slate-200 max-h-80 overflow-auto z-50 hidden';
-    searchResults.style.width = '400px';
-    searchInput.parentElement.appendChild(searchResults);
-
-    searchInput.addEventListener('input', function(e) {
-        const query = e.target.value.trim().toLowerCase();
-        if (query.length < 1) {
-            searchResults.classList.add('hidden');
-            return;
-        }
-        const results = performSearch(query);
-        displaySearchResults(results, searchResults);
-    });
-
-    searchInput.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            searchResults.classList.add('hidden');
-            searchInput.value = '';
-        }
-    });
-
-    // 点击外部关闭
-    document.addEventListener('click', function(e) {
-        if (!searchInput.parentElement.contains(e.target)) {
-            searchResults.classList.add('hidden');
-        }
-    });
-}
-
-function performSearch(query) {
-    const results = [];
-
-    // 搜索组织架构节点
-    orgNodes.forEach(node => {
-        if (node.title.toLowerCase().includes(query) ||
-            (node.subtitle && node.subtitle.toLowerCase().includes(query))) {
-            results.push({
-                type: 'org',
-                title: node.title,
-                desc: node.subtitle || '',
-                icon: node.icon || 'fa-sitemap',
-                color: node.color || '#3b82f6',
-                action: () => { switchTab('org'); highlightNode(node.id); }
-            });
-        }
-    });
-
-    // 搜索权责清单
-    authItems.forEach(item => {
-        if (item.title.toLowerCase().includes(query) ||
-            (item.items && item.items.some(i => i.toLowerCase().includes(query)))) {
-            results.push({
-                type: 'auth',
-                title: item.title,
-                desc: item.items ? item.items.join(', ') : '',
-                icon: 'fa-tasks',
-                color: '#64748b',
-                action: () => { switchTab('authority'); }
-            });
-        }
-    });
-
-    // 搜索岗位职责
-    positions.forEach(pos => {
-        if (pos.title.toLowerCase().includes(query) ||
-            (pos.responsibilities && pos.responsibilities.some(r => r.toLowerCase().includes(query)))) {
-            results.push({
-                type: 'position',
-                title: pos.title,
-                desc: pos.responsibilities ? pos.responsibilities.slice(0, 3).join(', ') : '',
-                icon: 'fa-user-tie',
-                color: '#8b5cf6',
-                action: () => { switchTab('positions'); highlightPosition(pos.id); }
-            });
-        }
-    });
-
-    // 搜索公司制度
-    handbookFiles.forEach(file => {
-        if (file.name.toLowerCase().includes(query)) {
-            results.push({
-                type: 'handbook',
-                title: file.name,
-                desc: hbCatNames[file.cat] || '',
-                icon: file.ext === 'pdf' ? 'fa-file-pdf' : 'fa-file-word',
-                color: file.ext === 'pdf' ? '#dc2626' : '#2563eb',
-                action: () => { switchTab('handbook'); openHbModal(file.id); }
-            });
-        }
-    });
-
-    return results.slice(0, 20);
-}
-
-function displaySearchResults(results, container) {
-    if (results.length === 0) {
-        container.innerHTML = '<div class="p-4 text-center text-slate-500 text-sm">未找到相关结果</div>';
-        container.classList.remove('hidden');
-        return;
-    }
-
-    const typeLabels = {
-        org: '组织架构',
-        auth: '权责清单',
-        position: '岗位职责',
-        handbook: '公司制度'
-    };
-
-    container.innerHTML = results.map(r => `
-        <div class="search-result-item p-3 hover:bg-slate-50 cursor-pointer border-b border-slate-100 last:border-0 flex items-center gap-3" onclick="(${r.action.toString()})(); document.getElementById('searchResults').classList.add('hidden'); document.getElementById('globalSearch').value = '';">
-            <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background: ${r.color}15; color: ${r.color};">
-                <i class="fas ${r.icon} text-sm"></i>
-            </div>
-            <div class="flex-1 min-w-0">
-                <div class="font-medium text-slate-900 text-sm truncate">${r.title}</div>
-                <div class="text-xs text-slate-500 truncate">${r.desc}</div>
-            </div>
-            <div class="text-xs text-slate-400 bg-slate-100 px-2 py-1 rounded">${typeLabels[r.type]}</div>
-        </div>
-    `).join('');
-    container.classList.remove('hidden');
-}
-
-function highlightNode(nodeId) {
-    setTimeout(() => {
-        const node = document.querySelector(`.org-node[data-id="${nodeId}"]`);
-        if (node) {
-            node.style.transition = 'all 0.3s';
-            node.style.boxShadow = '0 0 0 3px #3b82f6, 0 10px 40px rgba(59,130,246,0.3)';
-            setTimeout(() => { node.style.boxShadow = ''; }, 2000);
-        }
-    }, 300);
-}
-
-function highlightPosition(posId) {
-    setTimeout(() => {
-        const card = document.querySelector(`[data-position-id="${posId}"]`);
-        if (card) {
-            card.style.transition = 'all 0.3s';
-            card.style.boxShadow = '0 0 0 3px #8b5cf6, 0 10px 40px rgba(139,92,246,0.3)';
-            setTimeout(() => { card.style.boxShadow = ''; }, 2000);
-        }
-    }, 300);
-}
-
-// ==========================================
 // EXPORT HTML WITH CURRENT EDITS
 // ==========================================
 
 </script>
 
-</body>
-</html>
+</body><div id="immersive-translate-popup" style="all: initial"></div></html>
