@@ -2,7 +2,7 @@
 <html lang="zh-CN"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>天蚨基金发展规划(20260419v1.05)</title>
+    <title>天蚨基金发展规划(20260419v1.06)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -1727,7 +1727,7 @@ function initAppAfterAuth() {
 <body class="text-slate-900">
 <div id="pwdOverlay">
 <div id="pwdBox">
-<h2>天蚨基金规划(20260419v1.05)</h2>
+<h2>天蚨基金规划(20260419v1.06)</h2>
 <p>请输入访问密码以继续</p>
 <input id="pwdInput" type="password" placeholder="请输入密码" onkeydown="if(event.key==='Enter')checkPassword()">
 <button id="pwdBtn" onclick="checkPassword()">进入系统</button>
@@ -1810,10 +1810,7 @@ function initAppAfterAuth() {
     <header class="h-16 glass-dark-header flex items-center justify-between px-6 z-50 fixed top-0 left-0 right-0">
         <div class="flex items-center gap-4">
             <img src="logo.jpg" alt="天蚨基金" class="w-9 h-9 rounded-xl object-cover shadow-lg">
-            <div>
-                <div class="font-semibold text-slate-900 text-sm">天蚨基金</div>
-                <div class="text-[11px] text-slate-500">20260418</div>
-            </div>
+            <div class="font-semibold text-slate-900 text-sm whitespace-nowrap text-center">天蚨基金</div>
         </div>
 
         <!-- Mobile menu toggle button -->
@@ -9918,6 +9915,11 @@ function resizeNeuralCanvas() {
     // Reset transform then scale to avoid accumulation
     neuralCtx.setTransform(1, 0, 0, 1, 0, 0);
     neuralCtx.scale(2, 2);
+    // 清理动态生成的子节点，避免窗口大小变化时位置错乱
+    const categoryContainer = document.getElementById('categoryNodes');
+    if (categoryContainer) {
+        categoryContainer.querySelectorAll('.sub-node, .sub-wrapper').forEach(n => n.remove());
+    }
 }
 
 function createParticles() {
@@ -10076,6 +10078,9 @@ function activateNeuron(type) {
             node.classList.add('inactive');
         }
     });
+
+    // 显示返回按钮
+    document.getElementById('nnResetBtn').classList.add('show');
 
     // Generate category nodes after position transition settles
     setTimeout(() => generateCategoryNodes(type), 400);
@@ -10667,6 +10672,14 @@ function initGlobalSearch() {
         if (e.key === 'Escape') {
             searchResults.classList.add('hidden');
             searchInput.value = '';
+        }
+        if (e.key === 'Enter') {
+            const query = searchInput.value.trim().toLowerCase();
+            if (query.length >= 1) {
+                const results = performSearch(query);
+                displaySearchResults(results, searchResults);
+                searchResults.classList.remove('hidden');
+            }
         }
     });
 
