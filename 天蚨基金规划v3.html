@@ -1862,10 +1862,12 @@ function initAppAfterAuth() {
         <!-- STRATEGY TAB -->
         <section id="tab-strategy" class="tab-content hidden p-8 overflow-auto h-[calc(100vh-64px)]">
             <div class="max-w-4xl mx-auto space-y-8">
-                <div class="text-center mb-10 flex items-center justify-center gap-4">
-                    <h2 class="text-2xl font-bold text-slate-900" data-editable="strategy-title">战略规划</h2>
-                    <button onclick="enableEditMode('strategy')" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-medium rounded-lg transition flex items-center gap-1">
-                        <i class="fas fa-edit"></i> 编辑
+                <div class="flex items-center justify-between mb-8">
+                    <div class="text-center flex-1">
+                        <h2 class="text-2xl font-bold text-slate-900" data-editable="strategy-title">战略规划</h2>
+                    </div>
+                    <button onclick="enableEditMode('strategy')" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition flex items-center gap-2 shadow-sm">
+                        <i class="fas fa-edit"></i> 编辑内容
                     </button>
                 </div>
 
@@ -2196,13 +2198,15 @@ function initAppAfterAuth() {
         <!-- COUNCIL TAB -->
         <section id="tab-council" class="tab-content hidden p-8 overflow-auto h-[calc(100vh-64px)]">
             <div class="max-w-6xl mx-auto space-y-8">
-                <div class="text-center mb-8 flex items-center justify-center gap-4">
-                    <h2 style="font-family:Geist,'Noto Sans SC',sans-serif;font-size:22px;font-weight:700;color:#1e293b;" data-editable="council-title">议事机构</h2>
-                    <button onclick="enableEditMode('council')" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-medium rounded-lg transition flex items-center gap-1">
-                        <i class="fas fa-edit"></i> 编辑
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <h2 style="font-family:Geist,'Noto Sans SC',sans-serif;font-size:22px;font-weight:700;color:#1e293b;" data-editable="council-title">议事机构</h2>
+                        <p style="font-family:Geist,'Noto Sans SC',sans-serif;font-size:14px;color:#64748b;margin-top:4px;" data-editable="council-subtitle">公司治理体系的核心决策与监督机制</p>
+                    </div>
+                    <button onclick="enableEditMode('council')" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition flex items-center gap-2 shadow-sm">
+                        <i class="fas fa-edit"></i> 编辑内容
                     </button>
                 </div>
-                <p style="font-family:Geist,'Noto Sans SC',sans-serif;font-size:14px;color:#64748b;margin-top:8px;text-align:center;" data-editable="council-subtitle">公司治理体系的核心决策与监督机制</p>
 
                 <!-- 决策层级流程图 -->
                 <div class="rounded-3xl p-6 bg-gradient-to-r from-slate-50 to-blue-50 border border-slate-200 shadow-sm">
@@ -2239,24 +2243,20 @@ function initAppAfterAuth() {
                                 <i class="fas fa-building text-blue-600"></i>
                             </div>
                             <div>
-                                <div class="font-bold text-slate-900">股东会</div>
-                                <div class="text-xs text-slate-500">最高权力机构</div>
+                                <div class="font-bold text-slate-900" data-editable="council-gudonghui-title">股东会</div>
+                                <div class="text-xs text-slate-500" data-editable="council-gudonghui-subtitle">最高权力机构</div>
                             </div>
                         </div>
                         <div class="space-y-3 text-sm">
                             <div class="bg-slate-50 rounded-lg p-3">
-                                <div class="font-medium text-slate-700 mb-2">主要职权</div>
-                                <ul class="text-slate-600 space-y-1 text-xs">
+                                <div class="font-medium text-slate-700 mb-2" data-editable="council-gudonghui-duty-title">主要职权</div>
+                                <ul class="text-slate-600 space-y-1 text-xs" data-editable="council-gudonghui-duty">
                                     <li>• 决定经营方针与投资计划</li>
                                     <li>• 选举更换非职工董事监事</li>
                                     <li>• 审批财务预算决算方案</li>
                                     <li>• 决定增减注册资本</li>
                                     <li>• 审批合并分立解散清算</li>
                                 </ul>
-                            </div>
-                            <div class="flex items-center gap-2 text-xs">
-                                <span class="px-2 py-1 bg-blue-50 text-blue-600 rounded">年度会议</span>
-                                <span class="px-2 py-1 bg-slate-100 text-slate-600 rounded">临时会议</span>
                             </div>
                         </div>
                     </div>
@@ -2268,24 +2268,20 @@ function initAppAfterAuth() {
                                 <i class="fas fa-users-cog text-violet-600"></i>
                             </div>
                             <div>
-                                <div class="font-bold text-slate-900">董事会</div>
-                                <div class="text-xs text-slate-500">战略决策机构</div>
+                                <div class="font-bold text-slate-900" data-editable="council-dongshihui-title">董事会</div>
+                                <div class="text-xs text-slate-500" data-editable="council-dongshihui-subtitle">战略决策机构</div>
                             </div>
                         </div>
                         <div class="space-y-3 text-sm">
                             <div class="bg-slate-50 rounded-lg p-3">
-                                <div class="font-medium text-slate-700 mb-2">主要职权</div>
-                                <ul class="text-slate-600 space-y-1 text-xs">
+                                <div class="font-medium text-slate-700 mb-2" data-editable="council-dongshihui-duty-title">主要职权</div>
+                                <ul class="text-slate-600 space-y-1 text-xs" data-editable="council-dongshihui-duty">
                                     <li>• 执行股东会决议</li>
                                     <li>• 制定经营计划与投资方案</li>
                                     <li>• 制定基本管理制度</li>
                                     <li>• 决定内部管理机构设置</li>
                                     <li>• 任免聘任解聘经理层</li>
                                 </ul>
-                            </div>
-                            <div class="flex items-center gap-2 text-xs">
-                                <span class="px-2 py-1 bg-violet-50 text-violet-600 rounded">定期会议</span>
-                                <span class="px-2 py-1 bg-slate-100 text-slate-600 rounded">每季至少1次</span>
                             </div>
                         </div>
                     </div>
@@ -2297,24 +2293,20 @@ function initAppAfterAuth() {
                                 <i class="fas fa-briefcase text-emerald-600"></i>
                             </div>
                             <div>
-                                <div class="font-bold text-slate-900">总办会</div>
-                                <div class="text-xs text-slate-500">日常经营决策</div>
+                                <div class="font-bold text-slate-900" data-editable="council-zongbanhui-title">总办会</div>
+                                <div class="text-xs text-slate-500" data-editable="council-zongbanhui-subtitle">日常经营决策</div>
                             </div>
                         </div>
                         <div class="space-y-3 text-sm">
                             <div class="bg-slate-50 rounded-lg p-3">
-                                <div class="font-medium text-slate-700 mb-2">主要职责</div>
-                                <ul class="text-slate-600 space-y-1 text-xs">
+                                <div class="font-medium text-slate-700 mb-2" data-editable="council-zongbanhui-duty-title">主要职责</div>
+                                <ul class="text-slate-600 space-y-1 text-xs" data-editable="council-zongbanhui-duty">
                                     <li>• 落实董事会决策部署</li>
                                     <li>• 组织日常经营管理</li>
                                     <li>• 审议各部门工作方案</li>
                                     <li>• 协调跨部门重要事项</li>
                                     <li>• 审批权限内投资事项</li>
                                 </ul>
-                            </div>
-                            <div class="flex items-center gap-2 text-xs">
-                                <span class="px-2 py-1 bg-emerald-50 text-emerald-600 rounded">每周例会</span>
-                                <span class="px-2 py-1 bg-slate-100 text-slate-600 rounded">总经理主持</span>
                             </div>
                         </div>
                     </div>
@@ -2326,14 +2318,14 @@ function initAppAfterAuth() {
                                 <i class="fas fa-flag text-red-600"></i>
                             </div>
                             <div>
-                                <div class="font-bold text-slate-900">党委会</div>
-                                <div class="text-xs text-slate-500">政治核心保障</div>
+                                <div class="font-bold text-slate-900" data-editable="council-dangweihui-title">党委会</div>
+                                <div class="text-xs text-slate-500" data-editable="council-dangweihui-subtitle">政治核心保障</div>
                             </div>
                         </div>
                         <div class="space-y-3 text-sm">
                             <div class="bg-slate-50 rounded-lg p-3">
-                                <div class="font-medium text-slate-700 mb-2">主要职责</div>
-                                <ul class="text-slate-600 space-y-1 text-xs">
+                                <div class="font-medium text-slate-700 mb-2" data-editable="council-dangweihui-duty-title">主要职责</div>
+                                <ul class="text-slate-600 space-y-1 text-xs" data-editable="council-dangweihui-duty">
                                     <li>• 前置研究重大事项</li>
                                     <li>• 把方向管大局保落实</li>
                                     <li>• 监督政策法规执行</li>
@@ -2341,8 +2333,9 @@ function initAppAfterAuth() {
                                     <li>• 参与企业重大决策</li>
                                 </ul>
                             </div>
-                            <div class="flex items-center gap-2 text-xs">
-                                <span class="px-2 py-1 bg-red-50 text-red-600 rounded">前置程序</span>
+                        </div>
+                    </div>
+                </div>
                                 <span class="px-2 py-1 bg-slate-100 text-slate-600 rounded">党委书记主持</span>
                             </div>
                         </div>
@@ -2356,16 +2349,16 @@ function initAppAfterAuth() {
                             <i class="fas fa-search-dollar text-amber-600 text-lg"></i>
                         </div>
                         <div>
-                            <h3 class="font-bold text-slate-900 text-lg">投资决策委员会</h3>
-                            <p class="text-sm text-slate-500">专业投资审议与风险把控机构</p>
+                            <h3 class="font-bold text-slate-900 text-lg" data-editable="council-touweihui-title">投资决策委员会</h3>
+                            <p class="text-sm text-slate-500" data-editable="council-touweihui-subtitle">专业投资审议与风险把控机构</p>
                         </div>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
                         <div class="bg-white rounded-xl p-4">
                             <div class="font-medium text-slate-700 mb-3 flex items-center gap-2">
-                                <i class="fas fa-clipboard-list text-amber-500"></i> 审议事项
+                                <i class="fas fa-clipboard-list text-amber-500"></i> <span data-editable="council-touweihui-shenyi-title">审议事项</span>
                             </div>
-                            <ul class="text-sm text-slate-600 space-y-2">
+                            <ul class="text-sm text-slate-600 space-y-2" data-editable="council-touweihui-shenyi-content">
                                 <li>• 股权直投项目投资决策</li>
                                 <li>• 基金设立增资减资清算</li>
                                 <li>• 基金项目投资与退出</li>
@@ -2374,9 +2367,9 @@ function initAppAfterAuth() {
                         </div>
                         <div class="bg-white rounded-xl p-4">
                             <div class="font-medium text-slate-700 mb-3 flex items-center gap-2">
-                                <i class="fas fa-user-tie text-amber-500"></i> 人员构成
+                                <i class="fas fa-user-tie text-amber-500"></i> <span data-editable="council-touweihui-renyuan-title">人员构成</span>
                             </div>
-                            <ul class="text-sm text-slate-600 space-y-2">
+                            <ul class="text-sm text-slate-600 space-y-2" data-editable="council-touweihui-renyuan-content">
                                 <li>• 公司主要领导担任主任</li>
                                 <li>• 投资风控部门负责人</li>
                                 <li>• 外部行业专家顾问</li>
@@ -2385,9 +2378,9 @@ function initAppAfterAuth() {
                         </div>
                         <div class="bg-white rounded-xl p-4">
                             <div class="font-medium text-slate-700 mb-3 flex items-center gap-2">
-                                <i class="fas fa-gavel text-amber-500"></i> 决策规则
+                                <i class="fas fa-gavel text-amber-500"></i> <span data-editable="council-touweihui-guize-title">决策规则</span>
                             </div>
-                            <ul class="text-sm text-slate-600 space-y-2">
+                            <ul class="text-sm text-slate-600 space-y-2" data-editable="council-touweihui-guize-content">
                                 <li>• 参会委员超过2/3有效</li>
                                 <li>• 决议需参会委员过半通过</li>
                                 <li>• 重大事项需2/3以上同意</li>
@@ -2404,14 +2397,14 @@ function initAppAfterAuth() {
                             <i class="fas fa-eye text-teal-600 text-lg"></i>
                         </div>
                         <div>
-                            <h3 class="font-bold text-slate-900 text-lg">监事会</h3>
-                            <p class="text-sm text-slate-500">公司监督机构，保障合规运营</p>
+                            <h3 class="font-bold text-slate-900 text-lg" data-editable="council-jianshihui-title">监事会</h3>
+                            <p class="text-sm text-slate-500" data-editable="council-jianshihui-subtitle">公司监督机构，保障合规运营</p>
                         </div>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <div class="bg-slate-50 rounded-xl p-4">
-                            <div class="font-medium text-slate-700 mb-3">监督职责</div>
-                            <ul class="text-sm text-slate-600 space-y-2">
+                            <div class="font-medium text-slate-700 mb-3" data-editable="council-jianshihui-jiandu-title">监督职责</div>
+                            <ul class="text-sm text-slate-600 space-y-2" data-editable="council-jianshihui-jiandu-content">
                                 <li>• 监督董事高级管理人员履职</li>
                                 <li>• 检查公司财务状况</li>
                                 <li>• 对违规行为提出纠正建议</li>
@@ -2419,8 +2412,8 @@ function initAppAfterAuth() {
                             </ul>
                         </div>
                         <div class="bg-slate-50 rounded-xl p-4">
-                            <div class="font-medium text-slate-700 mb-3">履职方式</div>
-                            <ul class="text-sm text-slate-600 space-y-2">
+                            <div class="font-medium text-slate-700 mb-3" data-editable="council-jianshihui-lvxing-title">履职方式</div>
+                            <ul class="text-sm text-slate-600 space-y-2" data-editable="council-jianshihui-lvxing-content">
                                 <li>• 列席董事会会议</li>
                                 <li>• 定期开展监督检查</li>
                                 <li>• 发现问题及时报告</li>
