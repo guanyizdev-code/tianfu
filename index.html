@@ -2,7 +2,7 @@
 <html lang="zh-CN"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>天蚨基金发展规划(20260419v1.12)</title>
+    <title>天蚨基金发展规划(20260419v1.13)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -1728,7 +1728,7 @@ function initAppAfterAuth() {
 <body class="text-slate-900">
 <div id="pwdOverlay">
 <div id="pwdBox">
-<h2>天蚨基金规划(20260419v1.12)</h2>
+<h2>天蚨基金规划(20260419v1.13)</h2>
 <p>请输入访问密码以继续</p>
 <input id="pwdInput" type="password" placeholder="请输入密码" onkeydown="if(event.key==='Enter')checkPassword()">
 <button id="pwdBtn" onclick="checkPassword()">进入系统</button>
@@ -2534,6 +2534,7 @@ function initAppAfterAuth() {
                         <thead class="sticky top-0 z-20">
                             <tr>
                                 <th class="text-left px-4 py-3 border-b w-14">序号</th>
+                                <th class="text-left px-2 py-3 border-b w-12 text-xs text-slate-400">颜色</th>
                                 <th class="text-left px-4 py-3 border-b w-20">权责单位</th>
                                 <th class="text-left px-4 py-3 border-b min-w-[180px]">关键事项</th>
                                 <th class="text-left px-4 py-3 border-b">决策机构</th>
@@ -8991,15 +8992,17 @@ function renderAuthorityTable(data, editMode = false) {
         const highlight = row['highlight'] || '';
         const needConfirm = row['need_confirm'];
 
-        // 黄色标题行（一、二、三...）
-        if (highlight === 'yellow' && row['序号'].includes('、')) {
-            html += `<tr style="background:#FFFDE7;" data-row-idx="${idx}"><td colspan="26" class="px-4 py-2 font-bold text-slate-700 text-sm border-b border-yellow-200">${row['序号']}</td></tr>`;
+        // 黄色标题行（一、二、三... 或 有highlight标记）
+        if (highlight === 'yellow') {
+            const text = row['序号'] || '';
+            html += `<tr style="background:#FFFDE7;" data-row-idx="${idx}"><td colspan="27" class="px-4 py-2 font-bold text-slate-700 text-sm border-b border-yellow-200">${text}</td></tr>`;
             return;
         }
 
-        // 浅蓝色子标题行（1.1, 1.2...）
-        if (highlight === 'lightblue' && !row['关键事项']) {
-            html += `<tr style="background:#E3F2FD;" data-row-idx="${idx}"><td colspan="26" class="px-4 py-2 font-semibold text-slate-600 text-sm">${row['序号']} ${row['权责单位']}</td></tr>`;
+        // 浅蓝色子标题行（有highlight标记）
+        if (highlight === 'lightblue') {
+            const text = (row['序号'] || '') + ' ' + (row['权责单位'] || '');
+            html += `<tr style="background:#E3F2FD;" data-row-idx="${idx}"><td colspan="27" class="px-4 py-2 font-semibold text-slate-600 text-sm">${text}</td></tr>`;
             return;
         }
 
@@ -9017,9 +9020,24 @@ function renderAuthorityTable(data, editMode = false) {
                 // 文本列可直接编辑
                 if (editMode) {
                     html += `<td class="px-4 py-3 text-xs" style="${cellConfirmStyle}" data-auth-col="${col}" data-auth-row="${idx}"><input type="text" value="${value}" class="w-full px-2 py-1 border border-blue-300 rounded text-xs focus:outline-none focus:ring-2 focus:ring-blue-500" onchange="updateAuthData(${idx}, '${col}', this.value)"></td>`;
+                    // 在序号列后添加颜色选择器
+                    if (colIdx === 0) {
+                        const currentHighlight = row['highlight'] || '';
+                        html += `<td class="px-2 py-3"><select class="px-1 py-1 border border-slate-300 rounded text-xs focus:outline-none" onchange="updateAuthHighlight(${idx}, this.value)">
+                            <option value="" ${currentHighlight === '' ? 'selected' : ''}>无</option>
+                            <option value="yellow" ${currentHighlight === 'yellow' ? 'selected' : ''}>黄色</option>
+                            <option value="lightblue" ${currentHighlight === 'lightblue' ? 'selected' : ''}>浅蓝</option>
+                        </select></td>`;
+                    }
                 } else {
                     const cls = colIdx === 0 ? 'text-slate-500 font-mono' : (colIdx === 1 ? 'font-medium text-slate-800' : 'text-slate-700 whitespace-normal min-w-[180px]');
                     html += `<td class="px-4 py-3 ${cls} text-xs" style="${cellConfirmStyle}">${value}</td>`;
+                    // 在序号列后添加颜色列占位（非编辑模式显示颜色标记）
+                    if (colIdx === 0) {
+                        const h = row['highlight'] || '';
+                        const colorDot = h ? `<span class="inline-block w-3 h-3 rounded-full" style="background:${h === 'yellow' ? '#FFFDE7' : '#E3F2FD'}; border:1px solid ${h === 'yellow' ? '#F59E0B' : '#3B82F6'};"></span>` : '';
+                        html += `<td class="px-2 py-3 text-center">${colorDot}</td>`;
+                    }
                 }
             } else {
                 // 角色列使用徽章显示
@@ -9064,6 +9082,16 @@ function saveAuthorityEdit() {
 function updateAuthData(rowIdx, col, value) {
     if (authorityData[rowIdx]) {
         authorityData[rowIdx][col] = value;
+    }
+}
+
+function updateAuthHighlight(rowIdx, highlight) {
+    if (authorityData[rowIdx]) {
+        if (highlight) {
+            authorityData[rowIdx]['highlight'] = highlight;
+        } else {
+            delete authorityData[rowIdx]['highlight'];
+        }
     }
 }
 
