@@ -2,7 +2,7 @@
 <html lang="zh-CN"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>天蚨基金发展规划(20260419v1.10)</title>
+    <title>天蚨基金发展规划(20260419v1.11)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -1728,7 +1728,7 @@ function initAppAfterAuth() {
 <body class="text-slate-900">
 <div id="pwdOverlay">
 <div id="pwdBox">
-<h2>天蚨基金规划(20260419v1.10)</h2>
+<h2>天蚨基金规划(20260419v1.11)</h2>
 <p>请输入访问密码以继续</p>
 <input id="pwdInput" type="password" placeholder="请输入密码" onkeydown="if(event.key==='Enter')checkPassword()">
 <button id="pwdBtn" onclick="checkPassword()">进入系统</button>
@@ -1808,8 +1808,9 @@ function initAppAfterAuth() {
 <!-- Main Layout -->
 <div class="min-h-screen flex flex-col">
     <!-- Header -->
-    <header class="h-16 glass-dark-header flex items-center justify-between px-6 z-50 fixed top-0 left-0 right-0">
-        <div class="flex items-center">
+    <header class="h-16 glass-dark-header flex items-center px-6 z-50 fixed top-0 left-0 right-0">
+        <!-- 左侧logo区域，固定宽度以保持nav居中 -->
+        <div class="flex items-center w-[52px]">
             <img src="logo.jpg" alt="天蚨基金" class="w-9 h-9 rounded-xl object-cover shadow-lg">
         </div>
 
@@ -1818,14 +1819,17 @@ function initAppAfterAuth() {
             <button onclick="toggleMobileNav()" class="mobile-nav-btn"><i class="fas fa-bars"></i></button>
         </div>
 
-        <nav class="flex items-center gap-1 bg-black/5 p-1 rounded-xl">
-            <button onclick="switchTab('strategy')" id="nav-strategy" class="tab-btn active"><i class="fas fa-bullseye mr-1.5"></i>战略规划</button>
-            <button onclick="switchTab('org')" id="nav-org" class="tab-btn"><i class="fas fa-sitemap mr-1.5"></i>组织架构</button>
-            <button onclick="switchTab('council')" id="nav-council" class="tab-btn"><i class="fas fa-landmark mr-1.5"></i>议事机构</button>
-            <button onclick="switchTab('business')" id="nav-business" class="tab-btn"><i class="fas fa-briefcase mr-1.5"></i>业务条线</button>
-            <button onclick="switchTab('authority')" id="nav-authority" class="tab-btn"><i class="fas fa-tasks mr-1.5"></i>权责清单</button>
-            <button onclick="switchTab('positions')" id="nav-positions" class="tab-btn"><i class="fas fa-user-tie mr-1.5"></i>岗位设计</button>
-            <button onclick="switchTab('handbook')" id="nav-handbook" class="tab-btn"><i class="fas fa-book mr-1.5"></i>制度设计</button>
+        <!-- 导航栏居中 -->
+        <nav class="flex-1 flex justify-center">
+            <div class="flex items-center gap-1 bg-black/5 p-1 rounded-xl">
+                <button onclick="switchTab('strategy')" id="nav-strategy" class="tab-btn active"><i class="fas fa-bullseye mr-1.5"></i>战略规划</button>
+                <button onclick="switchTab('org')" id="nav-org" class="tab-btn"><i class="fas fa-sitemap mr-1.5"></i>组织架构</button>
+                <button onclick="switchTab('council')" id="nav-council" class="tab-btn"><i class="fas fa-landmark mr-1.5"></i>议事机构</button>
+                <button onclick="switchTab('business')" id="nav-business" class="tab-btn"><i class="fas fa-briefcase mr-1.5"></i>业务条线</button>
+                <button onclick="switchTab('authority')" id="nav-authority" class="tab-btn"><i class="fas fa-tasks mr-1.5"></i>权责清单</button>
+                <button onclick="switchTab('positions')" id="nav-positions" class="tab-btn"><i class="fas fa-user-tie mr-1.5"></i>岗位设计</button>
+                <button onclick="switchTab('handbook')" id="nav-handbook" class="tab-btn"><i class="fas fa-book mr-1.5"></i>制度设计</button>
+            </div>
         </nav>
 
         <div class="flex items-center gap-3">
@@ -10574,7 +10578,12 @@ function parseExcelToAuthorityData(jsonData) {
         '集团董事长': '集团董事长',
         '出资人': '市财政局',
         '市财政局': '市财政局',
-        '备注': '备注'
+        '备注': '备注',
+        '人力资源部': '',  // 不保留
+        '薪酬与绩效委员会': '',  // 不保留
+        '审计与风险委员会': '',  // 不保留
+        '战略与投资委员会': '',  // 不保留
+        '监事会主席/监事会': '',  // 不保留
     };
 
     // 所有字段列表
@@ -10585,29 +10594,54 @@ function parseExcelToAuthorityData(jsonData) {
                        '集团总经理办公会', '集团总经理', '集团党委会', '集团董事长',
                        '集团董事会', '市财政局', '备注'];
 
-    // 找到标题行（通常是第2或第3行）
-    let headerRow = null;
-    let headerRowIdx = -1;
+    // Excel有两行标题：第2行是主标题，第3行是子标题（如投资部、风控部等）
+    // 需要合并两行标题来确定列名
 
-    for (let i = 0; i < Math.min(5, jsonData.length); i++) {
+    // 找到标题行的位置
+    let headerRow1Idx = -1;
+    let headerRow2Idx = -1;
+
+    for (let i = 0; i < Math.min(10, jsonData.length); i++) {
         const row = jsonData[i];
-        if (row && row.some(cell => cell && (String(cell).includes('序号') || String(cell).includes('关键事项')))) {
-            headerRow = row;
-            headerRowIdx = i;
+        if (row && row.some(cell => cell && String(cell).includes('序号'))) {
+            headerRow1Idx = i;
+            // 下一行通常是子标题行
+            if (i + 1 < jsonData.length) {
+                headerRow2Idx = i + 1;
+            }
             break;
         }
     }
 
-    if (!headerRow) {
+    if (headerRow1Idx === -1) {
         console.error('未找到标题行');
         return [];
     }
 
+    const headerRow1 = jsonData[headerRow1Idx] || [];
+    const headerRow2 = jsonData[headerRow2Idx] || [];
+
+    // 合并两行标题：如果第2行有值就用第2行，否则用第1行
+    const mergedHeaders = [];
+    for (let colIdx = 0; colIdx < Math.max(headerRow1.length, headerRow2.length); colIdx++) {
+        const val1 = headerRow1[colIdx] ? String(headerRow1[colIdx]).trim() : '';
+        const val2 = headerRow2[colIdx] ? String(headerRow2[colIdx]).trim() : '';
+
+        // 子标题行（投资部、风控部等）优先
+        if (val2 && !val2.includes('天蚨公司') && !val2.includes('金控集团') &&
+            !val2.includes('序号') && !val2.includes('权责') && !val2.includes('关键') &&
+            !val2.includes('决策') && !val2.includes('备注') && !val2.includes('出资人')) {
+            mergedHeaders[colIdx] = val2;
+        } else {
+            mergedHeaders[colIdx] = val1 || val2;
+        }
+    }
+
     // 构建列索引映射
     const colIndexMap = {};
-    headerRow.forEach((cell, idx) => {
+    mergedHeaders.forEach((cell, idx) => {
         if (cell) {
-            const cellStr = String(cell).trim();
+            const cellStr = cell.trim();
             const mappedField = columnMapping[cellStr];
             if (mappedField && allFields.includes(mappedField)) {
                 colIndexMap[idx] = mappedField;
@@ -10615,11 +10649,14 @@ function parseExcelToAuthorityData(jsonData) {
         }
     });
 
+    console.log('合并后的标题:', mergedHeaders);
     console.log('列索引映射:', colIndexMap);
 
-    // 解析数据行
+    // 解析数据行（从标题行之后开始）
     let currentCategory = '';
-    for (let i = headerRowIdx + 1; i < jsonData.length; i++) {
+    const dataStartRow = Math.max(headerRow1Idx, headerRow2Idx) + 1;
+
+    for (let i = dataStartRow; i < jsonData.length; i++) {
         const row = jsonData[i];
         if (!row || row.length === 0) continue;
 
