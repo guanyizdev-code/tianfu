@@ -2,7 +2,7 @@
 <html lang="zh-CN" data-immersive-translate-page-theme="light"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>天蚨基金规划v1.34/260421</title>
+    <title>天蚨基金规划v1.35/260421</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -1792,7 +1792,7 @@ function initAppAfterAuth() {
 <body class="text-slate-900">
 <div id="pwdOverlay">
 <div id="pwdBox">
-<h2>天蚨基金规划v1.34/260421</h2>
+<h2>天蚨基金规划v1.35/260421</h2>
 <p>请输入访问密码以继续</p>
 <input id="pwdInput" type="password" placeholder="请输入密码" onkeydown="if(event.key==='Enter')checkPassword()">
 <button id="pwdBtn" onclick="checkPassword()">进入系统</button>
@@ -13235,21 +13235,26 @@ function parseAuthExcel(event) {
     event.target.value = '';
 }
 
+function getExcelColor(colorObj) {
+    if (!colorObj) return null;
+    if (colorObj.rgb) {
+        const rgb = colorObj.rgb;
+        if (rgb && rgb !== '00000000') {
+            return '#' + rgb.slice(-6);
+        }
+    }
+    if (colorObj.theme !== undefined) {
+        const themeMap = { 0: '#FFFFFF', 1: '#000000', 2: '#FF0000', 3: '#00FF00', 4: '#FFFF00', 5: '#CCFFFF', 6: '#FFCC00', 7: '#CCFFCC', 8: '#FFCCCC' };
+        return themeMap[colorObj.theme] || null;
+    }
+    return null;
+}
+
 function getExcelCellColor(cell) {
     if (!cell || !cell.s || !cell.s.fill) return null;
     const fill = cell.s.fill;
     if (fill.fgColor) {
-        if (fill.fgColor.rgb) {
-            const rgb = fill.fgColor.rgb;
-            if (rgb && rgb !== '00000000') {
-                return '#' + rgb.slice(-6);
-            }
-        }
-        // Theme colors - map common ones
-        if (fill.fgColor.theme !== undefined) {
-            const themeMap = { 0: '#FFFFFF', 1: '#000000', 4: '#FFFF00', 5: '#CCFFFF' };
-            return themeMap[fill.fgColor.theme] || null;
-        }
+        return getExcelColor(fill.fgColor);
     }
     return null;
 }
@@ -13261,9 +13266,39 @@ function getExcelFont(cell) {
     if (font.name) result.family = font.name;
     if (font.sz) result.size = font.sz + 'pt';
     if (font.bold) result.bold = true;
-    if (font.color && font.color.rgb) {
-        result.color = '#' + font.color.rgb.slice(-6);
+    if (font.italic) result.italic = true;
+    if (font.underline) result.underline = true;
+    if (font.color) {
+        const c = getExcelColor(font.color);
+        if (c) result.color = c;
     }
+    return result;
+}
+
+function getExcelBorder(cell) {
+    if (!cell || !cell.s || !cell.s.border) return {};
+    const b = cell.s.border;
+    const borders = {};
+    const styleMap = { thin: '1px', medium: '2px', thick: '3px' };
+    const sides = { left: 'border-left', right: 'border-right', top: 'border-top', bottom: 'border-bottom' };
+    for (const [side, cssProp] of Object.entries(sides)) {
+        const sideObj = b[side];
+        if (sideObj && sideObj.style) {
+            const width = styleMap[sideObj.style] || '1px';
+            const color = getExcelColor(sideObj.color) || '#000000';
+            borders[cssProp] = width + ' solid ' + color;
+        }
+    }
+    return borders;
+}
+
+function getExcelAlignment(cell) {
+    if (!cell || !cell.s || !cell.s.alignment) return {};
+    const a = cell.s.alignment;
+    const result = {};
+    if (a.horizontal) result.textAlign = a.horizontal;
+    if (a.vertical) result.verticalAlign = a.vertical === 'center' ? 'middle' : a.vertical;
+    if (a.wrapText) result.wrapText = true;
     return result;
 }
 
@@ -13301,7 +13336,6 @@ function regenerateAuthorityTable(sheet, jsonData) {
     let currentCategory = 'all';
 
     jsonData.forEach((row, r) => {
-        // Detect category from first column
         const firstVal = row[0];
         let rowType = 'data';
         let filterVal = currentCategory;
@@ -13330,63 +13364,29 @@ function regenerateAuthorityTable(sheet, jsonData) {
         while (c < row.length || c < 30) {
             const key = r + '_' + c;
             if (mergeMap[key]) {
-                // This is the top-left of a merged cell
                 const m = mergeMap[key];
                 const cellRef = XLSX.utils.encode_cell({r: r, c: c});
                 const cell = sheet[cellRef];
                 const val = cell ? cell.v : (row[c] || '');
-                const bg = getExcelCellColor(cell);
-                const font = getExcelFont(cell);
-
-                let style = 'border:1px solid #000;padding:3px 5px;vertical-align:middle;';
-                if (bg) style += 'background-color:' + bg + ';';
-                if (font.family) style += 'font-family:"' + font.family + '",serif;';
-                if (font.size) style += 'font-size:' + font.size + ';';
-                if (font.bold) style += 'font-weight:bold;';
-                if (font.color) style += 'color:' + font.color + ';';
-
-                const isHeader = r < 3;
+                const styles = buildCellStyle(cell, r, c, maxCols, true);
                 const tag = isHeader ? 'th' : 'td';
                 const rs = m.rs > 1 ? ' rowspan="' + m.rs + '"' : '';
                 const cs = m.cs > 1 ? ' colspan="' + m.cs + '"' : '';
                 let text = val !== undefined && val !== null ? String(val) : '';
                 text = text.replace(/\n/g, '<br>');
-
-                html += '<' + tag + rs + cs + ' style="' + style + '">' + text + '</' + tag + '>';
+                html += '<' + tag + rs + cs + ' style="' + styles + '">' + text + '</' + tag + '>';
                 c += m.cs;
-            } else if (Object.values(mergeMap).some(m => {
-                // Check if this cell is inside any merge
-                for (const [mk, mv] of Object.entries(mergeMap)) {
-                    const [mr, mc] = mk.split('_').map(Number);
-                    if (r >= mr && r < mr + mv.rs && c >= mc && c < mc + mv.cs && !(r === mr && c === mc)) {
-                        return true;
-                    }
-                }
-                return false;
-            })) {
+            } else if (isInsideMerge(r, c, mergeMap)) {
                 c++;
             } else {
                 const cellRef = XLSX.utils.encode_cell({r: r, c: c});
                 const cell = sheet[cellRef];
                 const val = row[c];
-                const bg = getExcelCellColor(cell);
-                const font = getExcelFont(cell);
-
-                let style = 'border:1px solid #000;padding:3px 5px;vertical-align:middle;';
-                if (bg) style += 'background-color:' + bg + ';';
-                if (font.family) style += 'font-family:"' + font.family + '",serif;';
-                if (font.size) style += 'font-size:' + font.size + ';';
-                if (font.bold) style += 'font-weight:bold;';
-                if (font.color) style += 'color:' + font.color + ';';
-                if (c >= 4 && c < maxCols - 1) style += 'text-align:center;';
-
-                const isHeader = r < 3;
+                const styles = buildCellStyle(cell, r, c, maxCols, false);
                 const tag = isHeader ? 'th' : 'td';
-
                 let text = val !== undefined && val !== null ? String(val) : '';
                 text = text.replace(/\n/g, '<br>');
-
-                html += '<' + tag + ' style="' + style + '">' + text + '</' + tag + '>';
+                html += '<' + tag + ' style="' + styles + '">' + text + '</' + tag + '>';
                 c++;
             }
         }
@@ -13395,6 +13395,74 @@ function regenerateAuthorityTable(sheet, jsonData) {
 
     html += '</table>';
     wrapper.innerHTML = html;
+}
+
+function isInsideMerge(r, c, mergeMap) {
+    for (const [mk, mv] of Object.entries(mergeMap)) {
+        const [mr, mc] = mk.split('_').map(Number);
+        if (r >= mr && r < mr + mv.rs && c >= mc && c < mc + mv.cs && !(r === mr && c === mc)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function buildCellStyle(cell, r, c, maxCols, isMerged) {
+    const styles = [];
+    const bg = getExcelCellColor(cell);
+    const font = getExcelFont(cell);
+    const borders = getExcelBorder(cell);
+    const align = getExcelAlignment(cell);
+
+    // Background
+    if (bg) styles.push('background-color:' + bg);
+
+    // Font
+    if (font.family) styles.push('font-family:"' + font.family + '",serif');
+    if (font.size) styles.push('font-size:' + font.size);
+    if (font.bold) styles.push('font-weight:bold');
+    if (font.italic) styles.push('font-style:italic');
+    if (font.underline) styles.push('text-decoration:underline');
+    if (font.color) styles.push('color:' + font.color);
+
+    // Borders (per side)
+    for (const [prop, val] of Object.entries(borders)) {
+        styles.push(prop + ':' + val);
+    }
+
+    // Alignment
+    const isHeader = r < 3;
+    if (isHeader) {
+        styles.push('text-align:center');
+        styles.push('vertical-align:middle');
+    } else {
+        if (align.textAlign) {
+            styles.push('text-align:' + align.textAlign);
+        } else if (c >= 4 && c < maxCols - 1) {
+            styles.push('text-align:center');
+        } else if (c === maxCols - 1) {
+            styles.push('text-align:left');
+        }
+        styles.push('vertical-align:' + (align.verticalAlign || 'middle'));
+    }
+
+    // Padding
+    styles.push('padding:3px 5px');
+
+    // White-space / wrap
+    if (isHeader) {
+        styles.push('white-space:normal');
+    } else if (c === 2 || c === 3) {
+        styles.push('white-space:normal');
+        styles.push('word-wrap:break-word');
+        styles.push('max-width:200px');
+    } else if (align.wrapText) {
+        styles.push('white-space:normal');
+    } else {
+        styles.push('white-space:nowrap');
+    }
+
+    return styles.join(';');
 }
 
 function getCellBgColor(cell) {
@@ -13742,7 +13810,7 @@ function applyAuthFormat(format, value) {
     }
 
     // Persist format
-    let allFormats = JSON.parse(localStorage.getItem('authorityFormats_v134') || '{}');
+    let allFormats = JSON.parse(localStorage.getItem('authorityFormats_v135') || '{}');
     const key = row + '_' + col;
     if (!allFormats[key]) allFormats[key] = {};
     if (format === 'bgColor' && (!value || value === '#ffffff')) {
@@ -13756,11 +13824,11 @@ function applyAuthFormat(format, value) {
     } else {
         allFormats[key][format] = value;
     }
-    localStorage.setItem('authorityFormats_v134', JSON.stringify(allFormats));
+    localStorage.setItem('authorityFormats_v135', JSON.stringify(allFormats));
 }
 
 function restoreAuthFormats() {
-    const allFormats = JSON.parse(localStorage.getItem('authorityFormats_v134') || '{}');
+    const allFormats = JSON.parse(localStorage.getItem('authorityFormats_v135') || '{}');
     const table = document.getElementById('authority-excel-table');
     if (!table) return;
 
@@ -13793,9 +13861,9 @@ function clearAuthCellFormat() {
     cell.style.textDecoration = '';
     cell.style.fontSize = '';
 
-    let allFormats = JSON.parse(localStorage.getItem('authorityFormats_v134') || '{}');
+    let allFormats = JSON.parse(localStorage.getItem('authorityFormats_v135') || '{}');
     delete allFormats[row + '_' + col];
-    localStorage.setItem('authorityFormats_v134', JSON.stringify(allFormats));
+    localStorage.setItem('authorityFormats_v135', JSON.stringify(allFormats));
     showToast('已清除选中单元格格式');
 }
 
@@ -15814,13 +15882,13 @@ function saveCellEdit(cell) {
     cell.style.backgroundColor = '#e6ffe6';
 
     // Persist to localStorage
-    let allEdits = JSON.parse(localStorage.getItem('authorityEdits_v134') || '{}');
+    let allEdits = JSON.parse(localStorage.getItem('authorityEdits_v135') || '{}');
     allEdits[`${row}_${col}`] = val;
-    localStorage.setItem('authorityEdits_v134', JSON.stringify(allEdits));
+    localStorage.setItem('authorityEdits_v135', JSON.stringify(allEdits));
 }
 
 function restoreAuthorityEdits() {
-    const allEdits = JSON.parse(localStorage.getItem('authorityEdits_v134') || '{}');
+    const allEdits = JSON.parse(localStorage.getItem('authorityEdits_v135') || '{}');
     const table = document.getElementById('authority-excel-table');
     if (!table) return;
 
@@ -15836,8 +15904,8 @@ function restoreAuthorityEdits() {
 }
 
 function clearAuthorityEdits() {
-    localStorage.removeItem('authorityEdits_v134');
-    localStorage.removeItem('authorityFormats_v134');
+    localStorage.removeItem('authorityEdits_v135');
+    localStorage.removeItem('authorityFormats_v135');
     editedCells = {};
     location.reload();
 }
