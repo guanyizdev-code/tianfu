@@ -2537,9 +2537,6 @@ function initAppAfterAuth() {
                         <button onclick="filterAuthority('综合部')" class="auth-filter px-3 py-1.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 transition" data-dept="综合部">综合部</button>
                     </div>
                     <div class="flex items-center gap-3">
-                        <button onclick="exportAuthorityExcel()" class="px-4 py-2 bg-blue-600 text-white rounded-xl font-medium text-sm hover:bg-blue-700 transition flex items-center gap-2 shadow-sm">
-                            <i class="fas fa-download"></i> 导出CSV
-                        </button>
                         <input type="file" id="authExcelInput" accept=".xlsx,.xls" style="display:none;" onchange="parseAuthExcel(event)">
                         <button onclick="document.getElementById('authExcelInput').click()" class="px-4 py-2 bg-emerald-600 text-white rounded-xl font-medium text-sm hover:bg-emerald-700 transition flex items-center gap-2 shadow-sm">
                             <i class="fas fa-file-excel"></i> 上传Excel
@@ -13232,10 +13229,53 @@ function regenerateAuthorityTable(sheet, jsonData) {
         mergeMap[key] = { rs: m.e.r - m.s.r + 1, cs: m.e.c - m.s.c + 1 };
     });
 
-    let html = '<table id="authority-excel-table" style="border-collapse:collapse;table-layout:fixed;width:max-content;font-family:仿宋,FangSong,serif;">';
+    // Get column widths from Excel
+    const colInfo = sheet['!cols'] || [];
+    const maxCols = Math.max(...jsonData.map(r => r.length), 30);
+    let colgroup = '<colgroup>';
+    for (let i = 0; i < maxCols; i++) {
+        const info = colInfo[i];
+        let wpx = 80;
+        if (info) {
+            if (info.wpx) wpx = info.wpx;
+            else if (info.wch) wpx = Math.max(40, Math.round(info.wch * 7.5));
+            else if (info.width) wpx = Math.max(40, Math.round(info.width * 7.5));
+        }
+        colgroup += '<col style="width:' + wpx + 'px;min-width:' + wpx + 'px;">';
+    }
+    colgroup += '</colgroup>';
+
+    let html = '<table id="authority-excel-table" style="border-collapse:collapse;table-layout:fixed;width:max-content;font-family:仿宋,FangSong,serif;">' + colgroup;
+
+    // Track current category for filter
+    let currentCategory = 'all';
 
     jsonData.forEach((row, r) => {
-        html += '<tr>';
+        // Detect category from first column
+        const firstVal = row[0];
+        let rowType = 'data';
+        let filterVal = currentCategory;
+
+        if (firstVal && typeof firstVal === 'string') {
+            if (/^[一二三四五]、/.test(firstVal)) {
+                rowType = 'category';
+                if (firstVal.includes('投资部')) currentCategory = '投资部';
+                else if (firstVal.includes('风控') || firstVal.includes('财务') || firstVal.includes('在管基金')) currentCategory = '运营部';
+                else if (firstVal.includes('综合')) currentCategory = '综合部';
+                else currentCategory = 'all';
+                filterVal = currentCategory;
+            } else if (/^\d+\.\d+$/.test(firstVal.trim())) {
+                rowType = 'subcategory';
+            }
+        }
+
+        const isHeader = r < 3;
+        if (isHeader) {
+            html += '<tr data-category="all" data-row-type="header">';
+        } else {
+            html += '<tr data-category="' + filterVal + '" data-row-type="' + rowType + '">';
+        }
+
         let c = 0;
         while (c < row.length || c < 30) {
             const key = r + '_' + c;
@@ -13290,7 +13330,7 @@ function regenerateAuthorityTable(sheet, jsonData) {
                 if (font.size) style += 'font-size:' + font.size + ';';
                 if (font.bold) style += 'font-weight:bold;';
                 if (font.color) style += 'color:' + font.color + ';';
-                if (c >= 4 && c < row.length - 1) style += 'text-align:center;';
+                if (c >= 4 && c < maxCols - 1) style += 'text-align:center;';
 
                 const isHeader = r < 3;
                 const tag = isHeader ? 'th' : 'td';
