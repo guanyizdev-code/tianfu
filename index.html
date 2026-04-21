@@ -2,7 +2,7 @@
 <html lang="zh-CN" data-immersive-translate-page-theme="light"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>天蚨基金发展规划(20260421v1.18)</title>
+    <title>天蚨基金规划 v1.19（2026 0421）</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -1242,8 +1242,8 @@ function checkPassword() {
 }
 
 function initAppAfterAuth() {
-    // Show strategy tab immediately so user sees content right away
-    switchTab('strategy');
+    // Show org tab immediately so user sees content right away
+    switchTab('org');
     initGlobalSearch();
     fetchAppData().then(() => {
         renderOrgChart();
@@ -1778,7 +1778,7 @@ function initAppAfterAuth() {
 <body class="text-slate-900">
 <div id="pwdOverlay" style="display: none;">
 <div id="pwdBox">
-<h2>天蚨基金规划(20260421v1.18)</h2>
+<h2>天蚨基金规划 v1.19（2026 0421）</h2>
 <p>请输入访问密码以继续</p>
 <input id="pwdInput" type="password" placeholder="请输入密码" onkeydown="if(event.key==='Enter')checkPassword()">
 <button id="pwdBtn" onclick="checkPassword()">进入系统</button>
@@ -1873,11 +1873,11 @@ function initAppAfterAuth() {
         <nav class="flex-1 flex justify-center">
             <div class="flex items-center gap-1 bg-black/5 p-1 rounded-xl">
                 <button onclick="switchTab('strategy')" id="nav-strategy" class="tab-btn"><i class="fas fa-bullseye mr-1.5"></i>战略规划</button>
-                <button onclick="switchTab('org')" id="nav-org" class="tab-btn"><i class="fas fa-sitemap mr-1.5"></i>组织架构</button>
+                <button onclick="switchTab('org')" id="nav-org" class="tab-btn active"><i class="fas fa-sitemap mr-1.5"></i>组织架构</button>
                 <button onclick="switchTab('council')" id="nav-council" class="tab-btn"><i class="fas fa-landmark mr-1.5"></i>议事机构</button>
                 <button onclick="switchTab('business')" id="nav-business" class="tab-btn"><i class="fas fa-briefcase mr-1.5"></i>业务条线</button>
                 <button onclick="switchTab('authority')" id="nav-authority" class="tab-btn"><i class="fas fa-tasks mr-1.5"></i>权责清单</button>
-                <button onclick="switchTab('positions')" id="nav-positions" class="tab-btn active"><i class="fas fa-user-tie mr-1.5"></i>岗位设计</button>
+                <button onclick="switchTab('positions')" id="nav-positions" class="tab-btn"><i class="fas fa-user-tie mr-1.5"></i>岗位设计</button>
                 <button onclick="switchTab('handbook')" id="nav-handbook" class="tab-btn"><i class="fas fa-book mr-1.5"></i>制度设计</button>
             </div>
         </nav>
@@ -1988,7 +1988,7 @@ function initAppAfterAuth() {
                 <div class="level-label business" style="top: 780px;">业务部门</div>
 
                 <!-- Nodes Layer -->
-                <div id="nodesLayer"><div class="org-node council" data-id="gudonghui" style="left: 776px; top: 77px; border-top: 3px solid rgb(37, 99, 235);">
+                <div id="nodesLayer"><div class="org-node council" data-id="gudonghui" style="left: 776px; top: 100px; border-top: 3px solid rgb(37, 99, 235);">
             <div class="node-icon" style="background:#2563eb15;color:#2563eb;"><i class="fas fa-landmark"></i></div>
             <div class="node-title">股东会</div>
             <div class="node-subtitle" style="text-align:center;"><div class="node-segment">定根本、决大事、保权益</div></div>
@@ -2295,7 +2295,7 @@ function initAppAfterAuth() {
                                 <div class="font-medium text-slate-700 mb-2" data-council-key="gudonghui-duty-title">主要职权</div>
                                 <ul class="text-slate-600 space-y-1 text-xs" data-council-key="gudonghui-duty-content"><li>• 决定经营方针与投资计划</li><li>• 选举更换非职工董事监事</li><li>• 审批财务预算决算方案</li><li>• 决定增减注册资本</li><li>• 审批合并分立解散清算</li></ul>
                             </div>
-                            <div class="flex items-center gap-2 text-xs" data-council-key="gudonghui-tags">                                年度会议                                临时会议                            </div>
+                            <div class="flex items-center gap-2 text-xs" data-council-key="gudonghui-tags"></div>
                         </div>
                     </div>
 
@@ -2315,7 +2315,7 @@ function initAppAfterAuth() {
                                 <div class="font-medium text-slate-700 mb-2" data-council-key="dongshihui-duty-title">主要职权</div>
                                 <ul class="text-slate-600 space-y-1 text-xs" data-council-key="dongshihui-duty-content"><li>• 执行股东会决议</li><li>• 制定经营计划与投资方案</li><li>• 制定基本管理制度</li><li>• 决定内部管理机构设置</li><li>• 任免聘任解聘经理层</li></ul>
                             </div>
-                            <div class="flex items-center gap-2 text-xs" data-council-key="dongshihui-tags">                                定期会议                                每季至少1次                            </div>
+                            <div class="flex items-center gap-2 text-xs" data-council-key="dongshihui-tags"></div>
                         </div>
                     </div>
 
@@ -2335,7 +2335,7 @@ function initAppAfterAuth() {
                                 <div class="font-medium text-slate-700 mb-2" data-council-key="zongbanhui-duty-title">主要职责</div>
                                 <ul class="text-slate-600 space-y-1 text-xs" data-council-key="zongbanhui-duty-content"><li>• 落实董事会决策部署</li><li>• 组织日常经营管理</li><li>• 审议各部门工作方案</li><li>• 协调跨部门重要事项</li><li>• 审批权限内投资事项</li></ul>
                             </div>
-                            <div class="flex items-center gap-2 text-xs" data-council-key="zongbanhui-tags">                                每周例会                                总经理主持                            </div>
+                            <div class="flex items-center gap-2 text-xs" data-council-key="zongbanhui-tags"></div>
                         </div>
                     </div>
 
@@ -2355,7 +2355,7 @@ function initAppAfterAuth() {
                                 <div class="font-medium text-slate-700 mb-2" data-council-key="dangweihui-duty-title">主要职责</div>
                                 <ul class="text-slate-600 space-y-1 text-xs" data-council-key="dangweihui-duty-content"><li>• 前置研究重大事项</li><li>• 把方向管大局保落实</li><li>• 监督政策法规执行</li><li>• 把好选人用人关</li><li>• 参与企业重大决策</li></ul>
                             </div>
-                            <div class="flex items-center gap-2 text-xs" data-council-key="dangweihui-tags">                                前置程序                                党委书记主持                            </div>
+                            <div class="flex items-center gap-2 text-xs" data-council-key="dangweihui-tags"></div>
                         </div>
                     </div>
                 </div>
