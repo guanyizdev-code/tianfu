@@ -2,7 +2,7 @@
 <html lang="zh-CN" data-immersive-translate-page-theme="light"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>天蚨基金规划v1.41/260421</title>
+    <title>天蚨基金规划v1.42/260421</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -1792,7 +1792,7 @@ function initAppAfterAuth() {
 <body class="text-slate-900">
 <div id="pwdOverlay">
 <div id="pwdBox">
-<h2>天蚨基金规划v1.41/260421</h2>
+<h2>天蚨基金规划v1.42/260421</h2>
 <p>请输入访问密码以继续</p>
 <input id="pwdInput" type="password" placeholder="请输入密码" onkeydown="if(event.key==='Enter')checkPassword()">
 <button id="pwdBtn" onclick="checkPassword()">进入系统</button>
@@ -2229,7 +2229,7 @@ function initAppAfterAuth() {
             </div></div><div class="org-node dept-back" data-id="zonghe" style="left: 1205px; top: 697px; border-top: 3px solid rgb(147, 51, 234);">
             <div class="node-icon" style="background:#9333ea15;color:#9333ea;"><i class="fas fa-building"></i></div>
             <div class="node-title">综合部</div>
-            <div class="node-subtitle" style="text-align:center;"><div class="node-segment">后勤保障</div></div>
+            <div class="node-subtitle" style="text-align:center;"><div class="node-segment">综合保障</div></div>
             <div class="node-childtitle" style="text-align:center;"><div class="node-segment">负责公司行政后勤、上级部门对接、三会服务及人力资源等综合管理工作</div></div>
             <div class="node-popover">
                 <div class="flex items-center gap-2 mb-2">
@@ -2238,7 +2238,7 @@ function initAppAfterAuth() {
                     </div>
                     <div>
                         <div class="font-bold text-sm text-slate-900 leading-tight">综合部</div>
-                        <div class="text-[11px] text-slate-500 mt-0.5">后勤保障</div>
+                        <div class="text-[11px] text-slate-500 mt-0.5">综合保障</div>
                     </div>
                 </div>
                 <div class="popover-body">
@@ -2477,7 +2477,7 @@ function initAppAfterAuth() {
                                 <span style="font-size:18px;font-weight:700;">47</span> 条子线
                             </div>
                             <div style="background:linear-gradient(135deg,#f59e0b,#fbbf24);color:#fff;padding:6px 16px;border-radius:20px;font-size:13px;font-weight:600;font-family:Geist,'Noto Sans SC',sans-serif;box-shadow:0 2px 8px rgba(245,158,11,0.25);">
-                                <span style="font-size:18px;font-weight:700;">730</span> 项事项
+                                <span style="font-size:18px;font-weight:700;">730</span> 项工作
                             </div>
                         </div>
                     </div>
@@ -6871,7 +6871,7 @@ function initAppAfterAuth() {
         <div ondblclick="openPositionEditModal('综合部', 1)" class="pos-card relative w-80 bg-white rounded-2xl p-5 shadow-sm border border-slate-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden cursor-pointer" style="animation-delay:80ms">
             <div class="absolute top-0 left-0 right-0 h-1 bg-purple-500"></div>
             <div class="flex items-start justify-between mb-4">
-                <div><h4 class="text-base font-bold text-slate-800">综合管理主管</h4></div>
+                <div><h4 class="text-base font-bold text-slate-800">行政经理</h4></div>
                 <div class="w-9 h-9 rounded-xl bg-purple-50 flex items-center justify-center text-purple-600 border border-purple-100">
                     <i class="fas fa-user text-xs"></i>
                 </div>
@@ -12023,9 +12023,9 @@ const defaultNodeData = {
         coreFunction: '负责承接原监事会日常监督与内控评价职能\n负责公司财务、法务、风控一体化管控'
     },
     zonghe: {
-        motto: '后勤保障',
+        motto: '综合保障',
         childTitle: '负责公司行政后勤、上级部门对接、三会服务及人力资源等综合管理工作',
-        positions: '综合部部长\n综合管理主管\n行政专员\n前台',
+        positions: '综合部部长\n行政经理\n行政专员\n前台',
         duties: '负责公司行政事务管理，包括公文处理、档案管理、印章证照管理等。\n负责后勤保障工作，包括办公环境维护、固定资产管理、采购管理等。\n负责上级部门对接、对外接待及公共关系维护。\n负责三会一层会议组织、决议督办及工商变更登记。\n负责人力资源规划、招聘培训、薪酬绩效、员工关系管理。\n负责安全生产、信息化建设及企业文化建设。',
         subs: '',
         subtitleAlign: 'center',
@@ -12055,7 +12055,7 @@ const positionGroups = {
         desc: "后台业务",
         items: [
             { title: "综合部部长", duties: ["统筹综合部全面工作，包括三会一层服务、人力资源、行政后勤","组织董事会、监事会、股东会会议，督办决议落实","负责公司印章、证照管理、工商变更及年检","协调采购管理、固定资产管理、信息化建设","负责安全生产、后勤保障和对外接待工作"] },
-            { title: "综合管理主管", duties: ["协助综合部部长开展人力资源管理工作","负责招聘、培训、绩效、薪酬福利等人事事务的具体执行","管理员工档案、劳动合同、社保公积金等人事资料","协调组织公司培训和企业文化活动"] },
+            { title: "行政经理", duties: ["协助综合部部长开展人力资源管理工作","负责招聘、培训、绩效、薪酬福利等人事事务的具体执行","管理员工档案、劳动合同、社保公积金等人事资料","协调组织公司培训和企业文化活动"] },
             { title: "行政专员", duties: ["制定公司章程修正案、三会一层议事规则","组织董监事会、股东会会议，检查决议落实情况","印章管理、证照年检、工商变更及登记","会议服务、物业管理、安全卫生管理","采购管理、固定资产管理、信息化维护","前台接待、信件快递管理、文印事务"] },
             { title: "前台", duties: ["负责迎送访客，保持专业仪态，做好访客登记与引导","为客人准备会议材料及茶水饮品","维护前台、接待区及公共区域的整洁与秩序","协助会议组织、设备调试、会后清理","管理信件快递签收登记分发，处理文印事务","接听总机电话，做好转接及留言记录"] }
         ]
