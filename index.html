@@ -2,7 +2,7 @@
 <html lang="zh-CN" data-immersive-translate-page-theme="light"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>天蚨基金规划v1.35/260421</title>
+    <title>天蚨基金规划v1.36/260421</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -1792,7 +1792,7 @@ function initAppAfterAuth() {
 <body class="text-slate-900">
 <div id="pwdOverlay">
 <div id="pwdBox">
-<h2>天蚨基金规划v1.35/260421</h2>
+<h2>天蚨基金规划v1.36/260421</h2>
 <p>请输入访问密码以继续</p>
 <input id="pwdInput" type="password" placeholder="请输入密码" onkeydown="if(event.key==='Enter')checkPassword()">
 <button id="pwdBtn" onclick="checkPassword()">进入系统</button>
@@ -2548,35 +2548,10 @@ function initAppAfterAuth() {
                         </button>
                     </div>
                 </div>
-                <!-- Format Toolbar (shown in edit mode) -->
-                <div id="auth-format-toolbar" class="hidden px-5 py-2 border-b border-slate-100 bg-slate-50 flex items-center gap-2">
-                    <span class="text-xs text-slate-500 mr-1">格式工具：</span>
-                    <label class="flex items-center gap-1 text-xs text-slate-600 cursor-pointer hover:text-slate-800" title="背景颜色">
-                        <i class="fas fa-fill-drip"></i>
-                        <input type="color" id="auth-bg-color" class="w-6 h-6 border-0 p-0 cursor-pointer" onchange="applyAuthFormat('bgColor', this.value)" value="#ffffff">
-                    </label>
-                    <label class="flex items-center gap-1 text-xs text-slate-600 cursor-pointer hover:text-slate-800" title="字体颜色">
-                        <i class="fas fa-font"></i>
-                        <input type="color" id="auth-font-color" class="w-6 h-6 border-0 p-0 cursor-pointer" onchange="applyAuthFormat('color', this.value)" value="#000000">
-                    </label>
-                    <button onclick="applyAuthFormat('bold')" class="px-2 py-1 text-xs font-bold bg-white border border-slate-200 rounded hover:bg-slate-100" title="加粗">B</button>
-                    <button onclick="applyAuthFormat('italic')" class="px-2 py-1 text-xs italic bg-white border border-slate-200 rounded hover:bg-slate-100" title="斜体">I</button>
-                    <button onclick="applyAuthFormat('underline')" class="px-2 py-1 text-xs underline bg-white border border-slate-200 rounded hover:bg-slate-100" title="下划线">U</button>
-                    <select id="auth-font-size" onchange="applyAuthFormat('fontSize', this.value)" class="text-xs border border-slate-200 rounded px-1 py-1 bg-white" title="字号">
-                        <option value="">字号</option>
-                        <option value="9pt">9</option>
-                        <option value="10pt">10</option>
-                        <option value="11pt">11</option>
-                        <option value="12pt">12</option>
-                        <option value="14pt">14</option>
-                        <option value="16pt">16</option>
-                        <option value="18pt">18</option>
-                    </select>
-                    <button onclick="clearAuthCellFormat()" class="px-2 py-1 text-xs text-red-600 bg-white border border-red-200 rounded hover:bg-red-50 ml-auto" title="清除选中单元格格式">
-                        <i class="fas fa-eraser"></i> 清除格式
-                    </button>
                 </div>
                 <div id="authority-table-wrapper" style="overflow-x: auto; max-height: calc(100vh - 180px);">
+                    <!-- x-spreadsheet editor (shown in edit mode) -->
+                    <div id="x-spreadsheet-container" style="display:none; height: calc(100vh - 220px);"></div>
 <table id="authority-excel-table" style="border-collapse: collapse; table-layout: fixed; width: max-content; font-family: '仿宋', 'FangSong', serif;">
 <tr data-category="all" data-row-type="data">
 <th colspan="30" style="font-family: '仿宋', serif; font-size: 14.0pt; font-weight: bold; color: #000000; border-left: 1px solid #000000; border-top: 1px solid #000000; text-align: center; vertical-align: middle; padding: 3px 5px; white-space: normal">长春金控-天蚨公司权限划分表</th>
@@ -13197,33 +13172,20 @@ function parseAuthExcel(event) {
         try {
             const data = new Uint8Array(e.target.result);
             const workbook = XLSX.read(data, { type: 'array', cellStyles: true });
+
+            // Convert to x-spreadsheet format with styles
+            const xsData = stoxWithStyles(workbook);
+            localStorage.setItem('authorityXsData_v136', JSON.stringify(xsData));
+
+            // Also regenerate static table for normal viewing
             const sheet = workbook.Sheets[workbook.SheetNames[0]];
-
-            // Parse to array of arrays
             const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-
-            // Regenerate entire table from uploaded Excel
             regenerateAuthorityTable(sheet, jsonData);
 
-            // Restore saved edits and formats after upload
-            setTimeout(() => {
-                restoreAuthorityEdits();
-                if (authEditMode) {
-                    // Re-enable edit mode on new table
-                    const table = document.getElementById('authority-excel-table');
-                    if (table) {
-                        table.querySelectorAll('tr').forEach(row => {
-                            const rowType = row.dataset.rowType;
-                            if (rowType === 'category' || rowType === 'subcategory' || rowType === 'header') return;
-                            row.querySelectorAll('td').forEach(cell => {
-                                cell.setAttribute('contenteditable', 'true');
-                                cell.setAttribute('onblur', 'saveCellEdit(this)');
-                                cell.addEventListener('click', authCellClickHandler);
-                            });
-                        });
-                    }
-                }
-            }, 100);
+            // If in edit mode, reload x-spreadsheet
+            if (authEditMode && authXs) {
+                authXs.loadData(xsData);
+            }
 
             showToast('Excel 已上传并重新生成表格，共 ' + jsonData.length + ' 行');
         } catch (err) {
@@ -13708,37 +13670,27 @@ let authEditMode = false;
 function enableAuthorityEdit() {
     authEditMode = !authEditMode;
     const table = document.getElementById('authority-excel-table');
-    if (!table) {
-        alert('权责清单表格未找到');
-        authEditMode = false;
-        return;
-    }
-
-    const toolbar = document.getElementById('auth-format-toolbar');
+    const xsContainer = document.getElementById('x-spreadsheet-container');
 
     if (authEditMode) {
-        // Enter edit mode: make data cells editable
-        table.querySelectorAll('tr').forEach(row => {
-            const rowType = row.dataset.rowType;
-            if (rowType === 'category' || rowType === 'subcategory' || rowType === 'header') return;
-            row.querySelectorAll('td').forEach(cell => {
-                cell.setAttribute('contenteditable', 'true');
-                cell.setAttribute('onblur', 'saveCellEdit(this)');
-                cell.addEventListener('click', authCellClickHandler);
-            });
-        });
-        if (toolbar) toolbar.classList.remove('hidden');
+        // Enter edit mode: hide static table, show x-spreadsheet
+        if (table) table.style.display = 'none';
+        if (xsContainer) {
+            xsContainer.style.display = 'block';
+            initXSpreadsheet();
+        }
         showEditModeTip(true);
-        showToast('已进入编辑模式，双击单元格可修改内容');
+        showToast('已进入编辑模式，可拖拽调整列宽行高');
     } else {
-        // Exit edit mode: remove editability
-        table.querySelectorAll('td[contenteditable="true"]').forEach(cell => {
-            cell.removeAttribute('contenteditable');
-            cell.removeAttribute('onblur');
-            cell.classList.remove('cell-selected');
-            cell.removeEventListener('click', authCellClickHandler);
-        });
-        if (toolbar) toolbar.classList.add('hidden');
+        // Exit edit mode: save x-spreadsheet data, restore static table
+        if (window.authXs) {
+            const data = window.authXs.getData();
+            localStorage.setItem('authorityXsData_v136', JSON.stringify(data));
+            // Also regenerate static table from x-spreadsheet data
+            renderStaticFromXs(data);
+        }
+        if (xsContainer) xsContainer.style.display = 'none';
+        if (table) table.style.display = '';
         showEditModeTip(false);
         showToast('已退出编辑模式');
     }
@@ -13760,111 +13712,222 @@ function saveAuthorityEdit() {
     // Placeholder for future batch save
 }
 
-let selectedAuthCell = null;
+// x-spreadsheet integration
+let authXs = null;
 
-function authCellClickHandler(e) {
-    if (!authEditMode) return;
-    // Deselect previous
-    if (selectedAuthCell) {
-        selectedAuthCell.classList.remove('cell-selected');
-    }
-    // Select new (but not when double-clicking to edit text)
-    if (e.detail === 1) {
-        selectedAuthCell = e.currentTarget;
-        selectedAuthCell.classList.add('cell-selected');
-    }
-}
+function initXSpreadsheet() {
+    const container = document.getElementById('x-spreadsheet-container');
+    if (!container) return;
 
-function applyAuthFormat(format, value) {
-    if (!selectedAuthCell || !authEditMode) {
-        showToast('请先点击选中一个单元格');
+    // Destroy previous instance if exists
+    if (authXs) {
+        authXs.reload();
         return;
     }
-    const cell = selectedAuthCell;
-    const row = cell.parentElement.rowIndex;
-    const col = cell.cellIndex;
 
-    switch (format) {
-        case 'bgColor':
-            cell.style.backgroundColor = value;
-            if (value === '#ffffff') cell.style.backgroundColor = '';
-            break;
-        case 'color':
-            cell.style.color = value;
-            break;
-        case 'bold':
-            cell.style.fontWeight = cell.style.fontWeight === 'bold' ? '' : 'bold';
-            value = cell.style.fontWeight;
-            break;
-        case 'italic':
-            cell.style.fontStyle = cell.style.fontStyle === 'italic' ? '' : 'italic';
-            value = cell.style.fontStyle;
-            break;
-        case 'underline':
-            cell.style.textDecoration = cell.style.textDecoration === 'underline' ? '' : 'underline';
-            value = cell.style.textDecoration;
-            break;
-        case 'fontSize':
-            cell.style.fontSize = value;
-            break;
+    // Load data from localStorage or use empty
+    let data = [];
+    const saved = localStorage.getItem('authorityXsData_v136');
+    if (saved) {
+        try { data = JSON.parse(saved); } catch(e) {}
     }
 
-    // Persist format
-    let allFormats = JSON.parse(localStorage.getItem('authorityFormats_v135') || '{}');
-    const key = row + '_' + col;
-    if (!allFormats[key]) allFormats[key] = {};
-    if (format === 'bgColor' && (!value || value === '#ffffff')) {
-        delete allFormats[key].bgColor;
-    } else if (format === 'bold' && !value) {
-        delete allFormats[key].bold;
-    } else if (format === 'italic' && !value) {
-        delete allFormats[key].italic;
-    } else if (format === 'underline' && !value) {
-        delete allFormats[key].underline;
-    } else {
-        allFormats[key][format] = value;
+    authXs = x_spreadsheet('#x-spreadsheet-container', {
+        showToolbar: true,
+        showGrid: true,
+        view: {
+            height: () => container.clientHeight,
+            width: () => container.clientWidth
+        }
+    });
+
+    if (data.length > 0) {
+        authXs.loadData(data);
     }
-    localStorage.setItem('authorityFormats_v135', JSON.stringify(allFormats));
-}
 
-function restoreAuthFormats() {
-    const allFormats = JSON.parse(localStorage.getItem('authorityFormats_v135') || '{}');
-    const table = document.getElementById('authority-excel-table');
-    if (!table) return;
-
-    Object.entries(allFormats).forEach(([key, fmt]) => {
-        const [row, col] = key.split('_').map(Number);
-        const cell = table.rows[row]?.cells[col];
-        if (!cell) return;
-        if (fmt.bgColor) cell.style.backgroundColor = fmt.bgColor;
-        if (fmt.color) cell.style.color = fmt.color;
-        if (fmt.bold) cell.style.fontWeight = 'bold';
-        if (fmt.italic) cell.style.fontStyle = 'italic';
-        if (fmt.underline) cell.style.textDecoration = 'underline';
-        if (fmt.fontSize) cell.style.fontSize = fmt.fontSize;
+    authXs.change((d) => {
+        localStorage.setItem('authorityXsData_v136', JSON.stringify(d));
     });
 }
 
-function clearAuthCellFormat() {
-    if (!selectedAuthCell || !authEditMode) {
-        showToast('请先点击选中一个单元格');
-        return;
+function renderStaticFromXs(data) {
+    // Convert x-spreadsheet data back to static HTML table
+    // This is a simplified conversion - full fidelity is maintained in x-spreadsheet
+    if (!data || data.length === 0) return;
+    const sheet = data[0];
+    const rows = sheet.rows || {};
+    const len = rows.len || 0;
+
+    let html = '<table id="authority-excel-table" style="border-collapse:collapse;table-layout:fixed;width:max-content;font-family:仿宋,FangSong,serif;">';
+
+    for (let r = 0; r < len; r++) {
+        const row = rows[r];
+        const cells = row ? row.cells : {};
+        html += '<tr>';
+
+        let c = 0;
+        let maxCol = 0;
+        Object.keys(cells).forEach(k => { maxCol = Math.max(maxCol, parseInt(k)); });
+
+        while (c <= maxCol) {
+            const cell = cells[c];
+            if (!cell) {
+                html += '<td></td>';
+                c++;
+                continue;
+            }
+
+            // Skip merged cells that are not top-left
+            if (cell.merge) {
+                // This is top-left of merge
+            }
+
+            let style = 'border:1px solid #000;padding:3px 5px;vertical-align:middle;';
+            if (cell.style) {
+                const s = cell.style;
+                if (s.bgcolor) style += 'background-color:' + s.bgcolor + ';';
+                if (s.color) style += 'color:' + s.color + ';';
+                if (s.font) {
+                    if (s.font.name) style += 'font-family:"' + s.font.name + '",serif;';
+                    if (s.font.size) style += 'font-size:' + s.font.size + 'pt;';
+                    if (s.font.bold) style += 'font-weight:bold;';
+                }
+                if (s.align) style += 'text-align:' + s.align + ';';
+                if (s.valign) style += 'vertical-align:' + s.valign + ';';
+            }
+
+            const tag = r < 3 ? 'th' : 'td';
+            let attrs = ' style="' + style + '"';
+
+            if (cell.merge) {
+                attrs += ' rowspan="' + (cell.merge[0] + 1) + '"';
+                attrs += ' colspan="' + (cell.merge[1] + 1) + '"';
+            }
+
+            let text = cell.text || '';
+            text = text.replace(/\n/g, '<br>');
+            html += '<' + tag + attrs + '>' + text + '</' + tag + '>';
+            c++;
+        }
+        html += '</tr>';
     }
-    const cell = selectedAuthCell;
-    const row = cell.parentElement.rowIndex;
-    const col = cell.cellIndex;
 
-    cell.style.backgroundColor = '';
-    cell.style.color = '';
-    cell.style.fontWeight = '';
-    cell.style.fontStyle = '';
-    cell.style.textDecoration = '';
-    cell.style.fontSize = '';
+    html += '</table>';
+    const wrapper = document.getElementById('authority-table-wrapper');
+    if (wrapper) {
+        // Replace only the static table, keep x-spreadsheet container
+        const oldTable = document.getElementById('authority-excel-table');
+        if (oldTable) {
+            oldTable.outerHTML = html;
+        } else {
+            wrapper.insertAdjacentHTML('afterbegin', html);
+        }
+    }
+}
 
-    let allFormats = JSON.parse(localStorage.getItem('authorityFormats_v135') || '{}');
-    delete allFormats[row + '_' + col];
-    localStorage.setItem('authorityFormats_v135', JSON.stringify(allFormats));
-    showToast('已清除选中单元格格式');
+// SheetJS workbook to x-spreadsheet format (with styles)
+function stoxWithStyles(wb) {
+    var out = [];
+    wb.SheetNames.forEach(function(name) {
+        var o = { name: name, rows: {}, cols: {}, merges: [] };
+        var ws = wb.Sheets[name];
+        if (!ws || !ws['!ref']) return;
+
+        var range = XLSX.utils.decode_range(ws['!ref']);
+        range.s = { r: 0, c: 0 };
+        var aoa = XLSX.utils.sheet_to_json(ws, { raw: false, header: 1, range: range });
+
+        // Column widths
+        var colInfo = ws['!cols'] || [];
+        colInfo.forEach(function(info, i) {
+            var w = info.wpx || (info.wch ? Math.round(info.wch * 7.5) : 80);
+            o.cols[i] = { width: w };
+        });
+
+        aoa.forEach(function(r, i) {
+            var cells = {};
+            r.forEach(function(c, j) {
+                var cellRef = XLSX.utils.encode_cell({ r: i, c: j });
+                var cell = ws[cellRef];
+
+                cells[j] = { text: c || '' };
+                if (cell && cell.f != null) {
+                    cells[j].text = '=' + cell.f;
+                }
+
+                // Style conversion
+                var style = {};
+                if (cell && cell.s) {
+                    // Background color
+                    if (cell.s.fill && cell.s.fill.fgColor) {
+                        var bg = getExcelColor(cell.s.fill.fgColor);
+                        if (bg) style.bgcolor = bg;
+                    }
+
+                    // Font
+                    if (cell.s.font) {
+                        var font = {};
+                        if (cell.s.font.name) font.name = cell.s.font.name;
+                        if (cell.s.font.sz) font.size = cell.s.font.sz;
+                        if (cell.s.font.bold) font.bold = true;
+                        if (cell.s.font.italic) font.italic = true;
+                        if (cell.s.font.underline) {
+                            style.underline = true;
+                        }
+                        if (cell.s.font.color) {
+                            var fc = getExcelColor(cell.s.font.color);
+                            if (fc) style.color = fc;
+                        }
+                        if (Object.keys(font).length > 0) style.font = font;
+                    }
+
+                    // Alignment
+                    if (cell.s.alignment) {
+                        if (cell.s.alignment.horizontal) style.align = cell.s.alignment.horizontal;
+                        if (cell.s.alignment.vertical) {
+                            style.valign = cell.s.alignment.vertical === 'center' ? 'middle' : cell.s.alignment.vertical;
+                        }
+                    }
+
+                    // Borders
+                    if (cell.s.border) {
+                        var border = {};
+                        var sides = { left: 'left', right: 'right', top: 'top', bottom: 'bottom' };
+                        var styleMap = { thin: 'thin', medium: 'medium', thick: 'thick' };
+                        for (var side in sides) {
+                            var b = cell.s.border[side];
+                            if (b && b.style) {
+                                var color = getExcelColor(b.color) || '#000000';
+                                border[sides[side]] = [styleMap[b.style] || 'thin', color];
+                            }
+                        }
+                        if (Object.keys(border).length > 0) style.border = border;
+                    }
+                }
+
+                if (Object.keys(style).length > 0) {
+                    cells[j].style = style;
+                }
+            });
+            o.rows[i] = { cells: cells };
+        });
+        o.rows.len = aoa.length;
+
+        // Merges
+        o.merges = [];
+        (ws['!merges'] || []).forEach(function(merge, i) {
+            if (o.rows[merge.s.r] == null) o.rows[merge.s.r] = { cells: {} };
+            if (o.rows[merge.s.r].cells[merge.s.c] == null) o.rows[merge.s.r].cells[merge.s.c] = {};
+            o.rows[merge.s.r].cells[merge.s.c].merge = [
+                merge.e.r - merge.s.r,
+                merge.e.c - merge.s.c
+            ];
+            o.merges[i] = XLSX.utils.encode_range(merge);
+        });
+
+        out.push(o);
+    });
+    return out;
 }
 
 function updateAuthData(rowIdx, col, value) {
@@ -15882,13 +15945,13 @@ function saveCellEdit(cell) {
     cell.style.backgroundColor = '#e6ffe6';
 
     // Persist to localStorage
-    let allEdits = JSON.parse(localStorage.getItem('authorityEdits_v135') || '{}');
+    let allEdits = JSON.parse(localStorage.getItem('authorityEdits_v136') || '{}');
     allEdits[`${row}_${col}`] = val;
-    localStorage.setItem('authorityEdits_v135', JSON.stringify(allEdits));
+    localStorage.setItem('authorityEdits_v136', JSON.stringify(allEdits));
 }
 
 function restoreAuthorityEdits() {
-    const allEdits = JSON.parse(localStorage.getItem('authorityEdits_v135') || '{}');
+    const allEdits = JSON.parse(localStorage.getItem('authorityEdits_v136') || '{}');
     const table = document.getElementById('authority-excel-table');
     if (!table) return;
 
@@ -15904,8 +15967,9 @@ function restoreAuthorityEdits() {
 }
 
 function clearAuthorityEdits() {
-    localStorage.removeItem('authorityEdits_v135');
-    localStorage.removeItem('authorityFormats_v135');
+    localStorage.removeItem('authorityEdits_v136');
+    localStorage.removeItem('authorityFormats_v136');
+    localStorage.removeItem('authorityXsData_v136');
     editedCells = {};
     location.reload();
 }
@@ -15939,4 +16003,7 @@ function exportAuthorityExcel() {
     link.click();
 }
 </script>
+<!-- x-spreadsheet for online Excel editing -->
+<link rel="stylesheet" href="https://unpkg.com/x-data-spreadsheet@1.1.5/dist/xspreadsheet.css">
+<script src="https://unpkg.com/x-data-spreadsheet@1.1.5/dist/xspreadsheet.js"></script>
 </body><div id="immersive-translate-popup" style="all: initial"></div></html>
