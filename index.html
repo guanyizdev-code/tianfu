@@ -13175,59 +13175,139 @@ function parseAuthExcel(event) {
             // Parse to array of arrays
             const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
 
-            // Store for preview
-            window.uploadedExcelData = jsonData;
+            // Regenerate entire table from uploaded Excel
+            regenerateAuthorityTable(sheet, jsonData);
 
-            // Update table cells from uploaded data (only text, keep format)
-            applyUploadedDataToTable(jsonData);
-
-            showToast('Excel 已上传并应用，共 ' + (jsonData.length - 3) + ' 行数据');
+            showToast('Excel 已上传并重新生成表格，共 ' + jsonData.length + ' 行');
         } catch (err) {
             console.error('解析Excel错误:', err);
-            alert('解析Excel文件失败，请检查文件格式');
+            alert('解析Excel文件失败: ' + err.message);
         }
     };
     reader.readAsArrayBuffer(file);
     event.target.value = '';
 }
 
-function applyUploadedDataToTable(excelData) {
-    const table = document.getElementById('authority-excel-table');
-    if (!table || !excelData) return;
-
-    const tableRows = table.querySelectorAll('tr');
-    let excelRowIdx = 0;
-
-    tableRows.forEach((tableRow, tableRowIdx) => {
-        // Skip header rows (0-2)
-        if (tableRowIdx < 3) return;
-
-        const cells = tableRow.querySelectorAll('td, th');
-        let excelColIdx = 0;
-
-        cells.forEach((cell) => {
-            // Skip category/subcategory rows
-            if (tableRow.dataset.rowType === 'category' || tableRow.dataset.rowType === 'subcategory') return;
-
-            // Find matching Excel cell
-            while (excelRowIdx < excelData.length && excelColIdx < excelData[excelRowIdx].length && excelData[excelRowIdx][excelColIdx] == null) {
-                excelColIdx++;
+function getExcelCellColor(cell) {
+    if (!cell || !cell.s || !cell.s.fill) return null;
+    const fill = cell.s.fill;
+    if (fill.fgColor) {
+        if (fill.fgColor.rgb) {
+            const rgb = fill.fgColor.rgb;
+            if (rgb && rgb !== '00000000') {
+                return '#' + rgb.slice(-6);
             }
-
-            if (excelRowIdx < excelData.length && excelColIdx < excelData[excelRowIdx].length) {
-                const val = excelData[excelRowIdx][excelColIdx];
-                if (val != null) {
-                    cell.innerText = String(val);
-                    cell.style.backgroundColor = '#fff3cd';
-                }
-                excelColIdx++;
-            }
-        });
-
-        if (tableRow.dataset.rowType !== 'category' && tableRow.dataset.rowType !== 'subcategory') {
-            excelRowIdx++;
         }
+        // Theme colors - map common ones
+        if (fill.fgColor.theme !== undefined) {
+            const themeMap = { 0: '#FFFFFF', 1: '#000000', 4: '#FFFF00', 5: '#CCFFFF' };
+            return themeMap[fill.fgColor.theme] || null;
+        }
+    }
+    return null;
+}
+
+function getExcelFont(cell) {
+    if (!cell || !cell.s || !cell.s.font) return {};
+    const font = cell.s.font;
+    const result = {};
+    if (font.name) result.family = font.name;
+    if (font.sz) result.size = font.sz + 'pt';
+    if (font.bold) result.bold = true;
+    if (font.color && font.color.rgb) {
+        result.color = '#' + font.color.rgb.slice(-6);
+    }
+    return result;
+}
+
+function regenerateAuthorityTable(sheet, jsonData) {
+    const wrapper = document.getElementById('authority-table-wrapper');
+    if (!wrapper || !jsonData || jsonData.length < 3) return;
+
+    // Get merge info
+    const merges = sheet['!merges'] || [];
+    const mergeMap = {};
+    merges.forEach(m => {
+        const key = m.s.r + '_' + m.s.c;
+        mergeMap[key] = { rs: m.e.r - m.s.r + 1, cs: m.e.c - m.s.c + 1 };
     });
+
+    let html = '<table id="authority-excel-table" style="border-collapse:collapse;table-layout:fixed;width:max-content;font-family:仿宋,FangSong,serif;">';
+
+    jsonData.forEach((row, r) => {
+        html += '<tr>';
+        let c = 0;
+        while (c < row.length || c < 30) {
+            const key = r + '_' + c;
+            if (mergeMap[key]) {
+                // This is the top-left of a merged cell
+                const m = mergeMap[key];
+                const cellRef = XLSX.utils.encode_cell({r: r, c: c});
+                const cell = sheet[cellRef];
+                const val = cell ? cell.v : (row[c] || '');
+                const bg = getExcelCellColor(cell);
+                const font = getExcelFont(cell);
+
+                let style = 'border:1px solid #000;padding:3px 5px;vertical-align:middle;';
+                if (bg) style += 'background-color:' + bg + ';';
+                if (font.family) style += 'font-family:"' + font.family + '",serif;';
+                if (font.size) style += 'font-size:' + font.size + ';';
+                if (font.bold) style += 'font-weight:bold;';
+                if (font.color) style += 'color:' + font.color + ';';
+
+                const isHeader = r < 3;
+                const tag = isHeader ? 'th' : 'td';
+                const rs = m.rs > 1 ? ' rowspan="' + m.rs + '"' : '';
+                const cs = m.cs > 1 ? ' colspan="' + m.cs + '"' : '';
+                const edit = (!isHeader && r >= 3) ? ' contenteditable="true" onblur="saveCellEdit(this)"' : '';
+
+                let text = val !== undefined && val !== null ? String(val) : '';
+                text = text.replace(/\n/g, '<br>');
+
+                html += '<' + tag + rs + cs + ' style="' + style + '"' + edit + '>' + text + '</' + tag + '>';
+                c += m.cs;
+            } else if (Object.values(mergeMap).some(m => {
+                // Check if this cell is inside any merge
+                for (const [mk, mv] of Object.entries(mergeMap)) {
+                    const [mr, mc] = mk.split('_').map(Number);
+                    if (r >= mr && r < mr + mv.rs && c >= mc && c < mc + mv.cs && !(r === mr && c === mc)) {
+                        return true;
+                    }
+                }
+                return false;
+            })) {
+                c++;
+            } else {
+                const cellRef = XLSX.utils.encode_cell({r: r, c: c});
+                const cell = sheet[cellRef];
+                const val = row[c];
+                const bg = getExcelCellColor(cell);
+                const font = getExcelFont(cell);
+
+                let style = 'border:1px solid #000;padding:3px 5px;vertical-align:middle;';
+                if (bg) style += 'background-color:' + bg + ';';
+                if (font.family) style += 'font-family:"' + font.family + '",serif;';
+                if (font.size) style += 'font-size:' + font.size + ';';
+                if (font.bold) style += 'font-weight:bold;';
+                if (font.color) style += 'color:' + font.color + ';';
+                if (c >= 4 && c < row.length - 1) style += 'text-align:center;';
+
+                const isHeader = r < 3;
+                const tag = isHeader ? 'th' : 'td';
+                const edit = (!isHeader && r >= 3) ? ' contenteditable="true" onblur="saveCellEdit(this)"' : '';
+
+                let text = val !== undefined && val !== null ? String(val) : '';
+                text = text.replace(/\n/g, '<br>');
+
+                html += '<' + tag + ' style="' + style + '"' + edit + '>' + text + '</' + tag + '>';
+                c++;
+            }
+        }
+        html += '</tr>';
+    });
+
+    html += '</table>';
+    wrapper.innerHTML = html;
 }
 
 function getCellBgColor(cell) {
