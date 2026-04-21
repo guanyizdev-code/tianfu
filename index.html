@@ -2,7 +2,7 @@
 <html lang="zh-CN" data-immersive-translate-page-theme="light"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>天蚨基金规划v1.33/260421</title>
+    <title>天蚨基金规划v1.34/260421</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -1278,6 +1278,8 @@ function initAppAfterAuth() {
 #pwdBtn{width:100%;margin-top:16px;padding:12px 16px;background:#18181b;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;}
 #pwdBtn:hover{opacity:0.92;}
 #pwdError{display:none;margin-top:12px;color:#dc2626;font-size:13px;}
+#authority-excel-table td.cell-selected{outline:2px solid #3b82f6;outline-offset:-2px;position:relative;z-index:1;}
+#auth-format-toolbar.hidden{display:none !important;}
 </style>
 <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
 <script src="https://unpkg.com/three-spritetext@1.8.1/dist/three-spritetext.min.js"></script>
@@ -1790,7 +1792,7 @@ function initAppAfterAuth() {
 <body class="text-slate-900">
 <div id="pwdOverlay">
 <div id="pwdBox">
-<h2>天蚨基金规划v1.33/260421</h2>
+<h2>天蚨基金规划v1.34/260421</h2>
 <p>请输入访问密码以继续</p>
 <input id="pwdInput" type="password" placeholder="请输入密码" onkeydown="if(event.key==='Enter')checkPassword()">
 <button id="pwdBtn" onclick="checkPassword()">进入系统</button>
@@ -2545,6 +2547,34 @@ function initAppAfterAuth() {
                             <i class="fas fa-undo"></i>
                         </button>
                     </div>
+                </div>
+                <!-- Format Toolbar (shown in edit mode) -->
+                <div id="auth-format-toolbar" class="hidden px-5 py-2 border-b border-slate-100 bg-slate-50 flex items-center gap-2">
+                    <span class="text-xs text-slate-500 mr-1">格式工具：</span>
+                    <label class="flex items-center gap-1 text-xs text-slate-600 cursor-pointer hover:text-slate-800" title="背景颜色">
+                        <i class="fas fa-fill-drip"></i>
+                        <input type="color" id="auth-bg-color" class="w-6 h-6 border-0 p-0 cursor-pointer" onchange="applyAuthFormat('bgColor', this.value)" value="#ffffff">
+                    </label>
+                    <label class="flex items-center gap-1 text-xs text-slate-600 cursor-pointer hover:text-slate-800" title="字体颜色">
+                        <i class="fas fa-font"></i>
+                        <input type="color" id="auth-font-color" class="w-6 h-6 border-0 p-0 cursor-pointer" onchange="applyAuthFormat('color', this.value)" value="#000000">
+                    </label>
+                    <button onclick="applyAuthFormat('bold')" class="px-2 py-1 text-xs font-bold bg-white border border-slate-200 rounded hover:bg-slate-100" title="加粗">B</button>
+                    <button onclick="applyAuthFormat('italic')" class="px-2 py-1 text-xs italic bg-white border border-slate-200 rounded hover:bg-slate-100" title="斜体">I</button>
+                    <button onclick="applyAuthFormat('underline')" class="px-2 py-1 text-xs underline bg-white border border-slate-200 rounded hover:bg-slate-100" title="下划线">U</button>
+                    <select id="auth-font-size" onchange="applyAuthFormat('fontSize', this.value)" class="text-xs border border-slate-200 rounded px-1 py-1 bg-white" title="字号">
+                        <option value="">字号</option>
+                        <option value="9pt">9</option>
+                        <option value="10pt">10</option>
+                        <option value="11pt">11</option>
+                        <option value="12pt">12</option>
+                        <option value="14pt">14</option>
+                        <option value="16pt">16</option>
+                        <option value="18pt">18</option>
+                    </select>
+                    <button onclick="clearAuthCellFormat()" class="px-2 py-1 text-xs text-red-600 bg-white border border-red-200 rounded hover:bg-red-50 ml-auto" title="清除选中单元格格式">
+                        <i class="fas fa-eraser"></i> 清除格式
+                    </button>
                 </div>
                 <div id="authority-table-wrapper" style="overflow-x: auto; max-height: calc(100vh - 180px);">
 <table id="authority-excel-table" style="border-collapse: collapse; table-layout: fixed; width: max-content; font-family: '仿宋', 'FangSong', serif;">
@@ -13175,6 +13205,26 @@ function parseAuthExcel(event) {
             // Regenerate entire table from uploaded Excel
             regenerateAuthorityTable(sheet, jsonData);
 
+            // Restore saved edits and formats after upload
+            setTimeout(() => {
+                restoreAuthorityEdits();
+                if (authEditMode) {
+                    // Re-enable edit mode on new table
+                    const table = document.getElementById('authority-excel-table');
+                    if (table) {
+                        table.querySelectorAll('tr').forEach(row => {
+                            const rowType = row.dataset.rowType;
+                            if (rowType === 'category' || rowType === 'subcategory' || rowType === 'header') return;
+                            row.querySelectorAll('td').forEach(cell => {
+                                cell.setAttribute('contenteditable', 'true');
+                                cell.setAttribute('onblur', 'saveCellEdit(this)');
+                                cell.addEventListener('click', authCellClickHandler);
+                            });
+                        });
+                    }
+                }
+            }, 100);
+
             showToast('Excel 已上传并重新生成表格，共 ' + jsonData.length + ' 行');
         } catch (err) {
             console.error('解析Excel错误:', err);
@@ -13596,6 +13646,8 @@ function enableAuthorityEdit() {
         return;
     }
 
+    const toolbar = document.getElementById('auth-format-toolbar');
+
     if (authEditMode) {
         // Enter edit mode: make data cells editable
         table.querySelectorAll('tr').forEach(row => {
@@ -13604,8 +13656,10 @@ function enableAuthorityEdit() {
             row.querySelectorAll('td').forEach(cell => {
                 cell.setAttribute('contenteditable', 'true');
                 cell.setAttribute('onblur', 'saveCellEdit(this)');
+                cell.addEventListener('click', authCellClickHandler);
             });
         });
+        if (toolbar) toolbar.classList.remove('hidden');
         showEditModeTip(true);
         showToast('已进入编辑模式，双击单元格可修改内容');
     } else {
@@ -13613,7 +13667,10 @@ function enableAuthorityEdit() {
         table.querySelectorAll('td[contenteditable="true"]').forEach(cell => {
             cell.removeAttribute('contenteditable');
             cell.removeAttribute('onblur');
+            cell.classList.remove('cell-selected');
+            cell.removeEventListener('click', authCellClickHandler);
         });
+        if (toolbar) toolbar.classList.add('hidden');
         showEditModeTip(false);
         showToast('已退出编辑模式');
     }
@@ -13633,6 +13690,113 @@ function showEditModeTip(show) {
 
 function saveAuthorityEdit() {
     // Placeholder for future batch save
+}
+
+let selectedAuthCell = null;
+
+function authCellClickHandler(e) {
+    if (!authEditMode) return;
+    // Deselect previous
+    if (selectedAuthCell) {
+        selectedAuthCell.classList.remove('cell-selected');
+    }
+    // Select new (but not when double-clicking to edit text)
+    if (e.detail === 1) {
+        selectedAuthCell = e.currentTarget;
+        selectedAuthCell.classList.add('cell-selected');
+    }
+}
+
+function applyAuthFormat(format, value) {
+    if (!selectedAuthCell || !authEditMode) {
+        showToast('请先点击选中一个单元格');
+        return;
+    }
+    const cell = selectedAuthCell;
+    const row = cell.parentElement.rowIndex;
+    const col = cell.cellIndex;
+
+    switch (format) {
+        case 'bgColor':
+            cell.style.backgroundColor = value;
+            if (value === '#ffffff') cell.style.backgroundColor = '';
+            break;
+        case 'color':
+            cell.style.color = value;
+            break;
+        case 'bold':
+            cell.style.fontWeight = cell.style.fontWeight === 'bold' ? '' : 'bold';
+            value = cell.style.fontWeight;
+            break;
+        case 'italic':
+            cell.style.fontStyle = cell.style.fontStyle === 'italic' ? '' : 'italic';
+            value = cell.style.fontStyle;
+            break;
+        case 'underline':
+            cell.style.textDecoration = cell.style.textDecoration === 'underline' ? '' : 'underline';
+            value = cell.style.textDecoration;
+            break;
+        case 'fontSize':
+            cell.style.fontSize = value;
+            break;
+    }
+
+    // Persist format
+    let allFormats = JSON.parse(localStorage.getItem('authorityFormats_v134') || '{}');
+    const key = row + '_' + col;
+    if (!allFormats[key]) allFormats[key] = {};
+    if (format === 'bgColor' && (!value || value === '#ffffff')) {
+        delete allFormats[key].bgColor;
+    } else if (format === 'bold' && !value) {
+        delete allFormats[key].bold;
+    } else if (format === 'italic' && !value) {
+        delete allFormats[key].italic;
+    } else if (format === 'underline' && !value) {
+        delete allFormats[key].underline;
+    } else {
+        allFormats[key][format] = value;
+    }
+    localStorage.setItem('authorityFormats_v134', JSON.stringify(allFormats));
+}
+
+function restoreAuthFormats() {
+    const allFormats = JSON.parse(localStorage.getItem('authorityFormats_v134') || '{}');
+    const table = document.getElementById('authority-excel-table');
+    if (!table) return;
+
+    Object.entries(allFormats).forEach(([key, fmt]) => {
+        const [row, col] = key.split('_').map(Number);
+        const cell = table.rows[row]?.cells[col];
+        if (!cell) return;
+        if (fmt.bgColor) cell.style.backgroundColor = fmt.bgColor;
+        if (fmt.color) cell.style.color = fmt.color;
+        if (fmt.bold) cell.style.fontWeight = 'bold';
+        if (fmt.italic) cell.style.fontStyle = 'italic';
+        if (fmt.underline) cell.style.textDecoration = 'underline';
+        if (fmt.fontSize) cell.style.fontSize = fmt.fontSize;
+    });
+}
+
+function clearAuthCellFormat() {
+    if (!selectedAuthCell || !authEditMode) {
+        showToast('请先点击选中一个单元格');
+        return;
+    }
+    const cell = selectedAuthCell;
+    const row = cell.parentElement.rowIndex;
+    const col = cell.cellIndex;
+
+    cell.style.backgroundColor = '';
+    cell.style.color = '';
+    cell.style.fontWeight = '';
+    cell.style.fontStyle = '';
+    cell.style.textDecoration = '';
+    cell.style.fontSize = '';
+
+    let allFormats = JSON.parse(localStorage.getItem('authorityFormats_v134') || '{}');
+    delete allFormats[row + '_' + col];
+    localStorage.setItem('authorityFormats_v134', JSON.stringify(allFormats));
+    showToast('已清除选中单元格格式');
 }
 
 function updateAuthData(rowIdx, col, value) {
@@ -15650,13 +15814,13 @@ function saveCellEdit(cell) {
     cell.style.backgroundColor = '#e6ffe6';
 
     // Persist to localStorage
-    let allEdits = JSON.parse(localStorage.getItem('authorityEdits_v133') || '{}');
+    let allEdits = JSON.parse(localStorage.getItem('authorityEdits_v134') || '{}');
     allEdits[`${row}_${col}`] = val;
-    localStorage.setItem('authorityEdits_v133', JSON.stringify(allEdits));
+    localStorage.setItem('authorityEdits_v134', JSON.stringify(allEdits));
 }
 
 function restoreAuthorityEdits() {
-    const allEdits = JSON.parse(localStorage.getItem('authorityEdits_v133') || '{}');
+    const allEdits = JSON.parse(localStorage.getItem('authorityEdits_v134') || '{}');
     const table = document.getElementById('authority-excel-table');
     if (!table) return;
 
@@ -15668,10 +15832,12 @@ function restoreAuthorityEdits() {
             cell.style.backgroundColor = '#e6ffe6';
         }
     });
+    restoreAuthFormats();
 }
 
 function clearAuthorityEdits() {
-    localStorage.removeItem('authorityEdits_v133');
+    localStorage.removeItem('authorityEdits_v134');
+    localStorage.removeItem('authorityFormats_v134');
     editedCells = {};
     location.reload();
 }
