@@ -2,7 +2,7 @@
 <html lang="zh-CN" data-immersive-translate-page-theme="light"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>天蚨基金规划 v1.28（2026 0421）</title>
+    <title>天蚨基金规划 v1.29（2026 0421）</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -1790,7 +1790,7 @@ function initAppAfterAuth() {
 <body class="text-slate-900">
 <div id="pwdOverlay">
 <div id="pwdBox">
-<h2>天蚨基金规划 v1.28（2026 0421）</h2>
+<h2>天蚨基金规划 v1.29（2026 0421）</h2>
 <p>请输入访问密码以继续</p>
 <input id="pwdInput" type="password" placeholder="请输入密码" onkeydown="if(event.key==='Enter')checkPassword()">
 <button id="pwdBtn" onclick="checkPassword()">进入系统</button>
@@ -9004,13 +9004,37 @@ function getRoleBadge(text) {
 }
 
 
+
 // ==========================================
-// 权责清单Excel解析和动态表格生成
+// 权责清单Excel解析和动态表格生成（v2 - 含样式）
 // ==========================================
 let authTableConfig = {
     cols: [],
     headers: [],
-    headerRows: 2
+    headerRows: 2,
+    cellStyles: {}
+};
+
+// Excel颜色映射
+const THEME_COLORS = {
+    0: 'FFFFFF', 1: '000000', 2: 'E2EFDA', 3: 'C6EFCE',
+    4: 'FFEB9C', 5: 'FFF2CC', 6: 'DDEBF7', 7: 'BDD7EE',
+    8: '9BC2E6', 9: 'F4B084'
+};
+
+const INDEXED_COLORS = {
+    9: 'FFC000', 41: 'BDD7EE', 42: 'DDEBF7', 43: 'F4B084',
+    44: 'FFC000', 45: 'FFF2CC', 46: 'C6EFCE', 47: 'A9D08E',
+    48: 'E2EFDA', 49: '63BE7B', 50: 'FFEB9C', 51: 'FFD966',
+    52: 'FFF2CC', 53: 'DDEBF7', 54: 'BDD7EE', 55: '9BC2E6'
+};
+
+// 特殊背景色映射（Excel RGB -> CSS颜色）
+const BG_COLOR_MAP = {
+    'FFFFFF00': '#FFFDE7',
+    'FFCCFFFF': '#E3F2FD',
+    'FFFFFFFF': '#FFFFFF',
+    '00000000': 'transparent'
 };
 
 function parseAuthExcel(event) {
@@ -9021,24 +9045,24 @@ function parseAuthExcel(event) {
     reader.onload = function(e) {
         try {
             const data = new Uint8Array(e.target.result);
-            const workbook = XLSX.read(data, { type: 'array' });
+            const workbook = XLSX.read(data, { type: 'array', cellStyles: true });
             const sheet = workbook.Sheets[workbook.SheetNames[0]];
             
-            // 解析表头结构
-            const headerInfo = parseExcelHeader(sheet);
+            // 解析表头结构（含样式）
+            const headerInfo = parseExcelHeaderWithStyles(sheet);
             
-            // 解析数据
-            const parsedData = parseExcelData(sheet, headerInfo);
+            // 解析数据（含样式）
+            const parsedData = parseExcelDataWithStyles(sheet, headerInfo);
             
             // 更新配置和数据
             authTableConfig = headerInfo;
             authorityData = parsedData;
             
             // 动态生成表头HTML
-            updateAuthTableHeader(headerInfo);
+            updateAuthTableHeaderWithStyles(headerInfo);
             
-            // 渲染数据
-            renderAuthorityTable(authorityData);
+            // 渲染数据（带样式）
+            renderAuthorityTableWithStyles(authorityData);
             
             showToast('权责清单已更新：共 ' + parsedData.length + ' 行数据');
         } catch (err) {
@@ -9050,19 +9074,61 @@ function parseAuthExcel(event) {
     event.target.value = '';
 }
 
-function parseExcelHeader(sheet) {
+function getCellBgColor(cell) {
+    if (!cell || !cell.s || !cell.s.fill) return null;
+    const fill = cell.s.fill;
+    
+    if (fill.fgColor) {
+        if (fill.fgColor.type === 'rgb') {
+            const rgb = fill.fgColor.rgb;
+            return BG_COLOR_MAP[rgb] || '#' + rgb.slice(-6);
+        } else if (fill.fgColor.type === 'theme') {
+            return '#' + THEME_COLORS[fill.fgColor.theme];
+        } else if (fill.fgColor.type === 'indexed') {
+            return '#' + INDEXED_COLORS[fill.fgColor.indexed];
+        }
+    }
+    return null;
+}
+
+function getCellBorderStyle(cell) {
+    if (!cell || !cell.s || !cell.s.border) return 'border:1px solid #e2e8f0';
+    const border = cell.s.border;
+    
+    const styleMap = { 'thin': '1px solid #94a3b8', 'medium': '2px solid #64748b' };
+    
+    let styles = [];
+    ['left', 'right', 'top', 'bottom'].forEach(side => {
+        if (border[side] && border[side].style) {
+            const borderColor = border[side].color ? (border[side].color.rgb ? '#' + border[side].color.rgb.slice(-6) : '#64748b') : '#64748b';
+            const borderWidth = border[side].style === 'medium' ? '2px' : '1px';
+            styles.push('border-' + side + ':' + borderWidth + ' solid ' + borderColor);
+        }
+    });
+    
+    return styles.length > 0 ? styles.join(';') : 'border:1px solid #e2e8f0';
+}
+
+function getCellFontColor(cell) {
+    if (!cell || !cell.s || !cell.s.font) return null;
+    const font = cell.s.font;
+    if (font.color) {
+        if (font.color.rgb) return '#' + font.color.rgb.slice(-6);
+        if (font.color.theme) return '#' + THEME_COLORS[font.color.theme];
+        if (font.color.indexed) return '#' + INDEXED_COLORS[font.color.indexed];
+    }
+    return null;
+}
+
+function parseExcelHeaderWithStyles(sheet) {
     const range = XLSX.utils.decode_range(sheet['!ref']);
     const merges = sheet['!merges'] || [];
     
-    // 找出表头行数（通过检查合并单元格）
     let headerEndRow = 3;
     for (const merge of merges) {
-        if (merge.s.r < 4) {
-            headerEndRow = Math.max(headerEndRow, merge.e.r + 1);
-        }
+        if (merge.s.r < 4) headerEndRow = Math.max(headerEndRow, merge.e.r + 1);
     }
     
-    // 解析第3行（实际列名行）获取所有列名
     const cols = [];
     const colWidths = [];
     for (let col = range.s.c; col <= range.e.c; col++) {
@@ -9071,12 +9137,10 @@ function parseExcelHeader(sheet) {
         const colName = cell ? String(cell.v).trim() : '';
         cols.push(colName);
         
-        const colLetter = XLSX.utils.encode_col(col);
         const width = sheet['!cols'] && sheet['!cols'][col] ? sheet['!cols'][col].wch || 13 : 13;
         colWidths.push(width);
     }
     
-    // 解析第一行的大类标题和合并信息
     const headerStructure = [];
     for (let col = range.s.c; col <= range.e.c; col++) {
         const mergeInfo = findMergeInfo(merges, 1, col);
@@ -9084,11 +9148,16 @@ function parseExcelHeader(sheet) {
             const cellAddr = XLSX.utils.encode_cell({ r: 1, c: col });
             const cell = sheet[cellAddr];
             const title = cell ? String(cell.v).trim() : '';
+            const bgColor = getCellBgColor(cell);
+            const borderStyle = getCellBorderStyle(cell);
+            
             headerStructure.push({
                 title: title,
                 startCol: col,
                 endCol: mergeInfo.endCol,
-                colspan: mergeInfo.endCol - col + 1
+                colspan: mergeInfo.endCol - col + 1,
+                bgColor: bgColor,
+                borderStyle: borderStyle
             });
         }
     }
@@ -9114,15 +9183,39 @@ function findMergeInfo(merges, row, col) {
     return null;
 }
 
-function parseExcelData(sheet, headerInfo) {
+function parseExcelDataWithStyles(sheet, headerInfo) {
     const range = XLSX.utils.decode_range(sheet['!ref']);
     const data = [];
     const cols = headerInfo.cols;
+    const merges = sheet['!merges'] || [];
     
     for (let row = headerInfo.headerRows; row <= range.e.r; row++) {
-        const rowData = {};
+        const rowData = { _rowStyle: {}, _cellStyles: {} };
         let isEmptyRow = true;
+        let hasMergeTitle = false;
         
+        // 检查是否是合并标题行（黄色/浅蓝色）
+        for (const merge of merges) {
+            if (merge.s.r === row && merge.s.c === 0 && merge.e.c > 3) {
+                hasMergeTitle = true;
+                const cellAddr = XLSX.utils.encode_cell({ r: row, c: merge.s.c });
+                const cell = sheet[cellAddr];
+                rowData._mergedTitle = cell ? String(cell.v).trim() : '';
+                rowData._mergeColspan = merge.e.c - merge.s.c + 1;
+                rowData._rowStyle.bgColor = getCellBgColor(cell);
+                rowData._rowStyle.border = getCellBorderStyle(cell);
+                rowData._rowStyle.fontColor = getCellFontColor(cell);
+                rowData._rowStyle.fontBold = cell && cell.s && cell.s.font && cell.s.font.bold;
+                break;
+            }
+        }
+        
+        if (hasMergeTitle) {
+            data.push(rowData);
+            continue;
+        }
+        
+        // 正常数据行
         for (let col = range.s.c; col <= range.e.c; col++) {
             const cellAddr = XLSX.utils.encode_cell({ r: row, c: col });
             const cell = sheet[cellAddr];
@@ -9132,73 +9225,67 @@ function parseExcelData(sheet, headerInfo) {
             
             const colName = cols[col] || 'col_' + col;
             rowData[colName] = value;
+            
+            rowData._cellStyles[colName] = {
+                bgColor: getCellBgColor(cell),
+                border: getCellBorderStyle(cell),
+                fontColor: getCellFontColor(cell)
+            };
         }
         
-        const firstCellAddr = XLSX.utils.encode_cell({ r: row, c: 0 });
-        const firstCell = sheet[firstCellAddr];
-        if (firstCell && firstCell.v) {
-            const seq = String(firstCell.v).trim();
-            if (seq.match(/^[一二三四五六七八九十]+[、.]/)) {
-                rowData['highlight'] = 'yellow';
-            } else if (seq.match(/^[\d]+\.[\d]+$/) && !rowData['关键事项']) {
-                rowData['highlight'] = 'lightblue';
-            }
-        }
-        
-        if (!isEmptyRow) {
-            data.push(rowData);
-        }
+        if (!isEmptyRow) data.push(rowData);
     }
     
     return data;
 }
 
-function updateAuthTableHeader(headerInfo) {
+function updateAuthTableHeaderWithStyles(headerInfo) {
     const thead = document.querySelector('#tab-authority table thead');
     if (!thead) return;
     
-    let html = '';
     const cols = headerInfo.cols;
     const colWidths = headerInfo.colWidths;
     const headerStructure = headerInfo.headerStructure;
     
-    html += '<tr class="bg-slate-100">';
-    const fixedCols = ['序号', '权责单位', '关键事项', '决策机构'];
+    let html = '';
+    
+    // 第一行：大类标题（带边框和背景色）
+    html += '<tr>';
+    const fixedCols = ['序号', '权责单位', '关键事项', '决策机构/人'];
     let colIdx = 0;
+    
     for (const fixed of fixedCols) {
         const width = colWidths[colIdx] ? Math.round(colWidths[colIdx] * 8) : 80;
-        html += '<th class="text-center px-2 py-2 border-b border-slate-300" style="width:' + width + 'px;" rowspan="' + headerInfo.headerRows + '">' + fixed + '</th>';
+        html += '<th class="text-center px-2 py-2" style="width:' + width + 'px;border:1px solid #94a3b8;background:#f1f5f9;" rowspan="' + headerInfo.headerRows + '">' + fixed + '</th>';
         colIdx++;
     }
     
     for (const struct of headerStructure) {
         if (struct.startCol >= fixedCols.length) {
-            const bgColor = struct.title.includes('天蚨') ? 'bg-blue-100' : 
-                           struct.title.includes('金控') ? 'bg-purple-100' : 
-                           struct.title.includes('出资人') ? 'bg-green-100' : 'bg-slate-100';
-            html += '<th class="text-center px-2 py-2 border-b border-slate-300 ' + bgColor + '" colspan="' + struct.colspan + '">' + struct.title + '</th>';
+            const bgColor = struct.bgColor || (struct.title.includes('天蚨') ? '#DBEAFE' : struct.title.includes('金控') ? '#F3E8FF' : '#F0FDF4');
+            const borderStyle = struct.borderStyle || 'border:1px solid #94a3b8';
+            html += '<th class="text-center px-2 py-2" style="' + borderStyle + ';background:' + bgColor + ';" colspan="' + struct.colspan + '">' + struct.title + '</th>';
         }
     }
     html += '</tr>';
     
-    html += '<tr class="bg-slate-50">';
+    // 第二行：具体列名
+    html += '<tr>';
     for (let i = fixedCols.length; i < cols.length; i++) {
         const colName = cols[i];
         if (!colName) continue;
         
-        let bgColor = 'bg-slate-50';
+        let bgColor = '#F8FAFC';
         for (const struct of headerStructure) {
             if (i >= struct.startCol && i <= struct.endCol) {
-                bgColor = struct.title.includes('天蚨') ? 'bg-blue-50' : 
-                         struct.title.includes('金控') ? 'bg-purple-50' : 
-                         struct.title.includes('出资人') ? 'bg-green-50' : 'bg-slate-50';
+                bgColor = struct.bgColor ? struct.bgColor.replace('#DBEAFE', '#EFF6FF').replace('#F3E8FF', '#FAF5FF') : '#F8FAFC';
                 break;
             }
         }
         
         const width = colWidths[i] ? Math.round(colWidths[i] * 8) : 75;
         const displayName = simplifyColumnName(colName);
-        html += '<th class="text-center px-1 py-2 border-b border-slate-200 ' + bgColor + ' text-xs" style="width:' + width + 'px;">' + displayName + '</th>';
+        html += '<th class="text-center px-1 py-2 text-xs" style="width:' + width + 'px;border:1px solid #cbd5e1;background:' + bgColor + ';">' + displayName + '</th>';
     }
     html += '</tr>';
     
@@ -9210,7 +9297,7 @@ function simplifyColumnName(name) {
         '天蚨公司总经理': '总经理',
         '天蚨公司董事长': '董事长',
         '天蚨公司董事会': '董事会',
-        '总经理办公会': '总经理办公会',
+        '总经理办公会': '总经理<br>办公会',
         '薪酬与绩效委员会': '薪酬绩效委',
         '审计与风险委员会': '审计风险委',
         '战略与投资委员会': '战略投资委',
@@ -9219,88 +9306,68 @@ function simplifyColumnName(name) {
     return simplifications[name] || name;
 }
 
-
-function renderAuthorityTable(data, editMode = false) {
+function renderAuthorityTableWithStyles(data) {
     const tbody = document.getElementById('authorityTable');
-    let html = '';
+    if (!tbody) return;
+    
     const cols = authTableConfig.cols.length > 0 ? authTableConfig.cols : ['序号', '权责单位', '关键事项', '决策机构', '投资部', '运营部', '综合部', '总办会', '天蚨总经理', '投决会', '天蚨董事长', '天蚨董事会', '股东会', '财务管理部', '合规风控部', '投资管理部', '人力资源部', '风控总监', '财务总监', '分管领导', '总经理办公会', '集团总经理', '薪酬绩效委', '审计风险委', '战略投资委', '党委', '集团董事长', '集团董事会', '市财政局', '备注'];
+    
+    let html = '';
+    
     data.forEach((row, idx) => {
-        const highlight = row['highlight'] || '';
-        const needConfirm = row['need_confirm'];
-
-        // 黄色标题行（一、二、三...）- 合并显示
-        if (highlight === 'yellow') {
-            const text = row['序号'] || '';
-            html += `<tr style="background:#FFFDE7;" data-row-idx="${idx}"><td colspan="${cols.length}" class="px-4 py-2 font-bold text-slate-700 text-sm border-b border-yellow-200">${text}</td></tr>`;
+        // 合并标题行
+        if (row._mergedTitle) {
+            const bgColor = row._rowStyle.bgColor || '#FFFDE7';
+            const fontWeight = row._rowStyle.fontBold ? 'font-weight:700;' : 'font-weight:600;';
+            const textColor = row._rowStyle.fontColor || (bgColor === '#FFFDE7' ? '#475569;' : '#64748b;');
+            const borderStyle = row._rowStyle.border || 'border:1px solid #f59e0b;';
+            html += '<tr style="background:' + bgColor + ';' + borderStyle + '" data-row-idx="' + idx + '">';
+            html += '<td colspan="' + cols.length + '" class="px-4 py-2 text-sm" style="' + fontWeight + 'color:' + textColor + '">' + row._mergedTitle + '</td>';
+            html += '</tr>';
             return;
         }
-
-        // 浅蓝色子标题行（1.1, 1.2...）- 合并显示序号+权责单位
-        if (highlight === 'lightblue') {
-            const seq = row['序号'] || '';
-            const dept = row['权责单位'] || '';
-            const text = seq + (dept ? ' ' + dept : '');
-            html += `<tr style="background:#E3F2FD;" data-row-idx="${idx}"><td colspan="${cols.length}" class="px-4 py-2 font-semibold text-slate-600 text-sm">${text}</td></tr>`;
-            return;
-        }
-
-        // 青色需要确认标记
-        const confirmStyle = needConfirm ? 'background:#B0F0F0;' : '';
-        const confirmClass = needConfirm ? 'need-confirm' : '';
-
-        html += `<tr class="hover:bg-slate-50 transition ${confirmClass}" style="${confirmStyle}" data-row-idx="${idx}">`;
-        cols.forEach((col, colIdx) => {
-            const value = row[col] || '';
-            // 单元格颜色（如果有）
-            const cellColors = row['cell_colors'] || {};
-            const cellColor = cellColors[col] || '';
-            let cellBgStyle = '';
-            if (cellColor === 'yellow') {
-                cellBgStyle = 'background:#FFFDE7;';
-            } else if (cellColor === 'lightblue') {
-                cellBgStyle = 'background:#E3F2FD;';
-            } else if (cellColor === 'cyan') {
-                cellBgStyle = 'background:#B0F0F0;';
+        
+        // 正常数据行
+        html += '<tr class="hover:bg-slate-50 transition" data-row-idx="' + idx + '">';
+        
+        cols.forEach((colName, colIdx) => {
+            const value = row[colName] || '';
+            const cellStyle = row._cellStyles[colName] || {};
+            const borderStyle = cellStyle.border || 'border:1px solid #e2e8f0;';
+            const bgColor = cellStyle.bgColor || '#FFFFFF';
+            const fontColor = cellStyle.fontColor || '';
+            const fontColorStyle = fontColor ? 'color:' + fontColor + ';' : '';
+            
+            // 序号列
+            if (colIdx === 0) {
+                html += '<td class="px-4 py-3 font-mono text-xs" style="' + borderStyle + ';background:' + bgColor + ';' + fontColorStyle + '">' + value + '</td>';
             }
-            // 如果有单元格颜色，覆盖行背景色
-            const finalCellStyle = cellBgStyle || (needConfirm && colIdx < 4 ? 'background:#00B0F0;' : '');
-
-            if (colIdx < 4 || colIdx === cols.length - 1) {
-                // 文本列可直接编辑（序号、权责单位、关键事项、决策机构、备注）
-                if (editMode) {
-                    html += `<td class="px-4 py-3 text-xs" style="${finalCellStyle}" data-auth-col="${col}" data-auth-row="${idx}"><input type="text" value="${value}" class="w-full px-2 py-1 border border-blue-300 rounded text-xs focus:outline-none focus:ring-2 focus:ring-blue-500" onchange="updateAuthData(${idx}, '${col}', this.value)"></td>`;
-                    // 在序号列后添加颜色选择器（行颜色）
-                    if (colIdx === 0) {
-                        const currentHighlight = row['highlight'] || '';
-                        html += `<td class="px-2 py-3"><select class="px-1 py-1 border border-slate-300 rounded text-xs focus:outline-none" onchange="updateAuthHighlight(${idx}, this.value)">
-                            <option value="" ${currentHighlight === '' ? 'selected' : ''}>无</option>
-                            <option value="yellow" ${currentHighlight === 'yellow' ? 'selected' : ''}>黄色</option>
-                            <option value="lightblue" ${currentHighlight === 'lightblue' ? 'selected' : ''}>浅蓝</option>
-                        </select></td>`;
-                    }
-                } else {
-                    const cls = colIdx === 0 ? 'text-slate-500 font-mono' : (colIdx === 1 ? 'font-medium text-slate-800' : 'text-slate-700 whitespace-normal min-w-[180px]');
-                    html += `<td class="px-4 py-3 ${cls} text-xs" style="${finalCellStyle}">${value}</td>`;
-                    // 在序号列后添加颜色列占位（非编辑模式显示颜色标记）
-                    if (colIdx === 0) {
-                        const h = row['highlight'] || '';
-                        const colorDot = h ? `<span class="inline-block w-3 h-3 rounded-full" style="background:${h === 'yellow' ? '#FFFDE7' : '#E3F2FD'}; border:1px solid ${h === 'yellow' ? '#F59E0B' : '#3B82F6'};"></span>` : '';
-                        html += `<td class="px-2 py-3 text-center">${colorDot}</td>`;
-                    }
-                }
-            } else {
-                // 角色列使用徽章显示
-                if (editMode) {
-                    html += `<td class="px-4 py-3" style="${finalCellStyle}" data-auth-col="${col}" data-auth-row="${idx}"><input type="text" value="${value}" class="w-full px-2 py-1 border border-blue-300 rounded text-xs focus:outline-none focus:ring-2 focus:ring-blue-500" onchange="updateAuthData(${idx}, '${col}', this.value)"></td>`;
-                } else {
-                    html += `<td class="px-4 py-3" style="${finalCellStyle}">${getRoleBadge(value)}</td>`;
-                }
+            // 权责单位
+            else if (colIdx === 1) {
+                html += '<td class="px-4 py-3 font-medium text-xs" style="' + borderStyle + ';background:' + bgColor + ';' + fontColorStyle + '">' + value + '</td>';
+            }
+            // 关键事项/决策机构
+            else if (colIdx === 2 || colIdx === 3) {
+                html += '<td class="px-4 py-3 text-xs" style="' + borderStyle + ';background:' + bgColor + ';' + fontColorStyle + '">' + value + '</td>';
+            }
+            // 备注
+            else if (colIdx === cols.length - 1) {
+                html += '<td class="px-4 py-3 text-xs" style="' + borderStyle + ';background:' + bgColor + ';' + fontColorStyle + '">' + value + '</td>';
+            }
+            // 角色列
+            else {
+                const badge = getRoleBadge(value);
+                html += '<td class="px-4 py-3 text-center" style="' + borderStyle + ';background:' + bgColor + '">' + badge + '</td>';
             }
         });
-        html += `</tr>`;
+        
+        html += '</tr>';
     });
+    
     tbody.innerHTML = html;
 }
+
+
 
 let authEditMode = false;
 function enableAuthorityEdit() {
