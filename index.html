@@ -2,7 +2,7 @@
 <html lang="zh-CN" data-immersive-translate-page-theme="light"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>天蚨基金规划v1.43/260421</title>
+    <title>天蚨基金规划v1.44/260421</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -1792,7 +1792,7 @@ function initAppAfterAuth() {
 <body class="text-slate-900">
 <div id="pwdOverlay">
 <div id="pwdBox">
-<h2>天蚨基金规划v1.43/260421</h2>
+<h2>天蚨基金规划v1.44/260421</h2>
 <p>请输入访问密码以继续</p>
 <input id="pwdInput" type="password" placeholder="请输入密码" onkeydown="if(event.key==='Enter')checkPassword()">
 <button id="pwdBtn" onclick="checkPassword()">进入系统</button>
@@ -2261,13 +2261,9 @@ function initAppAfterAuth() {
         <!-- COUNCIL TAB -->
         <section id="tab-council" class="tab-content p-8 overflow-auto h-[calc(100vh-64px)] hidden">
             <div class="max-w-6xl mx-auto space-y-8">
-                <div class="text-center mb-6">
-                    <h2 style="font-family:Geist,'Noto Sans SC',sans-serif;font-size:22px;font-weight:700;color:#1e293b;">议事机构</h2>
-                </div>
-
                 <!-- 决策层级流程图 -->
                 <div class="rounded-3xl p-6 bg-gradient-to-r from-slate-50 to-blue-50 border border-slate-200 shadow-sm">
-                    <div class="text-center mb-4 text-sm text-slate-500 font-medium">决策审批流程</div>
+                    <div class="text-center mb-4 text-lg text-slate-800 font-bold">决策审批流程</div>
                     <div class="flex flex-wrap items-center justify-center gap-3">
                         <div class="rounded-xl p-4 shadow-md border-t-4 border-red-500 min-w-[140px] text-center bg-white transform hover:scale-105 transition">
                             <div class="text-red-600 font-bold text-base">党委会</div>
@@ -2414,29 +2410,29 @@ function initAppAfterAuth() {
                     </h3>
                     <div class="grid grid-cols-2 md:grid-cols-5 gap-4 text-center">
                         <div class="bg-blue-50 rounded-xl p-4">
-                            <div class="text-blue-600 font-bold text-lg">股东会</div>
-                            <div class="text-xs text-slate-600 mt-2">每年至少1次</div>
-                            <div class="text-xs text-slate-500">提前20日通知</div>
+                            <div class="text-blue-600 font-bold text-lg" data-council-key="huiyi-gudonghui-title">股东会</div>
+                            <div class="text-xs text-slate-600 mt-2" data-council-key="huiyi-gudonghui-freq">每年至少1次</div>
+                            <div class="text-xs text-slate-500" data-council-key="huiyi-gudonghui-notice">提前20日通知</div>
                         </div>
                         <div class="bg-violet-50 rounded-xl p-4">
-                            <div class="text-violet-600 font-bold text-lg">董事会</div>
-                            <div class="text-xs text-slate-600 mt-2">每季至少1次</div>
-                            <div class="text-xs text-slate-500">提前10日通知</div>
+                            <div class="text-violet-600 font-bold text-lg" data-council-key="huiyi-dongshihui-title">董事会</div>
+                            <div class="text-xs text-slate-600 mt-2" data-council-key="huiyi-dongshihui-freq">每季至少1次</div>
+                            <div class="text-xs text-slate-500" data-council-key="huiyi-dongshihui-notice">提前10日通知</div>
                         </div>
                         <div class="bg-emerald-50 rounded-xl p-4">
-                            <div class="text-emerald-600 font-bold text-lg">总办会</div>
-                            <div class="text-xs text-slate-600 mt-2">每周召开</div>
-                            <div class="text-xs text-slate-500">固定时间地点</div>
+                            <div class="text-emerald-600 font-bold text-lg" data-council-key="huiyi-zongbanhui-title">总办会</div>
+                            <div class="text-xs text-slate-600 mt-2" data-council-key="huiyi-zongbanhui-freq">每周召开</div>
+                            <div class="text-xs text-slate-500" data-council-key="huiyi-zongbanhui-notice">固定时间地点</div>
                         </div>
                         <div class="bg-red-50 rounded-xl p-4">
-                            <div class="text-red-600 font-bold text-lg">党委会</div>
-                            <div class="text-xs text-slate-600 mt-2">按需召开</div>
-                            <div class="text-xs text-slate-500">重大事项前置</div>
+                            <div class="text-red-600 font-bold text-lg" data-council-key="huiyi-dangweihui-title">党委会</div>
+                            <div class="text-xs text-slate-600 mt-2" data-council-key="huiyi-dangweihui-freq">按需召开</div>
+                            <div class="text-xs text-slate-500" data-council-key="huiyi-dangweihui-notice">重大事项前置</div>
                         </div>
                         <div class="bg-amber-50 rounded-xl p-4">
-                            <div class="text-amber-600 font-bold text-lg">投委会</div>
-                            <div class="text-xs text-slate-600 mt-2">项目需要时</div>
-                            <div class="text-xs text-slate-500">及时召开审议</div>
+                            <div class="text-amber-600 font-bold text-lg" data-council-key="huiyi-touweihui-title">投委会</div>
+                            <div class="text-xs text-slate-600 mt-2" data-council-key="huiyi-touweihui-freq">项目需要时</div>
+                            <div class="text-xs text-slate-500" data-council-key="huiyi-touweihui-notice">及时召开审议</div>
                         </div>
                     </div>
                 </div>
