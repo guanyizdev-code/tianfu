@@ -16136,10 +16136,8 @@ function exportAuthorityExcel() {
         let rowData = [];
         const cells = row.querySelectorAll('td, th');
         cells.forEach(cell => {
-            let text = cell.innerText.replace(/
-/g, ' ').replace(/"/g, '""');
-            if (text.includes(',') || text.includes('"') || text.includes('
-')) {
+            let text = cell.innerText.replace(/\n/g, ' ').replace(/"/g, '""');
+            if (text.includes(',') || text.includes('"') || text.includes('\n')) {
                 text = '"' + text + '"';
             }
             rowData.push(text);
