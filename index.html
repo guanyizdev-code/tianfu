@@ -2,7 +2,7 @@
 <html lang="zh-CN" data-immersive-translate-page-theme="light"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>天蚨基金规划 v1.27（2026 0421）</title>
+    <title>天蚨基金规划 v1.28（2026 0421）</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -1790,7 +1790,7 @@ function initAppAfterAuth() {
 <body class="text-slate-900">
 <div id="pwdOverlay">
 <div id="pwdBox">
-<h2>天蚨基金规划 v1.27（2026 0421）</h2>
+<h2>天蚨基金规划 v1.28（2026 0421）</h2>
 <p>请输入访问密码以继续</p>
 <input id="pwdInput" type="password" placeholder="请输入密码" onkeydown="if(event.key==='Enter')checkPassword()">
 <button id="pwdBtn" onclick="checkPassword()">进入系统</button>
@@ -2535,6 +2535,12 @@ function initAppAfterAuth() {
                         <button onclick="filterAuthority('投资部')" class="auth-filter px-3 py-1.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 transition" data-dept="投资部">投资部</button>
                         <button onclick="filterAuthority('运营部')" class="auth-filter px-3 py-1.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 transition" data-dept="运营部">运营部</button>
                         <button onclick="filterAuthority('综合部')" class="auth-filter px-3 py-1.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 transition" data-dept="综合部">综合部</button>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <input type="file" id="authExcelInput" accept=".xlsx,.xls" style="display:none;" onchange="parseAuthExcel(event)">
+                        <button onclick="document.getElementById('authExcelInput').click()" class="px-4 py-2 bg-emerald-600 text-white rounded-xl font-medium text-sm hover:bg-emerald-700 transition flex items-center gap-2 shadow-sm">
+                            <i class="fas fa-file-excel"></i> 上传Excel更新
+                        </button>
                     </div>
                 </div>
                 <div class="overflow-x-auto max-h-[calc(100vh-180px)]">
@@ -8997,10 +9003,227 @@ function getRoleBadge(text) {
     return `<span class="badge ${cls}">${text}</span>`;
 }
 
+
+// ==========================================
+// 权责清单Excel解析和动态表格生成
+// ==========================================
+let authTableConfig = {
+    cols: [],
+    headers: [],
+    headerRows: 2
+};
+
+function parseAuthExcel(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            const sheet = workbook.Sheets[workbook.SheetNames[0]];
+            
+            // 解析表头结构
+            const headerInfo = parseExcelHeader(sheet);
+            
+            // 解析数据
+            const parsedData = parseExcelData(sheet, headerInfo);
+            
+            // 更新配置和数据
+            authTableConfig = headerInfo;
+            authorityData = parsedData;
+            
+            // 动态生成表头HTML
+            updateAuthTableHeader(headerInfo);
+            
+            // 渲染数据
+            renderAuthorityTable(authorityData);
+            
+            showToast('权责清单已更新：共 ' + parsedData.length + ' 行数据');
+        } catch (err) {
+            console.error('解析Excel错误:', err);
+            alert('解析Excel文件失败，请检查文件格式');
+        }
+    };
+    reader.readAsArrayBuffer(file);
+    event.target.value = '';
+}
+
+function parseExcelHeader(sheet) {
+    const range = XLSX.utils.decode_range(sheet['!ref']);
+    const merges = sheet['!merges'] || [];
+    
+    // 找出表头行数（通过检查合并单元格）
+    let headerEndRow = 3;
+    for (const merge of merges) {
+        if (merge.s.r < 4) {
+            headerEndRow = Math.max(headerEndRow, merge.e.r + 1);
+        }
+    }
+    
+    // 解析第3行（实际列名行）获取所有列名
+    const cols = [];
+    const colWidths = [];
+    for (let col = range.s.c; col <= range.e.c; col++) {
+        const cellAddr = XLSX.utils.encode_cell({ r: headerEndRow - 1, c: col });
+        const cell = sheet[cellAddr];
+        const colName = cell ? String(cell.v).trim() : '';
+        cols.push(colName);
+        
+        const colLetter = XLSX.utils.encode_col(col);
+        const width = sheet['!cols'] && sheet['!cols'][col] ? sheet['!cols'][col].wch || 13 : 13;
+        colWidths.push(width);
+    }
+    
+    // 解析第一行的大类标题和合并信息
+    const headerStructure = [];
+    for (let col = range.s.c; col <= range.e.c; col++) {
+        const mergeInfo = findMergeInfo(merges, 1, col);
+        if (mergeInfo && mergeInfo.isStart) {
+            const cellAddr = XLSX.utils.encode_cell({ r: 1, c: col });
+            const cell = sheet[cellAddr];
+            const title = cell ? String(cell.v).trim() : '';
+            headerStructure.push({
+                title: title,
+                startCol: col,
+                endCol: mergeInfo.endCol,
+                colspan: mergeInfo.endCol - col + 1
+            });
+        }
+    }
+    
+    return {
+        cols: cols,
+        colWidths: colWidths,
+        headerStructure: headerStructure,
+        headerRows: headerEndRow - 1,
+        totalCols: cols.length
+    };
+}
+
+function findMergeInfo(merges, row, col) {
+    for (const merge of merges) {
+        if (merge.s.r === row && merge.s.c === col) {
+            return { isStart: true, endCol: merge.e.c, endRow: merge.e.r };
+        }
+        if (merge.s.r <= row && merge.e.r >= row && merge.s.c <= col && merge.e.c >= col) {
+            return { isPart: true, startCol: merge.s.c, endCol: merge.e.c };
+        }
+    }
+    return null;
+}
+
+function parseExcelData(sheet, headerInfo) {
+    const range = XLSX.utils.decode_range(sheet['!ref']);
+    const data = [];
+    const cols = headerInfo.cols;
+    
+    for (let row = headerInfo.headerRows; row <= range.e.r; row++) {
+        const rowData = {};
+        let isEmptyRow = true;
+        
+        for (let col = range.s.c; col <= range.e.c; col++) {
+            const cellAddr = XLSX.utils.encode_cell({ r: row, c: col });
+            const cell = sheet[cellAddr];
+            const value = cell ? String(cell.v || '').trim() : '';
+            
+            if (value) isEmptyRow = false;
+            
+            const colName = cols[col] || 'col_' + col;
+            rowData[colName] = value;
+        }
+        
+        const firstCellAddr = XLSX.utils.encode_cell({ r: row, c: 0 });
+        const firstCell = sheet[firstCellAddr];
+        if (firstCell && firstCell.v) {
+            const seq = String(firstCell.v).trim();
+            if (seq.match(/^[一二三四五六七八九十]+[、.]/)) {
+                rowData['highlight'] = 'yellow';
+            } else if (seq.match(/^[\d]+\.[\d]+$/) && !rowData['关键事项']) {
+                rowData['highlight'] = 'lightblue';
+            }
+        }
+        
+        if (!isEmptyRow) {
+            data.push(rowData);
+        }
+    }
+    
+    return data;
+}
+
+function updateAuthTableHeader(headerInfo) {
+    const thead = document.querySelector('#tab-authority table thead');
+    if (!thead) return;
+    
+    let html = '';
+    const cols = headerInfo.cols;
+    const colWidths = headerInfo.colWidths;
+    const headerStructure = headerInfo.headerStructure;
+    
+    html += '<tr class="bg-slate-100">';
+    const fixedCols = ['序号', '权责单位', '关键事项', '决策机构'];
+    let colIdx = 0;
+    for (const fixed of fixedCols) {
+        const width = colWidths[colIdx] ? Math.round(colWidths[colIdx] * 8) : 80;
+        html += '<th class="text-center px-2 py-2 border-b border-slate-300" style="width:' + width + 'px;" rowspan="' + headerInfo.headerRows + '">' + fixed + '</th>';
+        colIdx++;
+    }
+    
+    for (const struct of headerStructure) {
+        if (struct.startCol >= fixedCols.length) {
+            const bgColor = struct.title.includes('天蚨') ? 'bg-blue-100' : 
+                           struct.title.includes('金控') ? 'bg-purple-100' : 
+                           struct.title.includes('出资人') ? 'bg-green-100' : 'bg-slate-100';
+            html += '<th class="text-center px-2 py-2 border-b border-slate-300 ' + bgColor + '" colspan="' + struct.colspan + '">' + struct.title + '</th>';
+        }
+    }
+    html += '</tr>';
+    
+    html += '<tr class="bg-slate-50">';
+    for (let i = fixedCols.length; i < cols.length; i++) {
+        const colName = cols[i];
+        if (!colName) continue;
+        
+        let bgColor = 'bg-slate-50';
+        for (const struct of headerStructure) {
+            if (i >= struct.startCol && i <= struct.endCol) {
+                bgColor = struct.title.includes('天蚨') ? 'bg-blue-50' : 
+                         struct.title.includes('金控') ? 'bg-purple-50' : 
+                         struct.title.includes('出资人') ? 'bg-green-50' : 'bg-slate-50';
+                break;
+            }
+        }
+        
+        const width = colWidths[i] ? Math.round(colWidths[i] * 8) : 75;
+        const displayName = simplifyColumnName(colName);
+        html += '<th class="text-center px-1 py-2 border-b border-slate-200 ' + bgColor + ' text-xs" style="width:' + width + 'px;">' + displayName + '</th>';
+    }
+    html += '</tr>';
+    
+    thead.innerHTML = html;
+}
+
+function simplifyColumnName(name) {
+    const simplifications = {
+        '天蚨公司总经理': '总经理',
+        '天蚨公司董事长': '董事长',
+        '天蚨公司董事会': '董事会',
+        '总经理办公会': '总经理办公会',
+        '薪酬与绩效委员会': '薪酬绩效委',
+        '审计与风险委员会': '审计风险委',
+        '战略与投资委员会': '战略投资委',
+        '出资人市财政局': '市财政局'
+    };
+    return simplifications[name] || name;
+}
+
+
 function renderAuthorityTable(data, editMode = false) {
     const tbody = document.getElementById('authorityTable');
     let html = '';
-    const cols = ['序号', '权责单位', '关键事项', '决策机构', '投资部', '运营部', '综合部', '总办会', '天蚨总经理', '投决会', '天蚨董事长', '天蚨董事会', '股东会', '财务管理部', '合规风控部', '投资管理部', '人力资源部', '风控总监', '财务总监', '分管领导', '总经理办公会', '集团总经理', '薪酬绩效委', '审计风险委', '战略投资委', '党委', '集团董事长', '集团董事会', '市财政局', '备注'];
+    const cols = authTableConfig.cols.length > 0 ? authTableConfig.cols : ['序号', '权责单位', '关键事项', '决策机构', '投资部', '运营部', '综合部', '总办会', '天蚨总经理', '投决会', '天蚨董事长', '天蚨董事会', '股东会', '财务管理部', '合规风控部', '投资管理部', '人力资源部', '风控总监', '财务总监', '分管领导', '总经理办公会', '集团总经理', '薪酬绩效委', '审计风险委', '战略投资委', '党委', '集团董事长', '集团董事会', '市财政局', '备注'];
     data.forEach((row, idx) => {
         const highlight = row['highlight'] || '';
         const needConfirm = row['need_confirm'];
@@ -9008,7 +9231,7 @@ function renderAuthorityTable(data, editMode = false) {
         // 黄色标题行（一、二、三...）- 合并显示
         if (highlight === 'yellow') {
             const text = row['序号'] || '';
-            html += `<tr style="background:#FFFDE7;" data-row-idx="${idx}"><td colspan="30" class="px-4 py-2 font-bold text-slate-700 text-sm border-b border-yellow-200">${text}</td></tr>`;
+            html += `<tr style="background:#FFFDE7;" data-row-idx="${idx}"><td colspan="${cols.length}" class="px-4 py-2 font-bold text-slate-700 text-sm border-b border-yellow-200">${text}</td></tr>`;
             return;
         }
 
@@ -9017,7 +9240,7 @@ function renderAuthorityTable(data, editMode = false) {
             const seq = row['序号'] || '';
             const dept = row['权责单位'] || '';
             const text = seq + (dept ? ' ' + dept : '');
-            html += `<tr style="background:#E3F2FD;" data-row-idx="${idx}"><td colspan="30" class="px-4 py-2 font-semibold text-slate-600 text-sm">${text}</td></tr>`;
+            html += `<tr style="background:#E3F2FD;" data-row-idx="${idx}"><td colspan="${cols.length}" class="px-4 py-2 font-semibold text-slate-600 text-sm">${text}</td></tr>`;
             return;
         }
 
@@ -9042,7 +9265,7 @@ function renderAuthorityTable(data, editMode = false) {
             // 如果有单元格颜色，覆盖行背景色
             const finalCellStyle = cellBgStyle || (needConfirm && colIdx < 4 ? 'background:#00B0F0;' : '');
 
-            if (colIdx < 4 || colIdx === 29) {
+            if (colIdx < 4 || colIdx === cols.length - 1) {
                 // 文本列可直接编辑（序号、权责单位、关键事项、决策机构、备注）
                 if (editMode) {
                     html += `<td class="px-4 py-3 text-xs" style="${finalCellStyle}" data-auth-col="${col}" data-auth-row="${idx}"><input type="text" value="${value}" class="w-full px-2 py-1 border border-blue-300 rounded text-xs focus:outline-none focus:ring-2 focus:ring-blue-500" onchange="updateAuthData(${idx}, '${col}', this.value)"></td>`;
