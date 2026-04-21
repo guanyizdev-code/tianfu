@@ -2448,8 +2448,21 @@ function initAppAfterAuth() {
             <div id="bizContainer" class="w-full h-full relative">
                 <canvas id="neuralCanvas" width="3512" height="1574" style="width: 1756px; height: 787px;"></canvas>
 
-                <div class="nn-title" style="top:28px;left:32px;">
-                    <p style="font-family:Geist,'Noto Sans SC',sans-serif;font-size:17px;color:#1e293b;font-weight:600;line-height:1.7;letter-spacing:0.03em;">公司业务架构按照前台、中台、后台统筹划分，共计 11 条主线业务、47 条子线业务，覆盖 730 项精细化具体工作事项。</p>
+                <div class="nn-title" style="top:20px;left:32px;right:32px;">
+                    <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+                        <div style="font-family:Geist,'Noto Sans SC',sans-serif;font-size:15px;color:#475569;font-weight:500;">公司业务架构按照前台、中台、后台统筹划分</div>
+                        <div style="display:flex;gap:12px;align-items:center;">
+                            <div style="background:linear-gradient(135deg,#3b82f6,#60a5fa);color:#fff;padding:6px 16px;border-radius:20px;font-size:13px;font-weight:600;font-family:Geist,'Noto Sans SC',sans-serif;box-shadow:0 2px 8px rgba(59,130,246,0.25);">
+                                <span style="font-size:18px;font-weight:700;">11</span> 条主线
+                            </div>
+                            <div style="background:linear-gradient(135deg,#10b981,#34d399);color:#fff;padding:6px 16px;border-radius:20px;font-size:13px;font-weight:600;font-family:Geist,'Noto Sans SC',sans-serif;box-shadow:0 2px 8px rgba(16,185,129,0.25);">
+                                <span style="font-size:18px;font-weight:700;">47</span> 条子线
+                            </div>
+                            <div style="background:linear-gradient(135deg,#f59e0b,#fbbf24);color:#fff;padding:6px 16px;border-radius:20px;font-size:13px;font-weight:600;font-family:Geist,'Noto Sans SC',sans-serif;box-shadow:0 2px 8px rgba(245,158,11,0.25);">
+                                <span style="font-size:18px;font-weight:700;">730</span> 项事项
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <button id="nnResetBtn" class="nn-reset-btn" onclick="resetNeuralNetwork()">
