@@ -13832,45 +13832,73 @@ function rgbToHex(rgb) {
 
 function initXSpreadsheet() {
     const container = document.getElementById('x-spreadsheet-container');
-    if (!container) return;
+    if (!container) { console.error('x-spreadsheet-container not found'); return; }
+
+    // Check if x-spreadsheet library is loaded
+    if (typeof x_spreadsheet === 'undefined') {
+        console.error('x-spreadsheet library not loaded');
+        container.innerHTML = '<div style="padding:40px;text-align:center;color:#666;">表格编辑器加载失败，请刷新页面重试</div>';
+        return;
+    }
+
+    // Make sure container is visible and has size before init
+    container.style.display = 'block';
+    container.style.height = '600px';
+    container.style.width = '100%';
 
     // Destroy previous instance
     if (authXs) {
-        authXs = null;
-        container.innerHTML = '';
+        try { authXs = null; } catch(e) {}
     }
+    container.innerHTML = '';
 
     // Load data from localStorage or build from static table
     let data = [];
     const saved = localStorage.getItem('authorityXsData_v137');
     if (saved) {
-        try { data = JSON.parse(saved); } catch(e) {}
+        try { data = JSON.parse(saved); } catch(e) { console.error('parse saved data failed', e); }
     }
 
     // If no saved data, build from current static table
     if (!data || data.length === 0) {
+        console.log('No saved x-spreadsheet data, building from static table...');
         data = buildXsDataFromStaticTable() || [];
         if (data.length > 0) {
             localStorage.setItem('authorityXsData_v137', JSON.stringify(data));
+            console.log('Built x-spreadsheet data, rows:', data[0].rows.len, 'cols:', Object.keys(data[0].cols).length);
         }
+    } else {
+        console.log('Loaded saved x-spreadsheet data, rows:', data[0] && data[0].rows ? data[0].rows.len : 'unknown');
     }
 
-    authXs = x_spreadsheet('#x-spreadsheet-container', {
-        showToolbar: true,
-        showGrid: true,
-        view: {
-            height: () => container.clientHeight,
-            width: () => container.clientWidth
+    console.log('Initializing x-spreadsheet...');
+
+    try {
+        authXs = x_spreadsheet('#x-spreadsheet-container', {
+            showToolbar: true,
+            showGrid: true,
+            view: {
+                height: () => 600,
+                width: () => container.clientWidth || 1200
+            }
+        });
+
+        if (data.length > 0) {
+            console.log('Loading data into x-spreadsheet...');
+            authXs.loadData(data);
+        } else {
+            console.warn('No data to load into x-spreadsheet');
         }
-    });
 
-    if (data.length > 0) {
-        authXs.loadData(data);
+        authXs.change((d) => {
+            localStorage.setItem('authorityXsData_v137', JSON.stringify(d));
+        });
+
+        console.log('x-spreadsheet initialized successfully');
+    } catch (err) {
+        console.error('x-spreadsheet init failed:', err);
+        container.innerHTML = '<div style="padding:40px;text-align:center;color:#dc2626;">表格编辑器初始化失败: ' + err.message + '</div>';
     }
-
-    authXs.change((d) => {
-        localStorage.setItem('authorityXsData_v137', JSON.stringify(d));
-    });
 }
 
 function renderStaticFromXs(data) {
