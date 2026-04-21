@@ -2,7 +2,7 @@
 <html lang="zh-CN" data-immersive-translate-page-theme="light"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>天蚨基金规划v1.37/260421</title>
+    <title>天蚨基金规划v1.38/260421</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -1792,7 +1792,7 @@ function initAppAfterAuth() {
 <body class="text-slate-900">
 <div id="pwdOverlay">
 <div id="pwdBox">
-<h2>天蚨基金规划v1.37/260421</h2>
+<h2>天蚨基金规划v1.38/260421</h2>
 <p>请输入访问密码以继续</p>
 <input id="pwdInput" type="password" placeholder="请输入密码" onkeydown="if(event.key==='Enter')checkPassword()">
 <button id="pwdBtn" onclick="checkPassword()">进入系统</button>
@@ -13175,7 +13175,7 @@ function parseAuthExcel(event) {
 
             // Convert to x-spreadsheet format with styles
             const xsData = stoxWithStyles(workbook);
-            localStorage.setItem('authorityXsData_v137', JSON.stringify(xsData));
+            localStorage.setItem('authorityXsData_v138', JSON.stringify(xsData));
 
             // Also regenerate static table for normal viewing
             const sheet = workbook.Sheets[workbook.SheetNames[0]];
@@ -13208,6 +13208,24 @@ function getExcelColor(colorObj) {
     if (colorObj.theme !== undefined) {
         const themeMap = { 0: '#FFFFFF', 1: '#000000', 2: '#FF0000', 3: '#00FF00', 4: '#FFFF00', 5: '#CCFFFF', 6: '#FFCC00', 7: '#CCFFCC', 8: '#FFCCCC' };
         return themeMap[colorObj.theme] || null;
+    }
+    if (colorObj.indexed !== undefined) {
+        const indexedMap = {
+            0: '#000000', 1: '#FFFFFF', 2: '#FF0000', 3: '#00FF00', 4: '#0000FF',
+            5: '#FFFF00', 6: '#FF00FF', 7: '#00FFFF', 8: '#000000', 9: '#FFFFFF',
+            10: '#FF0000', 11: '#00FF00', 12: '#0000FF', 13: '#FFFF00', 14: '#FF00FF',
+            15: '#00FFFF', 16: '#800000', 17: '#008000', 18: '#000080', 19: '#808000',
+            20: '#800080', 21: '#008080', 22: '#C0C0C0', 23: '#808080', 24: '#9999FF',
+            25: '#993366', 26: '#FFFFCC', 27: '#CCFFFF', 28: '#660066', 29: '#FF8080',
+            30: '#0066CC', 31: '#CCCCFF', 32: '#000080', 33: '#FF00FF', 34: '#FFFF00',
+            35: '#00FFFF', 36: '#800080', 37: '#800000', 38: '#008080', 39: '#0000FF',
+            40: '#00CCFF', 41: '#CCFFFF', 42: '#CCFFCC', 43: '#FFFF99', 44: '#99CCFF',
+            45: '#FF99CC', 46: '#CC99FF', 47: '#FFCC99', 48: '#3366FF', 49: '#33CCCC',
+            50: '#99CC00', 51: '#FFCC00', 52: '#FF9900', 53: '#FF6600', 54: '#666699',
+            55: '#969696', 56: '#003366', 57: '#339966', 58: '#003300', 59: '#333300',
+            60: '#993300', 61: '#993366', 62: '#333399', 63: '#333333'
+        };
+        return indexedMap[colorObj.indexed] || null;
     }
     return null;
 }
@@ -13691,7 +13709,7 @@ function enableAuthorityEdit() {
         // Exit edit mode: save x-spreadsheet data, restore static table
         if (window.authXs) {
             const data = window.authXs.getData();
-            localStorage.setItem('authorityXsData_v137', JSON.stringify(data));
+            localStorage.setItem('authorityXsData_v138', JSON.stringify(data));
             renderStaticFromXs(data);
         }
         if (xsContainer) xsContainer.style.display = 'none';
@@ -13724,16 +13742,55 @@ function buildXsDataFromStaticTable() {
     const table = document.getElementById('authority-excel-table');
     if (!table) return null;
 
-    const rows = table.querySelectorAll('tr');
+    const allRows = table.querySelectorAll('tr');
+    const rowCount = allRows.length;
+
+    // First pass: track which cells are occupied by rowspan from above
+    const rowspanTracker = {}; // key: "r_c" -> true
+    let maxCols = 0;
+
+    allRows.forEach((row, r) => {
+        const cells = row.querySelectorAll('td, th');
+        let colIdx = 0;
+        cells.forEach((cell) => {
+            // Skip columns covered by rowspan from above rows
+            while (colIdx < 100 && rowspanTracker[r + '_' + colIdx]) {
+                colIdx++;
+            }
+            if (colIdx >= 100) return;
+
+            const colspan = parseInt(cell.getAttribute('colspan')) || 1;
+            const rowspan = parseInt(cell.getAttribute('rowspan')) || 1;
+
+            // Mark cells covered by this cell's rowspan in subsequent rows
+            for (let rr = r + 1; rr < r + rowspan && rr < rowCount; rr++) {
+                for (let cc = colIdx; cc < colIdx + colspan; cc++) {
+                    rowspanTracker[rr + '_' + cc] = true;
+                }
+            }
+
+            maxCols = Math.max(maxCols, colIdx + colspan);
+            colIdx += colspan;
+        });
+    });
+
+    // Second pass: build x-spreadsheet data with correct column offsets
     const xsRows = {};
     const xsMerges = [];
     const xsCols = {};
 
-    rows.forEach((row, r) => {
+    allRows.forEach((row, r) => {
         const cells = row.querySelectorAll('td, th');
         const xsCells = {};
+        let colIdx = 0;
 
-        cells.forEach((cell, c) => {
+        cells.forEach((cell) => {
+            // Skip columns covered by rowspan from above rows
+            while (colIdx < maxCols && rowspanTracker[r + '_' + colIdx]) {
+                colIdx++;
+            }
+            if (colIdx >= maxCols) return;
+
             const text = cell.innerText;
             const style = window.getComputedStyle(cell);
 
@@ -13743,13 +13800,15 @@ function buildXsDataFromStaticTable() {
             // Background color
             const bg = style.backgroundColor;
             if (bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') {
-                cellStyle.bgcolor = rgbToHex(bg);
+                const hex = rgbToHex(bg);
+                if (hex) cellStyle.bgcolor = hex;
             }
 
             // Font color
             const color = style.color;
             if (color && color !== 'rgb(0, 0, 0)') {
-                cellStyle.color = rgbToHex(color);
+                const hex = rgbToHex(color);
+                if (hex) cellStyle.color = hex;
             }
 
             // Font
@@ -13757,10 +13816,14 @@ function buildXsDataFromStaticTable() {
             const fontFamily = style.fontFamily;
             if (fontFamily) font.name = fontFamily.split(',')[0].replace(/["']/g, '');
             const fontSize = style.fontSize;
-            if (fontSize) font.size = parseInt(fontSize);
-            if (style.fontWeight === 'bold' || parseInt(style.fontWeight) >= 600) font.bold = true;
+            if (fontSize) {
+                const size = parseInt(fontSize);
+                if (size) font.size = size;
+            }
+            const fontWeight = style.fontWeight;
+            if (fontWeight === 'bold' || parseInt(fontWeight) >= 600) font.bold = true;
             if (style.fontStyle === 'italic') font.italic = true;
-            if (style.textDecoration.includes('underline')) cellStyle.underline = true;
+            if (style.textDecoration && style.textDecoration.includes('underline')) cellStyle.underline = true;
             if (Object.keys(font).length > 0) cellStyle.font = font;
 
             // Alignment
@@ -13771,7 +13834,7 @@ function buildXsDataFromStaticTable() {
                 cellStyle.valign = vAlign === 'middle' ? 'center' : vAlign;
             }
 
-            // Borders (simplified)
+            // Borders
             const border = {};
             const sides = ['left', 'right', 'top', 'bottom'];
             sides.forEach(side => {
@@ -13787,32 +13850,30 @@ function buildXsDataFromStaticTable() {
             if (Object.keys(border).length > 0) cellStyle.border = border;
 
             // Merge cells
-            const rowspan = cell.getAttribute('rowspan');
-            const colspan = cell.getAttribute('colspan');
-            if (rowspan || colspan) {
-                cellData.merge = [
-                    (parseInt(rowspan) || 1) - 1,
-                    (parseInt(colspan) || 1) - 1
-                ];
+            const colspan = parseInt(cell.getAttribute('colspan')) || 1;
+            const rowspan = parseInt(cell.getAttribute('rowspan')) || 1;
+            if (colspan > 1 || rowspan > 1) {
+                cellData.merge = [rowspan - 1, colspan - 1];
                 xsMerges.push(XLSX.utils.encode_range({
-                    s: { r: r, c: c },
-                    e: { r: r + (parseInt(rowspan) || 1) - 1, c: c + (parseInt(colspan) || 1) - 1 }
+                    s: { r: r, c: colIdx },
+                    e: { r: r + rowspan - 1, c: colIdx + colspan - 1 }
                 }));
             }
 
-            // Column width (from first row)
+            // Column width
             if (r === 0) {
-                const w = parseInt(style.width);
-                if (w) xsCols[c] = { width: w };
+                const width = parseInt(style.width);
+                if (width) xsCols[colIdx] = { width: width };
             }
 
             if (Object.keys(cellStyle).length > 0) cellData.style = cellStyle;
-            xsCells[c] = cellData;
+            xsCells[colIdx] = cellData;
+            colIdx += colspan;
         });
 
         xsRows[r] = { cells: xsCells };
     });
-    xsRows.len = rows.length;
+    xsRows.len = rowCount;
 
     return [{
         name: 'sheet1',
@@ -13854,7 +13915,7 @@ function initXSpreadsheet() {
 
     // Load data from localStorage or build from static table
     let data = [];
-    const saved = localStorage.getItem('authorityXsData_v137');
+    const saved = localStorage.getItem('authorityXsData_v138');
     if (saved) {
         try { data = JSON.parse(saved); } catch(e) { console.error('parse saved data failed', e); }
     }
@@ -13864,7 +13925,7 @@ function initXSpreadsheet() {
         console.log('No saved x-spreadsheet data, building from static table...');
         data = buildXsDataFromStaticTable() || [];
         if (data.length > 0) {
-            localStorage.setItem('authorityXsData_v137', JSON.stringify(data));
+            localStorage.setItem('authorityXsData_v138', JSON.stringify(data));
             console.log('Built x-spreadsheet data, rows:', data[0].rows.len, 'cols:', Object.keys(data[0].cols).length);
         }
     } else {
@@ -13891,7 +13952,7 @@ function initXSpreadsheet() {
         }
 
         authXs.change((d) => {
-            localStorage.setItem('authorityXsData_v137', JSON.stringify(d));
+            localStorage.setItem('authorityXsData_v138', JSON.stringify(d));
         });
 
         console.log('x-spreadsheet initialized successfully');
@@ -16096,13 +16157,13 @@ function saveCellEdit(cell) {
     cell.style.backgroundColor = '#e6ffe6';
 
     // Persist to localStorage
-    let allEdits = JSON.parse(localStorage.getItem('authorityEdits_v137') || '{}');
+    let allEdits = JSON.parse(localStorage.getItem('authorityEdits_v138') || '{}');
     allEdits[`${row}_${col}`] = val;
-    localStorage.setItem('authorityEdits_v137', JSON.stringify(allEdits));
+    localStorage.setItem('authorityEdits_v138', JSON.stringify(allEdits));
 }
 
 function restoreAuthorityEdits() {
-    const allEdits = JSON.parse(localStorage.getItem('authorityEdits_v137') || '{}');
+    const allEdits = JSON.parse(localStorage.getItem('authorityEdits_v138') || '{}');
     const table = document.getElementById('authority-excel-table');
     if (!table) return;
 
@@ -16118,9 +16179,9 @@ function restoreAuthorityEdits() {
 }
 
 function clearAuthorityEdits() {
-    localStorage.removeItem('authorityEdits_v137');
-    localStorage.removeItem('authorityFormats_v137');
-    localStorage.removeItem('authorityXsData_v137');
+    localStorage.removeItem('authorityEdits_v138');
+    localStorage.removeItem('authorityFormats_v138');
+    localStorage.removeItem('authorityXsData_v138');
     editedCells = {};
     location.reload();
 }
