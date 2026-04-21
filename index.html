@@ -2,7 +2,7 @@
 <html lang="zh-CN" data-immersive-translate-page-theme="light"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>天蚨基金规划v1.40/260421</title>
+    <title>天蚨基金规划v1.41/260421</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -1792,7 +1792,7 @@ function initAppAfterAuth() {
 <body class="text-slate-900">
 <div id="pwdOverlay">
 <div id="pwdBox">
-<h2>天蚨基金规划v1.40/260421</h2>
+<h2>天蚨基金规划v1.41/260421</h2>
 <p>请输入访问密码以继续</p>
 <input id="pwdInput" type="password" placeholder="请输入密码" onkeydown="if(event.key==='Enter')checkPassword()">
 <button id="pwdBtn" onclick="checkPassword()">进入系统</button>
@@ -2450,7 +2450,25 @@ function initAppAfterAuth() {
 
                 <div class="nn-title" style="top:20px;left:32px;right:32px;">
                     <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
-                        <div style="font-family:Geist,'Noto Sans SC',sans-serif;font-size:15px;color:#475569;font-weight:500;">公司业务架构按照前台、中台、后台统筹划分</div>
+                        <!-- 标题卡片 -->
+                        <div style="display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:10px 20px;box-shadow:0 1px 3px rgba(0,0,0,0.04),0 4px 12px rgba(0,0,0,0.03);">
+                            <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#f0f9ff,#e0f2fe);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                <i class="fas fa-sitemap" style="color:#3b82f6;font-size:16px;"></i>
+                            </div>
+                            <div style="font-family:Geist,'Noto Sans SC',sans-serif;">
+                                <div style="font-size:12px;color:#94a3b8;font-weight:500;letter-spacing:0.5px;">公司业务架构</div>
+                                <div style="font-size:15px;color:#1e293b;font-weight:600;margin-top:1px;">
+                                    按照
+                                    <span style="display:inline-flex;align-items:center;gap:4px;margin:0 2px;">
+                                        <span style="background:linear-gradient(135deg,#dbeafe,#eff6ff);color:#2563eb;padding:1px 8px;border-radius:6px;font-size:13px;font-weight:700;">前台</span>
+                                        <span style="background:linear-gradient(135deg,#d1fae5,#f0fdf4);color:#059669;padding:1px 8px;border-radius:6px;font-size:13px;font-weight:700;">中台</span>
+                                        <span style="background:linear-gradient(135deg,#f3e8ff,#faf5ff);color:#7c3aed;padding:1px 8px;border-radius:6px;font-size:13px;font-weight:700;">后台</span>
+                                    </span>
+                                    统筹划分
+                                </div>
+                            </div>
+                        </div>
+                        <!-- 数据 badge -->
                         <div style="display:flex;gap:12px;align-items:center;">
                             <div style="background:linear-gradient(135deg,#3b82f6,#60a5fa);color:#fff;padding:6px 16px;border-radius:20px;font-size:13px;font-weight:600;font-family:Geist,'Noto Sans SC',sans-serif;box-shadow:0 2px 8px rgba(59,130,246,0.25);">
                                 <span style="font-size:18px;font-weight:700;">11</span> 条主线
